@@ -1,14 +1,8 @@
 # 🔮 모이닷
 
----
-
 ## 📈 About Service
 
----
-
 ## 💻 Backend Developer
-
----
 
 <table align = "center" style = "table-layout: auto; width: 100%; table-layout: fixed;">
   <tr>
@@ -34,8 +28,6 @@
 
 ## 🛠 Tech Stack
 
----
-
 | Archictecture | Spring MVC                                         |
 |:--------------|:---------------------------------------------------|
 | Language      | Java 17                                            |
@@ -47,4 +39,3 @@
 
 ## ⚙️ Software Architecture
 
----
