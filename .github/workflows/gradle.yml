@@ -2,9 +2,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
 permissions:
   contents: read
@@ -21,15 +21,15 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        
+
     - uses : actions/checkout@v3
     - run : touch ./src/main/resources/application.yml
     - run : echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
     - run : cat ./src/main/resources/application.yml
-    
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-    
+
     - name: Build with Gradle
       run: ./gradlew clean build
 
@@ -46,7 +46,7 @@ jobs:
 
     - name: Upload to S3
       run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./moidotServer.zip s3://moidot-bucket/moidotServer.zip
-    
+
     - name: Deploy
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
