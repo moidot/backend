@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement((s) -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((request) -> request
-                        .requestMatchers("/api/v1/version").permitAll()
+                        .requestMatchers("/api/v1/version","/docs/*").permitAll()
                 );
         return httpSecurity.build();
     }
