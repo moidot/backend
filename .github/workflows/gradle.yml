@@ -1,6 +1,5 @@
 name: Java CI with Gradle
 
-# master 브랜치의 push와 pull로 CI가 작동
 on:
   push:
     branches: [ "master" ]
@@ -24,9 +23,9 @@ jobs:
         distribution: 'temurin'
         
     - uses : actions/checkout@v3
-    - run : touch ./src/main/resources/application.properties
-    - run : echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
-    - run : cat ./src/main/resources/application.properties
+    - run : touch ./src/main/resources/application.yml
+    - run : echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
+    - run : cat ./src/main/resources/application.yml
     
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
@@ -45,13 +44,9 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-	#3
-	# 만들어 놓은 S3에 해당 zip 파일 저장
     - name: Upload to S3
       run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./moidotServer.zip s3://moidot-bucket/moidotServer.zip
     
-    #4
-    # AWS CodeDeploy에 배포
     - name: Deploy
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
