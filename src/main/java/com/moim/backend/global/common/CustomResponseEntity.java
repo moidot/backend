@@ -16,23 +16,28 @@ public class CustomResponseEntity<T> {
 
     public static <T> CustomResponseEntity<T> success(T data) {
         return CustomResponseEntity.<T>builder()
-                .code(Result.OK.getCode())
-                .message(Result.OK.getMessage())
+                .result(Result.OK)
                 .data(data)
+                .build();
+    }
+
+    public static <T> CustomResponseEntity<T> success() {
+        return CustomResponseEntity.<T>builder()
+                .result(Result.OK)
                 .build();
     }
 
     public static <T> CustomResponseEntity<T> fail(Result result) {
         return CustomResponseEntity.<T>builder()
-                .code(result.getCode())
-                .message(result.getMessage())
+                .result(result)
                 .build();
     }
 
     @Builder
-    public CustomResponseEntity(int code, String message, T data) {
-        this.code = code;
-        this.message = message;
+    public CustomResponseEntity(Result result, int code, String message, T data) {
+        this.code = (result == null) ? code : result.getCode();
+        this.message = (result == null) ? message : result.getMessage();
         this.data = data;
     }
+
 }
