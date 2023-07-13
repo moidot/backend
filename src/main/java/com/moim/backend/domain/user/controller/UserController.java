@@ -18,7 +18,9 @@ public class UserController {
 
     @PostMapping("/login")
     public CustomResponseEntity<String> loginByEmail(@RequestBody UserRequest.Login request) {
-        return CustomResponseEntity.success(userService.login(request));
+        return CustomResponseEntity.success(
+                userService.login(request)
+        );
     }
 
     @PostMapping("/login/security")
