@@ -3,7 +3,6 @@ package com.moim.backend.domain.user.controller;
 import com.moim.backend.domain.user.request.UserRequest;
 import com.moim.backend.domain.user.service.UserService;
 import com.moim.backend.global.common.CustomResponseEntity;
-import com.moim.backend.global.common.Result;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +17,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public CustomResponseEntity<String> loginByEmail(@RequestBody UserRequest.LoginDto request) {
+    public CustomResponseEntity<String> loginByEmail(@RequestBody UserRequest.Login request) {
         return CustomResponseEntity.success(userService.login(request));
     }
 

@@ -11,7 +11,7 @@ public class UserService {
 
     private final JwtService jwtService;
 
-    public String login(UserRequest.LoginDto request) {
+    public String login(UserRequest.Login request) {
         return jwtService.createToken(request.getEmail());
     }
 
