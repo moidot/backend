@@ -9,5 +9,13 @@ endif::[]
 :toclevels: 2
 :sectlinks:
 
+= 🌐 Common
+== 공통 API 규격
+include::api/common/status.adoc[]
+
+== 응답 상태 코드 및 메세지
+include::api/common/statusDetail.adoc[]
+
+= 📈 API
 == Version API
 include::api/admin/version.adoc[]
