@@ -25,6 +25,11 @@ jobs:
     - run : echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
     - run : cat ./src/main/resources/application.yml
 
+    - uses: actions/checkout@v4
+    - run: touch ./src/test/resources/application.yml
+    - run: echo "${{ secrets.TEST_APPLICATION }}" > ./src/test/resources/application.yml
+    - run: cat ./src/test/resources/application.yml
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 

@@ -18,7 +18,7 @@ public class BestPlace {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
-    private Group group;
+    private Groups group;
 
     @NotNull
     private Double latitude;
@@ -26,7 +26,7 @@ public class BestPlace {
     private Double longitude;
 
     @Builder
-    private BestPlace(Long id, Group group, Double latitude, Double longitude) {
+    private BestPlace(Long id, Groups group, Double latitude, Double longitude) {
         this.id = id;
         this.group = group;
         this.latitude = latitude;

@@ -18,7 +18,7 @@ public class Participation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
-    private Group group;
+    private Groups group;
 
     @NotNull
     private Long userId;
@@ -38,7 +38,7 @@ public class Participation {
     private String password;
 
     @Builder
-    private Participation(Long id, Group group, Long userId, String userName, Double latitude, Double longitude, TransportationType transportation, String password) {
+    private Participation(Long id, Groups group, Long userId, String userName, Double latitude, Double longitude, TransportationType transportation, String password) {
         this.id = id;
         this.group = group;
         this.userId = userId;
