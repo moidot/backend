@@ -1,0 +1,51 @@
+package com.moim.backend.domain.space.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Participation {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private Group group;
+
+    @NotNull
+    private Long userId;
+
+    @NotNull
+    private String userName;
+
+    @NotNull
+    private Double latitude;
+    @NotNull
+    private Double longitude;
+
+    @Enumerated(value = EnumType.STRING)
+    private TransportationType transportation;
+
+    @NotNull
+    private String password;
+
+    @Builder
+    private Participation(Long id, Group group, Long userId, String userName, Double latitude, Double longitude, TransportationType transportation, String password) {
+        this.id = id;
+        this.group = group;
+        this.userId = userId;
+        this.userName = userName;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.transportation = transportation;
+        this.password = password;
+    }
+}
