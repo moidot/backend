@@ -15,14 +15,14 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Group {
+public class Groups {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long groupId;
 
     @NotNull
-    private String adminId;
+    private Long adminId;
 
     @NotNull
     private String name;
@@ -32,7 +32,7 @@ public class Group {
     private String place;
 
     @Builder
-    private Group(Long spaceId, String adminId, String name, LocalDateTime date, String place) {
+    private Groups(Long spaceId, Long adminId, String name, LocalDateTime date, String place) {
         this.groupId = spaceId;
         this.adminId = adminId;
         this.name = name;
