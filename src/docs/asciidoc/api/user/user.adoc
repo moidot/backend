@@ -1,0 +1,9 @@
+=== 이메일로 로그인하는 API
+
+==== HTTP Request Body
+include::{snippets}/login-by-email/http-request.adoc[]
+include::{snippets}/login-by-email/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/login-by-email/http-response.adoc[]
+include::{snippets}/login-by-email/response-fields.adoc[]
