@@ -1,3 +1,12 @@
+=== 토큰으로 유저 이름 가져오는 API
+
+==== HTTP Request Body
+include::{snippets}/get-user-name-by-token/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/get-user-name-by-token/http-response.adoc[]
+include::{snippets}/get-user-name-by-token/response-fields.adoc[]
+
 === 이메일로 로그인하는 API
 
 ==== HTTP Request Body

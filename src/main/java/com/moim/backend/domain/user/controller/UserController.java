@@ -23,7 +23,9 @@ public class UserController {
     @GetMapping("")
     public CustomResponseEntity<String> getUserNameByToken(@Login User user) {
 
-        return CustomResponseEntity.success(user.getName());
+        return CustomResponseEntity.success(
+                userService.getUserNameByToken(user)
+        );
     }
 
     @PostMapping("/login")

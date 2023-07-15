@@ -2,6 +2,7 @@ package com.moim.backend.docs.user;
 
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.user.controller.UserController;
+import com.moim.backend.domain.user.entity.User;
 import com.moim.backend.domain.user.request.UserRequest;
 import com.moim.backend.domain.user.response.UserResponse;
 import com.moim.backend.domain.user.service.UserService;
@@ -36,7 +37,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
 
     @DisplayName("이메일로 로그인하는 API")
     @Test
-    void test() throws Exception {
+    void loginByEmail() throws Exception {
         // given
         UserRequest.Login request = new UserRequest.Login("yujung-31476@naver.com", "김유정");
 
@@ -66,7 +67,40 @@ public class UserControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("message").type(JsonFieldType.STRING)
                                         .description("상태 메세지"),
                                 fieldWithPath("data.token").type(JsonFieldType.STRING)
-                                        .description("엑세스 토큰")
+                                        .description("엑세스 토큰(시간, 이메일, 이름에 따라 달라짐)")
+                        ))
+                );
+    }
+
+    @DisplayName("토큰으로 유저 이름 가져오는 API")
+    @Test
+    void getUserNameByToken() throws Exception {
+        // given
+        User user = User.builder()
+                        .email("yu-jung31476@naver.com")
+                        .name("김유정")
+                        .build();
+
+        given(userService.getUserNameByToken(any()))
+                .willReturn(user.getName());
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/user")
+                                .header("Authorization", "JWT AccessToken")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("get-user-name-by-token",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data").type(JsonFieldType.STRING)
+                                        .description("이름")
                         ))
                 );
     }

@@ -16,6 +16,10 @@ public class UserService {
 
     private final JwtService jwtService;
 
+    public String getUserNameByToken(User user) {
+        return user.getName();
+    }
+
     public UserResponse.Login login(UserRequest.Login request) {
         User user = saveOrUpdate(request);
 
