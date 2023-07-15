@@ -32,8 +32,8 @@ public class Groups {
     private String place;
 
     @Builder
-    private Groups(Long spaceId, Long adminId, String name, LocalDateTime date, String place) {
-        this.groupId = spaceId;
+    private Groups(Long groupId, Long adminId, String name, LocalDateTime date, String place) {
+        this.groupId = groupId;
         this.adminId = adminId;
         this.name = name;
         this.date = date;

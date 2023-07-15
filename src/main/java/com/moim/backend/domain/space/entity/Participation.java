@@ -14,7 +14,7 @@ public class Participation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long participationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
@@ -34,12 +34,11 @@ public class Participation {
     @Enumerated(value = EnumType.STRING)
     private TransportationType transportation;
 
-    @NotNull
     private String password;
 
     @Builder
-    private Participation(Long id, Groups group, Long userId, String userName, Double latitude, Double longitude, TransportationType transportation, String password) {
-        this.id = id;
+    private Participation(Long participationId, Groups group, Long userId, String userName, Double latitude, Double longitude, TransportationType transportation, String password) {
+        this.participationId = participationId;
         this.group = group;
         this.userId = userId;
         this.userName = userName;

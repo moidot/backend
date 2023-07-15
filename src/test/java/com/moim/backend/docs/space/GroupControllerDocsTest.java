@@ -93,4 +93,76 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         )
                 ));
     }
+
+    @DisplayName("모임 참여 API")
+    @Test
+    void participationGroup() throws Exception {
+        // given
+        GroupRequest.Participate request
+                = new GroupRequest.Participate(1L, 37.5660, 126.9784, "BUS", "abc123");
+
+        given(groupService.participateGroup(any()))
+                .willReturn(
+                        GroupResponse.Participate.builder()
+                                .participationId(1L)
+                                .groupId(1L)
+                                .userId(1L)
+                                .userName("안지영")
+                                .latitude(37.57449)
+                                .longitude(126.89521)
+                                .transportation("BUS")
+                                .build()
+                );
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.post("/api/v1/group/participate")
+                                .header("Authorization", "JWT AccessToken")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("group-participation",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization")
+                                        .description("insert the AccessToken")
+                        ),
+                        requestFields(
+                                fieldWithPath("groupId").type(JsonFieldType.NUMBER)
+                                        .description("그룹 ID / Long"),
+                                fieldWithPath("latitude").type(JsonFieldType.NUMBER)
+                                        .description("위도 / Double"),
+                                fieldWithPath("longitude").type(JsonFieldType.NUMBER)
+                                        .description("경도 / Double"),
+                                fieldWithPath("transportation").type(JsonFieldType.STRING)
+                                        .description("'BUS' / 'SUBWAY'"),
+                                fieldWithPath("password").type(JsonFieldType.STRING)
+                                        .optional()
+                                        .description("모임 내 비밀번호")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data.participationId").type(JsonFieldType.NUMBER)
+                                        .description("모임 참여자 ID / Long"),
+                                fieldWithPath("data.groupId").type(JsonFieldType.NUMBER)
+                                        .description("그룹 ID / Long"),
+                                fieldWithPath("data.userId").type(JsonFieldType.NUMBER)
+                                        .description("유저 ID / Long"),
+                                fieldWithPath("data.userName").type(JsonFieldType.STRING)
+                                        .description("유저 이름"),
+                                fieldWithPath("data.latitude").type(JsonFieldType.NUMBER)
+                                        .description("위도 / Double"),
+                                fieldWithPath("data.longitude").type(JsonFieldType.NUMBER)
+                                        .description("경도 / Long"),
+                                fieldWithPath("data.transportation").type(JsonFieldType.STRING)
+                                        .description("내 이동수단")
+                        )
+                ));
+    }
 }

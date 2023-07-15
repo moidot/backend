@@ -1,5 +1,6 @@
 package com.moim.backend.domain.space.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,25 @@ public class GroupServiceRequest {
         private Create(String name, LocalDateTime date) {
             this.name = name;
             this.date = date;
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class Participate {
+        private Long groupId;
+        private Double latitude;
+        private Double longitude;
+        private String transportation;
+        private String password;
+
+        @Builder
+        private Participate(Long groupId, Double latitude, Double longitude, String transportation, String password) {
+            this.groupId = groupId;
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.transportation = transportation;
+            this.password = password;
         }
     }
 }

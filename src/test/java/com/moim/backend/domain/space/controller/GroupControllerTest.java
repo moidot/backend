@@ -47,4 +47,38 @@ class GroupControllerTest extends ControllerTestSupport {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
+
+    @DisplayName("모임 참여 API")
+    @Test
+    void participationGroup() throws Exception {
+        // given
+        GroupRequest.Participate request
+                = new GroupRequest.Participate(1L, 37.5660, 126.9784, "BUS", "abc123");
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/v1/group/participate")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("모임 참여 API - 위도 미입력 실패")
+    @Test
+    void participationGroupFailsWhenLatitudeNotProvided() throws Exception {
+        // given
+        GroupRequest.Participate request
+                = new GroupRequest.Participate(1L, null, 126.9784, "BUS", "abc123");
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/v1/group/participate")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
 }

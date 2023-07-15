@@ -14,7 +14,7 @@ public class BestPlace {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long bestPlaceId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
@@ -26,8 +26,8 @@ public class BestPlace {
     private Double longitude;
 
     @Builder
-    private BestPlace(Long id, Groups group, Double latitude, Double longitude) {
-        this.id = id;
+    private BestPlace(Long bestPlaceId, Groups group, Double latitude, Double longitude) {
+        this.bestPlaceId = bestPlaceId;
         this.group = group;
         this.latitude = latitude;
         this.longitude = longitude;
