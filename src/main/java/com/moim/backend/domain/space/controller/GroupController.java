@@ -22,4 +22,11 @@ public class GroupController {
     ) {
         return CustomResponseEntity.success(groupService.createGroup(request.toServiceRequest()));
     }
+
+    @PostMapping("/api/v1/group/participate")
+    public CustomResponseEntity<GroupResponse.Participate> participateGroup(
+             @RequestBody @Valid GroupRequest.Participate request
+    ) {
+        return CustomResponseEntity.success(groupService.participateGroup(request.toServiceRequest()));
+    }
 }
