@@ -1,6 +1,6 @@
 package com.moim.backend.domain.admin.controller;
 
-import com.moim.backend.domain.admin.ControllerTestSupport;
+import com.moim.backend.domain.ControllerTestSupport;
 import com.moim.backend.domain.admin.request.VersionRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
