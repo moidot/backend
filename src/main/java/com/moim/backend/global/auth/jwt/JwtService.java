@@ -1,5 +1,6 @@
 package com.moim.backend.global.auth.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.NativeWebRequest;
 
 import java.security.Key;
 import java.util.Date;
@@ -59,8 +61,23 @@ public class JwtService implements InitializingBean {
         return false;
     }
 
+    public String getUserEmail(String token) {
+        Claims body = Jwts.parserBuilder().setSigningKey(key).build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return body.getSubject();
+    }
+
     public String getToken(HttpServletRequest request) {
-        String authorizationValue = request.getHeader(HttpHeaders.AUTHORIZATION);
+        return getToken(request.getHeader(HttpHeaders.AUTHORIZATION));
+    }
+
+    public String getToken(NativeWebRequest request) {
+        return getToken(request.getHeader(HttpHeaders.AUTHORIZATION));
+    }
+
+    private String getToken(String authorizationValue) {
         String[] splitAuthorization = authorizationValue.split(" ");
         if (splitAuthorization.length > 1) {
             return splitAuthorization[1];
