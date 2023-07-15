@@ -19,5 +19,9 @@ include::api/common/statusDetail.adoc[]
 = 📈 API
 == Version API
 include::api/admin/version.adoc[]
+
 == User API
 include::api/user/user.adoc[]
+
+== GroupAPI
+include::api/space/group.adoc[]

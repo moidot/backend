@@ -1,0 +1,12 @@
+=== 모임 생성 API
+
+==== HTTP Request Headers
+include::{snippets}/group-create/request-headers.adoc[]
+
+==== HTTP Request Body
+include::{snippets}/group-create/http-request.adoc[]
+include::{snippets}/group-create/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/group-create/http-response.adoc[]
+include::{snippets}/group-create/response-fields.adoc[]
