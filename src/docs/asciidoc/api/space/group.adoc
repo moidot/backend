@@ -10,3 +10,16 @@ include::{snippets}/group-create/request-fields.adoc[]
 ==== HTTP Response
 include::{snippets}/group-create/http-response.adoc[]
 include::{snippets}/group-create/response-fields.adoc[]
+
+=== 모임 참여 API
+
+==== HTTP Request Headers
+include::{snippets}/group-participation/request-headers.adoc[]
+
+==== HTTP Request Body
+include::{snippets}/group-participation/http-request.adoc[]
+include::{snippets}/group-participation/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/group-participation/http-response.adoc[]
+include::{snippets}/group-participation/response-fields.adoc[]
