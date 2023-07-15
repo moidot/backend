@@ -12,6 +12,8 @@ import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 @Service
@@ -46,6 +48,8 @@ public class GroupService {
                 .orElseThrow(
                         () -> new CustomException(Result.NOT_FOUND_GROUP)
                 );
+        String encryptedPassword = (!request.getPassword().isBlank()) ?
+                encrypt(request.getPassword()) : null;
 
         Participation participation = participationRepository.save(
                 Participation.builder()
@@ -56,10 +60,26 @@ public class GroupService {
                         .latitude(request.getLatitude())
                         .longitude(request.getLongitude())
                         .transportation(TransportationType.valueOf(request.getTransportation()))
-                        .password(request.getPassword())
+                        .password(encryptedPassword)
                         .build()
         );
 
         return GroupResponse.Participate.response(participation);
+    }
+
+    // method
+    public static String encrypt(String password) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(password.getBytes());
+            byte[] bytes = md.digest();
+            for (byte aByte : bytes) {
+                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new CustomException(Result.FAIL);
+        }
     }
 }
