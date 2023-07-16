@@ -6,6 +6,7 @@ import com.moim.backend.domain.user.response.UserResponse;
 import com.moim.backend.domain.user.service.UserService;
 import com.moim.backend.global.auth.Login;
 import com.moim.backend.global.common.CustomResponseEntity;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public CustomResponseEntity<UserResponse.Login> loginByEmail(@RequestBody UserRequest.Login request) {
+    public CustomResponseEntity<UserResponse.Login> loginByEmail(@Valid @RequestBody UserRequest.Login request) {
         return CustomResponseEntity.success(
                 userService.login(request)
         );

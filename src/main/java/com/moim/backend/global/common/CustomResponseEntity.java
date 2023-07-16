@@ -27,6 +27,13 @@ public class CustomResponseEntity<T> {
                 .build();
     }
 
+    public static <T> CustomResponseEntity<T> fail(String message) {
+        return CustomResponseEntity.<T>builder()
+                .code(Result.FAIL.getCode())
+                .message(message)
+                .build();
+    }
+
     public static <T> CustomResponseEntity<T> fail(Result result) {
         return CustomResponseEntity.<T>builder()
                 .result(result)
