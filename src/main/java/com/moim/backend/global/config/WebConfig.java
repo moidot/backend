@@ -18,7 +18,7 @@ public class WebConfig implements WebMvcConfigurer {
     private final LoginArgumentResolver loginArgumentResolver;
 
     private List<String> loginEndpointList = List.of(
-            "/user"
+            "/user","/api"
     );
 
     @Override

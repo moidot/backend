@@ -1,6 +1,6 @@
 package com.moim.backend.domain.user.controller;
 
-import com.moim.backend.domain.user.entity.User;
+import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.request.UserRequest;
 import com.moim.backend.domain.user.response.UserResponse;
 import com.moim.backend.domain.user.service.UserService;
@@ -22,7 +22,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("")
-    public CustomResponseEntity<String> getUserNameByToken(@Login User user) {
+    public CustomResponseEntity<String> getUserNameByToken(@Login Users user) {
 
         return CustomResponseEntity.success(
                 userService.getUserNameByToken(user)

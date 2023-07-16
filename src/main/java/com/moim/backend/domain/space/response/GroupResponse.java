@@ -29,11 +29,14 @@ public class GroupResponse {
         }
 
         public static GroupResponse.Create response(Groups group) {
+            String date;
+            if (group.getDate() != null) date = group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            else date = "none";
             return Create.builder()
                     .groupId(group.getGroupId())
                     .adminId(group.getAdminId())
                     .name(group.getName())
-                    .date(group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .date(date)
                     .fixedPlace(group.getPlace())
                     .build();
         }

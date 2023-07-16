@@ -19,11 +19,12 @@ class GroupControllerTest extends ControllerTestSupport {
     void createGroup() throws Exception {
         // given
         GroupRequest.Create request =
-                new GroupRequest.Create("테스트 그룹", LocalDateTime.of(2023, 7, 13, 13, 0));
+                new GroupRequest.Create("테스트 그룹", "2023-07-13");
 
         // when // then
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/api/v1/group")
+                                .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -36,11 +37,12 @@ class GroupControllerTest extends ControllerTestSupport {
     void createGroupBlankGroupNameException() throws Exception {
         // given
         GroupRequest.Create request =
-                new GroupRequest.Create(" ", LocalDateTime.of(2023, 7, 13, 13, 0));
+                new GroupRequest.Create(" ", "2023-07-13");
 
         // when // then
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/api/v1/group")
+                                .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -53,11 +55,12 @@ class GroupControllerTest extends ControllerTestSupport {
     void participationGroup() throws Exception {
         // given
         GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, 37.5660, 126.9784, "BUS", "abc123");
+                = new GroupRequest.Participate(1L, 37.5660, 126.9784, "BUS", "123456");
 
         // when // then
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/api/v1/group/participate")
+                                .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -75,6 +78,7 @@ class GroupControllerTest extends ControllerTestSupport {
         // when // then
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/api/v1/group/participate")
+                                .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )

@@ -1,6 +1,6 @@
 package com.moim.backend.domain.user.service;
 
-import com.moim.backend.domain.user.entity.User;
+import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.domain.user.request.UserRequest;
 import com.moim.backend.domain.user.response.UserResponse;
@@ -16,22 +16,29 @@ public class UserService {
 
     private final JwtService jwtService;
 
-    public String getUserNameByToken(User user) {
+    public String getUserNameByToken(Users user) {
         return user.getName();
     }
 
     public UserResponse.Login login(UserRequest.Login request) {
-        User user = saveOrUpdate(request);
+        Users user = saveOrUpdate(request);
 
         return new UserResponse.Login(jwtService.createToken(user.getEmail()));
     }
 
-    private User saveOrUpdate(UserRequest.Login request) {
-        User user = userRepository.findByEmail(request.getEmail())
+    private Users saveOrUpdate(UserRequest.Login request) {
+        Users user = userRepository.findByEmail(request.getEmail())
                 .map(entity -> entity.update(request.getName()))
-                .orElse(request.toUserEntity());
+                .orElse(toUserEntity(request));
 
         return userRepository.save(user);
+    }
+
+    private Users toUserEntity(UserRequest.Login request) {
+        return Users.builder()
+                .email(request.getEmail())
+                .name(request.getName())
+                .build();
     }
 
 }

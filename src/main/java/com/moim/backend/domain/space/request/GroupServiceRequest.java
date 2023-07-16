@@ -1,11 +1,14 @@
 package com.moim.backend.domain.space.request;
 
-import jakarta.validation.constraints.NotNull;
+import com.moim.backend.domain.space.entity.Groups;
+import com.moim.backend.domain.space.entity.Participation;
+import com.moim.backend.domain.space.entity.TransportationType;
+import com.moim.backend.domain.user.entity.Users;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class GroupServiceRequest {
 
@@ -13,10 +16,10 @@ public class GroupServiceRequest {
     @NoArgsConstructor
     public static class Create {
         private String name;
-        private LocalDateTime date;
+        private LocalDate date;
 
         @Builder
-        private Create(String name, LocalDateTime date) {
+        private Create(String name, LocalDate date) {
             this.name = name;
             this.date = date;
         }

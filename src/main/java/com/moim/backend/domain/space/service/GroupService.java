@@ -7,6 +7,7 @@ import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
+import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,45 +23,25 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final ParticipationRepository participationRepository;
 
-
-    public GroupResponse.Create createGroup(GroupServiceRequest.Create request) {
-
-        Groups group = groupRepository.save(
-                Groups.builder()
-                        // 유저 미구현 상태로 인한 ID값 임시 랜덤
-                        .adminId((long) ((Math.random() * 10000) + 1))
-                        .name(request.getName())
-                        .date(request.getDate())
-                        .place("none")
-                        .build()
-        );
+    public GroupResponse.Create createGroup(GroupServiceRequest.Create request, Users user) {
+        Groups group = groupRepository.save(toGroupEntity(request, user));
 
         return GroupResponse.Create.response(group);
     }
 
-    public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request) {
+    public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request, Users user) {
         if (!request.getTransportation().equals("BUS") && !request.getTransportation().equals("SUBWAY")) {
             throw new CustomException(Result.INVALID_TRANSPORTATION);
         }
-
         Groups group = groupRepository.findById(request.getGroupId())
                 .orElseThrow(
                         () -> new CustomException(Result.NOT_FOUND_GROUP)
                 );
-        String encryptedPassword = (!request.getPassword().isBlank()) ?
+        String encryptedPassword = (request.getPassword() != null) ?
                 encrypt(request.getPassword()) : null;
 
         Participation participation = participationRepository.save(
-                Participation.builder()
-                        .group(group)
-                        // 유저 미구현 상태로 인한 userId 및 이름 고정
-                        .userId(1L)
-                        .userName("JWT 미구현")
-                        .latitude(request.getLatitude())
-                        .longitude(request.getLongitude())
-                        .transportation(TransportationType.valueOf(request.getTransportation()))
-                        .password(encryptedPassword)
-                        .build()
+                toParticipationEntity(request, group, user, encryptedPassword)
         );
 
         return GroupResponse.Participate.response(participation);
@@ -82,4 +62,27 @@ public class GroupService {
             throw new CustomException(Result.FAIL);
         }
     }
+
+    private Groups toGroupEntity(GroupServiceRequest.Create request, Users user) {
+        return Groups.builder()
+                .adminId(user.getUserId())
+                .name(request.getName())
+                .date(request.getDate())
+                .build();
+    }
+
+    private Participation toParticipationEntity(
+            GroupServiceRequest.Participate request, Groups group, Users user, String encryptedPassword
+    ) {
+        return Participation.builder()
+                .group(group)
+                .userId(user.getUserId())
+                .userName(user.getName())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .transportation(TransportationType.valueOf(request.getTransportation()))
+                .password(encryptedPassword)
+                .build();
+    }
+
 }

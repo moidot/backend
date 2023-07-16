@@ -10,9 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -39,9 +36,9 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     void createGroup() throws Exception {
         // given
         GroupRequest.Create request =
-                new GroupRequest.Create("테스트 그룹", null);
+                new GroupRequest.Create("테스트 그룹", "2023-07-13");
 
-        given(groupService.createGroup(any()))
+        given(groupService.createGroup(any(), any()))
                 .willReturn(
                         GroupResponse.Create.builder()
                                 .groupId(1L)
@@ -71,8 +68,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         requestFields(
                                 fieldWithPath("name").type(JsonFieldType.STRING)
                                         .description("모임 이름"),
-                                fieldWithPath("date").type(JsonFieldType.OBJECT)
-                                        .description("모임 날짜 / LocalDateTime")
+                                fieldWithPath("date").type(JsonFieldType.STRING)
+                                        .description("모임 날짜 / 'yyyy-dd-mm'")
                                         .optional()
                         ),
                         responseFields(
@@ -99,9 +96,9 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     void participationGroup() throws Exception {
         // given
         GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, 37.5660, 126.9784, "BUS", "abc123");
+                = new GroupRequest.Participate(1L, 37.5660, 126.9784, "BUS", "123456");
 
-        given(groupService.participateGroup(any()))
+        given(groupService.participateGroup(any(), any()))
                 .willReturn(
                         GroupResponse.Participate.builder()
                                 .participationId(1L)
