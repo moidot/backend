@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class User {
+public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,14 +25,13 @@ public class User {
     @NotNull(message = "name은 null이 될 수 없습니다.")
     private String name;
 
-    public User update(String name) {
+    public Users update(String name) {
         this.name = name;
-
         return this;
     }
 
     @Builder
-    public User(String email, String name) {
+    public Users(String email, String name) {
         this.email = email;
         this.name = name;
     }

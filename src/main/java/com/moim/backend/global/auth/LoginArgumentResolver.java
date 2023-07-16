@@ -1,6 +1,6 @@
 package com.moim.backend.global.auth;
 
-import com.moim.backend.domain.user.entity.User;
+import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.global.auth.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         boolean isLoginAnnotation = parameter.getParameterAnnotation(Login.class) != null;
-        boolean isUserClass = parameter.getParameterType().equals(User.class);
+        boolean isUserClass = parameter.getParameterType().equals(Users.class);
 
         return isLoginAnnotation && isUserClass;
     }

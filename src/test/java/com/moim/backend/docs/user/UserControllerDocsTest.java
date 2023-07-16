@@ -2,7 +2,7 @@ package com.moim.backend.docs.user;
 
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.user.controller.UserController;
-import com.moim.backend.domain.user.entity.User;
+import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.request.UserRequest;
 import com.moim.backend.domain.user.response.UserResponse;
 import com.moim.backend.domain.user.service.UserService;
@@ -76,7 +76,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
     @Test
     void getUserNameByToken() throws Exception {
         // given
-        User user = User.builder()
+        Users user = Users.builder()
                         .email("yu-jung31476@naver.com")
                         .name("김유정")
                         .build();

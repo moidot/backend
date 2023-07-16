@@ -23,7 +23,7 @@ public class BookmarkPlace {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private Users user;
 
     @NotNull(message = "장소 이름은 null이 될 수 없습니다.")
    private String name;
