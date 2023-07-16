@@ -10,7 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,12 +27,12 @@ public class Groups {
     @NotNull
     private String name;
 
-    private LocalDateTime date;
+    private LocalDate date;
 
     private String place;
 
     @Builder
-    private Groups(Long groupId, Long adminId, String name, LocalDateTime date, String place) {
+    private Groups(Long groupId, Long adminId, String name, LocalDate date, String place) {
         this.groupId = groupId;
         this.adminId = adminId;
         this.name = name;
