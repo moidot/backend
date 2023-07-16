@@ -1,13 +1,14 @@
 package com.moim.backend.domain.space.request;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
+import com.moim.backend.domain.space.entity.Groups;
+import com.moim.backend.domain.space.entity.Participation;
+import com.moim.backend.domain.space.entity.TransportationType;
+import com.moim.backend.domain.user.entity.Users;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class GroupServiceRequest {
 
@@ -21,6 +22,15 @@ public class GroupServiceRequest {
         private Create(String name, LocalDate date) {
             this.name = name;
             this.date = date;
+        }
+
+        public Groups toGroupEntity(Users user) {
+            return Groups.builder()
+                    .adminId(user.getUserId())
+                    .name(name)
+                    .date(date)
+                    .place("none")
+                    .build();
         }
     }
 
@@ -40,6 +50,18 @@ public class GroupServiceRequest {
             this.longitude = longitude;
             this.transportation = transportation;
             this.password = password;
+        }
+
+        public Participation toParticipationEntity(Groups group, Users user, String encryptedPassword) {
+            return Participation.builder()
+                    .group(group)
+                    .userId(user.getUserId())
+                    .userName(user.getName())
+                    .latitude(latitude)
+                    .longitude(longitude)
+                    .transportation(TransportationType.valueOf(transportation))
+                    .password(encryptedPassword)
+                    .build();
         }
     }
 }

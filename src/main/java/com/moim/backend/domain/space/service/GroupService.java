@@ -4,7 +4,6 @@ import com.moim.backend.domain.space.Repository.GroupRepository;
 import com.moim.backend.domain.space.Repository.ParticipationRepository;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
-import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.user.entity.Users;
@@ -24,14 +23,7 @@ public class GroupService {
     private final ParticipationRepository participationRepository;
 
     public GroupResponse.Create createGroup(GroupServiceRequest.Create request, Users user) {
-        Groups group = groupRepository.save(
-                Groups.builder()
-                        .adminId(user.getUserId())
-                        .name(request.getName())
-                        .date(request.getDate())
-                        .place("none")
-                        .build()
-        );
+        Groups group = groupRepository.save(request.toGroupEntity(user));
 
         return GroupResponse.Create.response(group);
     }
@@ -48,15 +40,7 @@ public class GroupService {
                 encrypt(request.getPassword()) : null;
 
         Participation participation = participationRepository.save(
-                Participation.builder()
-                        .group(group)
-                        .userId(user.getUserId())
-                        .userName(user.getName())
-                        .latitude(request.getLatitude())
-                        .longitude(request.getLongitude())
-                        .transportation(TransportationType.valueOf(request.getTransportation()))
-                        .password(encryptedPassword)
-                        .build()
+                request.toParticipationEntity(group, user, encryptedPassword)
         );
 
         return GroupResponse.Participate.response(participation);
