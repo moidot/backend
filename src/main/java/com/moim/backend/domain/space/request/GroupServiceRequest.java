@@ -23,15 +23,6 @@ public class GroupServiceRequest {
             this.name = name;
             this.date = date;
         }
-
-        public Groups toGroupEntity(Users user) {
-            return Groups.builder()
-                    .adminId(user.getUserId())
-                    .name(name)
-                    .date(date)
-                    .place("none")
-                    .build();
-        }
     }
 
     @Getter
@@ -50,18 +41,6 @@ public class GroupServiceRequest {
             this.longitude = longitude;
             this.transportation = transportation;
             this.password = password;
-        }
-
-        public Participation toParticipationEntity(Groups group, Users user, String encryptedPassword) {
-            return Participation.builder()
-                    .group(group)
-                    .userId(user.getUserId())
-                    .userName(user.getName())
-                    .latitude(latitude)
-                    .longitude(longitude)
-                    .transportation(TransportationType.valueOf(transportation))
-                    .password(encryptedPassword)
-                    .build();
         }
     }
 }

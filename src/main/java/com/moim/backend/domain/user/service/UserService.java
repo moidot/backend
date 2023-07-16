@@ -29,9 +29,16 @@ public class UserService {
     private Users saveOrUpdate(UserRequest.Login request) {
         Users user = userRepository.findByEmail(request.getEmail())
                 .map(entity -> entity.update(request.getName()))
-                .orElse(request.toUserEntity());
+                .orElse(toUserEntity(request));
 
         return userRepository.save(user);
+    }
+
+    private Users toUserEntity(UserRequest.Login request) {
+        return Users.builder()
+                .email(request.getEmail())
+                .name(request.getName())
+                .build();
     }
 
 }

@@ -1,6 +1,5 @@
 package com.moim.backend.domain.user.request;
 
-import com.moim.backend.domain.user.entity.Users;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,13 +15,6 @@ public class UserRequest {
         private String email;
         @NotNull(message = "name은 null이 될 수 없습니다.")
         private String name;
-
-        public Users toUserEntity() {
-            return Users.builder()
-                    .email(email)
-                    .name(name)
-                    .build();
-        }
     }
 
 }

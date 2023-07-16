@@ -37,6 +37,6 @@ public class Groups {
         this.adminId = adminId;
         this.name = name;
         this.date = date;
-        this.place = place;
+        this.place = (place == null) ? "none" : place;
     }
 }

@@ -4,6 +4,7 @@ import com.moim.backend.domain.space.Repository.GroupRepository;
 import com.moim.backend.domain.space.Repository.ParticipationRepository;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
+import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.user.entity.Users;
@@ -23,7 +24,7 @@ public class GroupService {
     private final ParticipationRepository participationRepository;
 
     public GroupResponse.Create createGroup(GroupServiceRequest.Create request, Users user) {
-        Groups group = groupRepository.save(request.toGroupEntity(user));
+        Groups group = groupRepository.save(toGroupEntity(request, user));
 
         return GroupResponse.Create.response(group);
     }
@@ -40,7 +41,7 @@ public class GroupService {
                 encrypt(request.getPassword()) : null;
 
         Participation participation = participationRepository.save(
-                request.toParticipationEntity(group, user, encryptedPassword)
+                toParticipationEntity(request, group, user, encryptedPassword)
         );
 
         return GroupResponse.Participate.response(participation);
@@ -60,6 +61,28 @@ public class GroupService {
         } catch (NoSuchAlgorithmException e) {
             throw new CustomException(Result.FAIL);
         }
+    }
+
+    private Groups toGroupEntity(GroupServiceRequest.Create request, Users user) {
+        return Groups.builder()
+                .adminId(user.getUserId())
+                .name(request.getName())
+                .date(request.getDate())
+                .build();
+    }
+
+    private Participation toParticipationEntity(
+            GroupServiceRequest.Participate request, Groups group, Users user, String encryptedPassword
+    ) {
+        return Participation.builder()
+                .group(group)
+                .userId(user.getUserId())
+                .userName(user.getName())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .transportation(TransportationType.valueOf(request.getTransportation()))
+                .password(encryptedPassword)
+                .build();
     }
 
 }
