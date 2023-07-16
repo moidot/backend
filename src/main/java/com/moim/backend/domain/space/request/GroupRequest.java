@@ -5,8 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class GroupRequest {
 
@@ -16,7 +17,9 @@ public class GroupRequest {
     public static class Create {
         @NotBlank
         private String name;
-        private String date;
+
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate date;
 
         public GroupServiceRequest.Create toServiceRequest() {
             return GroupServiceRequest.Create.builder()

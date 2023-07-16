@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
-import java.util.StringTokenizer;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +28,7 @@ public class GroupService {
                 Groups.builder()
                         .adminId(user.getUserId())
                         .name(request.getName())
-                        .date(parseLocalDate(request.getDate()))
+                        .date(request.getDate())
                         .place("none")
                         .build()
         );
@@ -80,15 +78,4 @@ public class GroupService {
         }
     }
 
-    private static LocalDate parseLocalDate(String strDate) {
-        LocalDate date = null;
-        if (strDate != null) {
-            StringTokenizer st = new StringTokenizer(strDate, "-");
-            int year = Integer.parseInt(st.nextToken());
-            int month = Integer.parseInt(st.nextToken());
-            int day = Integer.parseInt(st.nextToken());
-            date = LocalDate.of(year, month, day);
-        }
-        return date;
-    }
 }
