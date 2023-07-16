@@ -1,6 +1,7 @@
 package com.moim.backend.domain.space.request;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,10 @@ public class GroupServiceRequest {
     @NoArgsConstructor
     public static class Create {
         private String name;
-        private LocalDateTime date;
+        private String date;
 
         @Builder
-        private Create(String name, LocalDateTime date) {
+        private Create(String name, String date) {
             this.name = name;
             this.date = date;
         }

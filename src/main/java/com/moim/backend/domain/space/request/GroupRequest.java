@@ -16,7 +16,7 @@ public class GroupRequest {
     public static class Create {
         @NotBlank
         private String name;
-        private LocalDateTime date;
+        private String date;
 
         public GroupServiceRequest.Create toServiceRequest() {
             return GroupServiceRequest.Create.builder()
