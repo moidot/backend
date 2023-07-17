@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -19,7 +20,7 @@ class GroupControllerTest extends ControllerTestSupport {
     void createGroup() throws Exception {
         // given
         GroupRequest.Create request =
-                new GroupRequest.Create("테스트 그룹", "2023-07-13");
+                new GroupRequest.Create("테스트 그룹", LocalDate.of(2023, 7, 13));
 
         // when // then
         mockMvc.perform(
@@ -37,7 +38,7 @@ class GroupControllerTest extends ControllerTestSupport {
     void createGroupBlankGroupNameException() throws Exception {
         // given
         GroupRequest.Create request =
-                new GroupRequest.Create(" ", "2023-07-13");
+                new GroupRequest.Create(" ", LocalDate.of(2023, 7, 13));
 
         // when // then
         mockMvc.perform(

@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 
+import java.time.LocalDate;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -36,7 +38,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     void createGroup() throws Exception {
         // given
         GroupRequest.Create request =
-                new GroupRequest.Create("테스트 그룹", "2023-07-13");
+                new GroupRequest.Create("테스트 그룹", null);
 
         given(groupService.createGroup(any(), any()))
                 .willReturn(

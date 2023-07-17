@@ -53,7 +53,7 @@ class GroupServiceTest {
         );
 
         GroupRequest.Create request = new GroupRequest.Create(
-                "테스트 그룹", "2023-07-14"
+                "테스트 그룹", LocalDate.of(2023,7,15)
         );
 
         // when
@@ -62,7 +62,7 @@ class GroupServiceTest {
         // then
         assertThat(response)
                 .extracting("groupId", "adminId", "name", "date", "fixedPlace")
-                .contains(1L, user.getUserId(), "테스트 그룹", "2023-07-14", "none");
+                .contains(1L, user.getUserId(), "테스트 그룹", "2023-07-15", "none");
     }
 
     @DisplayName("하나의 유저가 새로운 모임을 생성할때 날짜는 입력하지 않는다.")
