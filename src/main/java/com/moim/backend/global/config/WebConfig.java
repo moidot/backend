@@ -17,10 +17,6 @@ public class WebConfig implements WebMvcConfigurer {
     private final LoginInterceptor loginInterceptor;
     private final LoginArgumentResolver loginArgumentResolver;
 
-    private List<String> loginEndpointList = List.of(
-            "/user","/api"
-    );
-
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         argumentResolvers.add(loginArgumentResolver);
@@ -28,8 +24,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(loginInterceptor)
-                .addPathPatterns(loginEndpointList);
+        registry.addInterceptor(loginInterceptor);
     }
 
 }
