@@ -1,11 +1,9 @@
 package com.moim.backend.global.auth.jwt;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,11 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -50,7 +48,7 @@ public class JwtService implements InitializingBean {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("JWT 토큰이 잘못되었습니다.");
         }
 
@@ -65,31 +63,19 @@ public class JwtService implements InitializingBean {
     }
 
     public String getToken(HttpServletRequest request) {
-        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-        if (authorization == null) {
-            throw new NullPointerException("header에 authorization 값이 없습니다.");
-        }
-
-        return getToken(authorization);
+        return getToken(Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION)));
     }
 
     public String getToken(NativeWebRequest request) {
-        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-        if (authorization == null) {
-            throw new NullPointerException("header에 authorization 값이 없습니다.");
-        }
-
-        return getToken(request.getHeader(HttpHeaders.AUTHORIZATION));
+        return getToken(Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION)));
     }
 
-    private String getToken(String authorization) {
-        String[] splitAuthorization = authorization.split(" ");
-        if (splitAuthorization.length > 1) {
-            return splitAuthorization[1];
-        } else {
-            return splitAuthorization[0];
-        }
+    public String getToken(Optional<String> authorization) {
+        String[] splitAuthorization = authorization
+                .orElseThrow(() -> new NullPointerException("header에 authorization 값이 없습니다."))
+                .split(" ");
+
+        return (splitAuthorization.length > 1) ? splitAuthorization[1] : splitAuthorization[0];
     }
+
 }
