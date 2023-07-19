@@ -53,7 +53,7 @@ class GroupServiceTest {
         );
 
         GroupRequest.Create request = new GroupRequest.Create(
-                "테스트 그룹", LocalDate.of(2023,7,15)
+                "테스트 그룹", LocalDate.of(2023, 7, 15)
         );
 
         // when
@@ -116,7 +116,7 @@ class GroupServiceTest {
         );
 
         GroupRequest.Participate request =
-                new GroupRequest.Participate(saveGroup.getGroupId(), 37.5660, 126.9784, "BUS", "2345");
+                new GroupRequest.Participate(saveGroup.getGroupId(), "경기도불주먹", 37.5660, 126.9784, "BUS", "2345");
 
         // when
         GroupResponse.Participate response =
@@ -131,9 +131,8 @@ class GroupServiceTest {
                         "transportation"
                 )
                 .contains(
-                        saveGroup.getGroupId(), participateUser.getUserId(),
-                        participateUser.getName(), 37.5660, 126.9784,
-                        "BUS"
+                        saveGroup.getGroupId(), participateUser.getUserId(), "경기도불주먹",
+                        37.5660, 126.9784, "BUS"
                 );
 
         Participation participation = participationRepository.findById(response.getParticipationId()).get();
@@ -168,7 +167,7 @@ class GroupServiceTest {
         );
 
         GroupRequest.Participate request =
-                new GroupRequest.Participate(saveGroup.getGroupId(), 37.5660, 126.9784, "BUS", null);
+                new GroupRequest.Participate(saveGroup.getGroupId(), "경기도불주먹", 37.5660, 126.9784, "BUS", null);
 
         // when
         GroupResponse.Participate response =
@@ -183,7 +182,7 @@ class GroupServiceTest {
                 )
                 .contains(
                         1L, saveGroup.getGroupId(), participateUser.getUserId(),
-                        participateUser.getName(), 37.5660, 126.9784,
+                        "경기도불주먹", 37.5660, 126.9784,
                         "BUS"
                 );
 
@@ -212,7 +211,7 @@ class GroupServiceTest {
         );
 
         GroupRequest.Participate request
-                = new GroupRequest.Participate(saveGroup.getGroupId(), 37.5660, 126.9784, "TAXI", "abc123");
+                = new GroupRequest.Participate(saveGroup.getGroupId(), "경기도불주먹", 37.5660, 126.9784, "TAXI", "abc123");
 
         // when // then
         assertThatThrownBy(() -> groupService.participateGroup(request.toServiceRequest(), user))

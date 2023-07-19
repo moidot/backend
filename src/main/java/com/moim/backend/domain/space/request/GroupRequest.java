@@ -15,7 +15,7 @@ public class GroupRequest {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Create {
-        @NotBlank
+        @NotBlank(message = "그룹 이름을 입력하지 않았습니다.")
         private String name;
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -36,6 +36,9 @@ public class GroupRequest {
         @NotNull
         private Long groupId;
 
+        @NotBlank(message = "별명을 입력하지 않았습니다.")
+        private String userName;
+
         @NotNull
         private Double latitude;
 
@@ -50,6 +53,7 @@ public class GroupRequest {
         public GroupServiceRequest.Participate toServiceRequest() {
             return GroupServiceRequest.Participate.builder()
                     .groupId(groupId)
+                    .userName(userName)
                     .latitude(latitude)
                     .longitude(longitude)
                     .transportation(transportation)
