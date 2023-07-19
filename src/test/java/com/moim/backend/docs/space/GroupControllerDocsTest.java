@@ -98,7 +98,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     void participationGroup() throws Exception {
         // given
         GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, "안지영", 37.5660, 126.9784, "BUS", "123456");
+                = new GroupRequest.Participate(1L, "안지영", "쇼파르", 37.5660, 126.9784, "BUS", "123456");
 
         given(groupService.participateGroup(any(), any()))
                 .willReturn(
@@ -107,6 +107,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .groupId(1L)
                                 .userId(1L)
                                 .userName("안지영")
+                                .locationName("쇼파르")
                                 .latitude(37.57449)
                                 .longitude(126.89521)
                                 .transportation("BUS")
@@ -134,6 +135,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("그룹 ID / Long"),
                                 fieldWithPath("userName").type(JsonFieldType.STRING)
                                         .description("유저 별명"),
+                                fieldWithPath("locationName").type(JsonFieldType.STRING)
+                                        .description("출발 위치 이름"),
                                 fieldWithPath("latitude").type(JsonFieldType.NUMBER)
                                         .description("위도 / Double"),
                                 fieldWithPath("longitude").type(JsonFieldType.NUMBER)
@@ -157,6 +160,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("유저 ID / Long"),
                                 fieldWithPath("data.userName").type(JsonFieldType.STRING)
                                         .description("유저 별명"),
+                                fieldWithPath("data.locationName").type(JsonFieldType.STRING)
+                                        .description("출발 위치"),
                                 fieldWithPath("data.latitude").type(JsonFieldType.NUMBER)
                                         .description("위도 / Double"),
                                 fieldWithPath("data.longitude").type(JsonFieldType.NUMBER)

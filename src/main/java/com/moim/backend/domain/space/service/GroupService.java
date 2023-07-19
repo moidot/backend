@@ -85,6 +85,7 @@ public class GroupService {
                 .group(group)
                 .userId(userId)
                 .userName(request.getUserName())
+                .locationName(request.getLocationName())
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
                 .transportation(TransportationType.valueOf(request.getTransportation()))

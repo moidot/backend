@@ -30,6 +30,7 @@ public class GroupServiceRequest {
     public static class Participate {
         private Long groupId;
         private String userName;
+        private String locationName;
         private Double latitude;
         private Double longitude;
         private String transportation;

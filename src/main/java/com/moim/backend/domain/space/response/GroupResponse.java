@@ -49,16 +49,18 @@ public class GroupResponse {
         private Long groupId;
         private Long userId;
         private String userName;
+        private String locationName;
         private Double latitude;
         private Double longitude;
         private String transportation;
 
         @Builder
-        private Participate(Long participationId, Long groupId, Long userId, String userName, Double latitude, Double longitude, String transportation) {
+        private Participate(Long participationId, Long groupId, Long userId, String userName, String locationName, Double latitude, Double longitude, String transportation) {
             this.participationId = participationId;
             this.groupId = groupId;
             this.userId = userId;
             this.userName = userName;
+            this.locationName = locationName;
             this.latitude = latitude;
             this.longitude = longitude;
             this.transportation = transportation;
@@ -70,6 +72,7 @@ public class GroupResponse {
                     .groupId(participation.getGroup().getGroupId())
                     .userId(participation.getUserId())
                     .userName(participation.getUserName())
+                    .locationName(participation.getLocationName())
                     .latitude(participation.getLatitude())
                     .longitude(participation.getLongitude())
                     .transportation(participation.getTransportation().name())

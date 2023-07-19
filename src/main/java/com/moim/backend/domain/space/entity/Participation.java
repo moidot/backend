@@ -1,6 +1,7 @@
 package com.moim.backend.domain.space.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -27,7 +28,11 @@ public class Participation {
     private String userName;
 
     @NotNull
+    private String locationName;
+
+    @NotNull
     private Double latitude;
+
     @NotNull
     private Double longitude;
 
@@ -37,11 +42,12 @@ public class Participation {
     private String password;
 
     @Builder
-    private Participation(Long participationId, Groups group, Long userId, String userName, Double latitude, Double longitude, TransportationType transportation, String password) {
+    private Participation(Long participationId, Groups group, Long userId, String userName, String locationName, Double latitude, Double longitude, TransportationType transportation, String password) {
         this.participationId = participationId;
         this.group = group;
         this.userId = userId;
         this.userName = userName;
+        this.locationName = locationName;
         this.latitude = latitude;
         this.longitude = longitude;
         this.transportation = transportation;
