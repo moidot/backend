@@ -116,7 +116,10 @@ class GroupServiceTest {
         );
 
         GroupRequest.Participate request =
-                new GroupRequest.Participate(saveGroup.getGroupId(), "경기도불주먹", 37.5660, 126.9784, "BUS", "2345");
+                new GroupRequest.Participate(
+                        saveGroup.getGroupId(), "경기도불주먹", "커피나무",
+                        37.5660, 126.9784, "BUS", "2345"
+                );
 
         // when
         GroupResponse.Participate response =
@@ -126,13 +129,14 @@ class GroupServiceTest {
         assertThat(response.getParticipationId()).isNotNull();
         assertThat(response)
                 .extracting(
-                        "groupId", "userId",
+                        "groupId", "userId", "locationName",
                         "userName", "latitude", "longitude",
                         "transportation"
                 )
                 .contains(
-                        saveGroup.getGroupId(), participateUser.getUserId(), "경기도불주먹",
-                        37.5660, 126.9784, "BUS"
+                        saveGroup.getGroupId(), participateUser.getUserId(), "커피나무",
+                        "경기도불주먹", 37.5660, 126.9784,
+                        "BUS"
                 );
 
         Participation participation = participationRepository.findById(response.getParticipationId()).get();
@@ -167,7 +171,10 @@ class GroupServiceTest {
         );
 
         GroupRequest.Participate request =
-                new GroupRequest.Participate(saveGroup.getGroupId(), "경기도불주먹", 37.5660, 126.9784, "BUS", null);
+                new GroupRequest.Participate(
+                        saveGroup.getGroupId(), "경기도불주먹", "커피나무",
+                        37.5660, 126.9784, "BUS", null
+                );
 
         // when
         GroupResponse.Participate response =
@@ -176,14 +183,14 @@ class GroupServiceTest {
         // then
         assertThat(response)
                 .extracting(
-                        "participationId", "groupId", "userId",
-                        "userName", "latitude", "longitude",
-                        "transportation"
+                        "participationId", "groupId", "locationName",
+                        "userId", "userName", "latitude",
+                        "longitude", "transportation"
                 )
                 .contains(
-                        1L, saveGroup.getGroupId(), participateUser.getUserId(),
-                        "경기도불주먹", 37.5660, 126.9784,
-                        "BUS"
+                        1L, saveGroup.getGroupId(), "커피나무",
+                        participateUser.getUserId(), "경기도불주먹", 37.5660,
+                        126.9784, "BUS"
                 );
 
         Participation participation = participationRepository.findById(response.getParticipationId()).get();
@@ -210,8 +217,11 @@ class GroupServiceTest {
                         .build()
         );
 
-        GroupRequest.Participate request
-                = new GroupRequest.Participate(saveGroup.getGroupId(), "경기도불주먹", 37.5660, 126.9784, "TAXI", "abc123");
+        GroupRequest.Participate request =
+                new GroupRequest.Participate(
+                        saveGroup.getGroupId(), "경기도불주먹", "커피나무",
+                        37.5660, 126.9784, "TAXI", "2345"
+                );
 
         // when // then
         assertThatThrownBy(() -> groupService.participateGroup(request.toServiceRequest(), user))

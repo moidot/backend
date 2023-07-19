@@ -39,6 +39,9 @@ public class GroupRequest {
         @NotBlank(message = "별명을 입력하지 않았습니다.")
         private String userName;
 
+        @NotBlank(message = "출발 위치가 입력되지 않았습니다.")
+        private String locationName;
+
         @NotNull
         private Double latitude;
 
@@ -54,6 +57,7 @@ public class GroupRequest {
             return GroupServiceRequest.Participate.builder()
                     .groupId(groupId)
                     .userName(userName)
+                    .locationName(locationName)
                     .latitude(latitude)
                     .longitude(longitude)
                     .transportation(transportation)
