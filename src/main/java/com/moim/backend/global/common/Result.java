@@ -10,7 +10,9 @@ public enum Result {
     // Space
     UNEXPECTED_EXCEPTION(-1000, "예상치 못한 예외가 발생했습니다."),
     NOT_FOUND_GROUP(-1001, "존재하지 않는 그룹입니다."),
-    INVALID_TRANSPORTATION(-1002, "잘못된 이동수단 입니다.");
+    INVALID_TRANSPORTATION(-1002, "잘못된 이동수단 입니다."),
+    NOT_FOUND_PARTICIPATE(-1003, "존재하지 않는 참여자 정보 입니다."),
+    NOT_MATCHED_PARTICIPATE(-1004, "자신의 참여 정보가 아닙니다.");
 
     private final int code;
     private final String message;

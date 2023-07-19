@@ -4,6 +4,8 @@ import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.user.entity.Users;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -35,5 +37,19 @@ public class GroupServiceRequest {
         private Double longitude;
         private String transportation;
         private String password;
+    }
+
+
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @NoArgsConstructor
+    @Builder
+    public static class ParticipateUpdate {
+        private Long participateId;
+        private String userName;
+        private String locationName;
+        private Double latitude;
+        private Double longitude;
+        private String transportation;
     }
 }

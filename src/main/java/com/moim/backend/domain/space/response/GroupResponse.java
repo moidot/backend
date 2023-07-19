@@ -2,9 +2,7 @@ package com.moim.backend.domain.space.response;
 
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.format.DateTimeFormatter;
 
@@ -75,6 +73,22 @@ public class GroupResponse {
                     .locationName(participation.getLocationName())
                     .latitude(participation.getLatitude())
                     .longitude(participation.getLongitude())
+                    .transportation(participation.getTransportation().name())
+                    .build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Builder
+    public static class ParticipateUpdate {
+        private String locationName;
+        private String transportation;
+
+        public static GroupResponse.ParticipateUpdate response(Participation participation) {
+            return ParticipateUpdate.builder()
+                    .locationName(participation.getLocationName())
                     .transportation(participation.getTransportation().name())
                     .build();
         }
