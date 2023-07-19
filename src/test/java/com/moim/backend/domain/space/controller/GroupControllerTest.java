@@ -1,5 +1,6 @@
 package com.moim.backend.domain.space.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.moim.backend.domain.ControllerTestSupport;
 import com.moim.backend.domain.space.request.GroupRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -79,6 +80,42 @@ class GroupControllerTest extends ControllerTestSupport {
         // when // then
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/api/v1/group/participate")
+                                .header("Authorization", "JWT AccessToken")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("내 참여 정보 수정 API")
+    @Test
+    void participationUpdate() throws Exception {
+        // given
+        GroupRequest.ParticipateUpdate request
+                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, "BUS");
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.patch("/api/v1/group/participate")
+                                .header("Authorization", "JWT AccessToken")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("내 참여 정보 수정 API - 별명 미입력 실패")
+    @Test
+    void participationUpdateFailsWhenUserNameNotProvided() throws Exception {
+        // given
+        GroupRequest.ParticipateUpdate request
+                = new GroupRequest.ParticipateUpdate(1L, " ", "쇼파르", 37.5660, 126.9784, "BUS");
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.patch("/api/v1/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)

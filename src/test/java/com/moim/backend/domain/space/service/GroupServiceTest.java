@@ -4,6 +4,7 @@ import com.moim.backend.domain.space.Repository.GroupRepository;
 import com.moim.backend.domain.space.Repository.ParticipationRepository;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
+import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.user.entity.Users;
@@ -45,12 +46,7 @@ class GroupServiceTest {
     @Test
     void create() {
         // given
-        Users user = userRepository.save(
-                Users.builder()
-                        .email("test@test.com")
-                        .name("테스트 이름")
-                        .build()
-        );
+        Users user = savedUser("test@test.com", "테스트 이름");
 
         GroupRequest.Create request = new GroupRequest.Create(
                 "테스트 그룹", LocalDate.of(2023, 7, 15)
@@ -61,20 +57,15 @@ class GroupServiceTest {
 
         // then
         assertThat(response)
-                .extracting("groupId", "adminId", "name", "date", "fixedPlace")
-                .contains(1L, user.getUserId(), "테스트 그룹", "2023-07-15", "none");
+                .extracting("adminId", "name", "date", "fixedPlace")
+                .contains(user.getUserId(), "테스트 그룹", "2023-07-15", "none");
     }
 
     @DisplayName("하나의 유저가 새로운 모임을 생성할때 날짜는 입력하지 않는다.")
     @Test
     void createNotEnteredDate() {
         // given
-        Users user = userRepository.save(
-                Users.builder()
-                        .email("test@test.com")
-                        .name("테스트 이름")
-                        .build()
-        );
+        Users user = savedUser("test@test.com", "테스트 이름");
 
         GroupRequest.Create request = new GroupRequest.Create("테스트 그룹", null);
 
@@ -92,34 +83,12 @@ class GroupServiceTest {
     @Test
     void participate() {
         // given
-        Users user = userRepository.save(
-                Users.builder()
-                        .email("test@test.com")
-                        .name("테스트 이름")
-                        .build()
-        );
+        Users user = savedUser("test@test.com", "테스트 이름");
 
-        Users participateUser = userRepository.save(
-                Users.builder()
-                        .email("test2@test.com")
-                        .name("테스트 이름2")
-                        .build()
-        );
+        Users participateUser = savedUser("test2@test.com", "테스트 이름2");
 
-        Groups saveGroup = groupRepository.save(
-                Groups.builder()
-                        .adminId(user.getUserId())
-                        .name("테스트 그룹")
-                        .place("none")
-                        .date(LocalDate.of(2023, 7, 23))
-                        .build()
-        );
-
-        GroupRequest.Participate request =
-                new GroupRequest.Participate(
-                        saveGroup.getGroupId(), "경기도불주먹", "커피나무",
-                        37.5660, 126.9784, "BUS", "2345"
-                );
+        Groups saveGroup = savedGroup(user.getUserId(), "테스트 그룹");
+        GroupRequest.Participate request = savedParticipate(saveGroup);
 
         // when
         GroupResponse.Participate response =
@@ -143,32 +112,24 @@ class GroupServiceTest {
         assertThat(participation.getPassword()).isEqualTo(encrypt("2345"));
     }
 
+    private static GroupRequest.Participate savedParticipate(Groups saveGroup) {
+        GroupRequest.Participate request =
+                new GroupRequest.Participate(
+                        saveGroup.getGroupId(), "경기도불주먹", "커피나무",
+                        37.5660, 126.9784, "BUS", "2345"
+                );
+        return request;
+    }
+
     @DisplayName("하나의 유저가 하나의 그룹에 참가할때 비밀번호를 입력하지 않는다.")
     @Test
     void participateNotEnteredPassword() {
         // given
-        Users user = userRepository.save(
-                Users.builder()
-                        .email("test@test.com")
-                        .name("테스트 이름")
-                        .build()
-        );
+        Users user = savedUser("test@test.com", "테스트 이름");
 
-        Users participateUser = userRepository.save(
-                Users.builder()
-                        .email("test2@test.com")
-                        .name("테스트 이름2")
-                        .build()
-        );
+        Users participateUser = savedUser("test2@test.com", "테스트 이름2");
 
-        Groups saveGroup = groupRepository.save(
-                Groups.builder()
-                        .adminId(user.getUserId())
-                        .name("테스트 그룹")
-                        .place("none")
-                        .date(LocalDate.of(2023, 7, 23))
-                        .build()
-        );
+        Groups saveGroup = savedGroup(user.getUserId(), "테스트 그룹");
 
         GroupRequest.Participate request =
                 new GroupRequest.Participate(
@@ -183,12 +144,12 @@ class GroupServiceTest {
         // then
         assertThat(response)
                 .extracting(
-                        "participationId", "groupId", "locationName",
+                        "groupId", "locationName",
                         "userId", "userName", "latitude",
                         "longitude", "transportation"
                 )
                 .contains(
-                        1L, saveGroup.getGroupId(), "커피나무",
+                        saveGroup.getGroupId(), "커피나무",
                         participateUser.getUserId(), "경기도불주먹", 37.5660,
                         126.9784, "BUS"
                 );
@@ -201,21 +162,9 @@ class GroupServiceTest {
     @Test
     void throwsExceptionWhenParticipateWithInvalidTransportation() {
         // given
-        Groups saveGroup = groupRepository.save(
-                Groups.builder()
-                        .adminId(1L)
-                        .name("모임장")
-                        .place("none")
-                        .date(LocalDate.of(2023, 7, 12))
-                        .build()
-        );
+        Groups saveGroup = savedGroup(1L, "모임장");
 
-        Users user = userRepository.save(
-                Users.builder()
-                        .email("test@test.com")
-                        .name("테스트 이름")
-                        .build()
-        );
+        Users user = savedUser("test@test.com", "테스트 이름");
 
         GroupRequest.Participate request =
                 new GroupRequest.Participate(
@@ -229,7 +178,105 @@ class GroupServiceTest {
                 .contains(-1002, "잘못된 이동수단 입니다.");
     }
 
+    @DisplayName("자신이 속해있는 그룹에서 나의 참여정보를 수정한다.")
+    @Test
+    void participateUpdate() {
+        // given
+        Users admin = savedUser("test@test.com", "테스트 이름");
+
+        Users user1 = savedUser("test2@test.com", "테스트 이름2");
+
+        Groups group = savedGroup(admin.getUserId(), "모임장");
+
+        Participation user1Participation = savedParticipation(
+                user1, group, user1.getName(),
+                "커피나무", 37.5660, 126.9784, "BUS"
+        );
+
+        GroupRequest.ParticipateUpdate request = new GroupRequest.ParticipateUpdate(
+                user1Participation.getParticipationId(), "양파쿵야", "뮬", 37.5700, 126.9790, "SUBWAY"
+        );
+
+        // when
+        GroupResponse.ParticipateUpdate response =
+                groupService.participateUpdate(request.toServiceRequest(), user1);
+
+        // then
+        assertThat(response)
+                .extracting("locationName", "transportation")
+                .contains("뮬", "SUBWAY");
+    }
+
+    @DisplayName("자신이 속해있는 그룹에서 내가 아닌 참여정보를 수정하려할때 Exception 이 발생한다.")
+    @Test
+    void throwsExceptionWhenModifyingUnauthorizedParticipantInfo() {
+        // given
+        Users admin = savedUser("test@test.com", "테스트 이름");
+
+        Users user1 = savedUser("test2@test.com", "테스트 이름2");
+
+        Groups group = savedGroup(admin.getUserId(), "모임장");
+
+        Participation user1Participation = savedParticipation(
+                user1, group, user1.getName(),
+                "커피나무", 37.5660, 126.9784, "BUS"
+        );
+
+        Participation adminParticipation = savedParticipation(
+                admin, group, admin.getName(),
+                "커피나무", 37.5660, 126.9784, "BUS"
+        );
+
+        GroupRequest.ParticipateUpdate request = new GroupRequest.ParticipateUpdate(
+                user1Participation.getParticipationId(), "양파쿵야", "뮬", 37.5700, 126.9790, "SUBWAY"
+        );
+
+        // when // then
+        assertThatThrownBy(() -> groupService.participateUpdate(request.toServiceRequest(), admin))
+                .extracting("result.code", "result.message")
+                .contains(-1004, "자신의 참여 정보가 아닙니다.");
+    }
+
     // method
+
+    private Groups savedGroup(Long userId, String name) {
+        return groupRepository.save(
+                Groups.builder()
+                        .adminId(userId)
+                        .name(name)
+                        .place("none")
+                        .date(LocalDate.of(2023, 7, 10))
+                        .build()
+        );
+    }
+
+    private Participation savedParticipation(
+            Users user, Groups group, String userName,
+            String locationName, Double latitude, Double longitude,
+            String type
+    ) {
+        return participationRepository.save(
+                Participation.builder()
+                        .group(group)
+                        .userId(user.getUserId())
+                        .userName(userName)
+                        .locationName(locationName)
+                        .latitude(latitude)
+                        .longitude(longitude)
+                        .transportation(TransportationType.valueOf(type))
+                        .build()
+        );
+    }
+
+    private Users savedUser(String email, String name) {
+        return userRepository.save(
+                Users.builder()
+                        .email(email)
+                        .name(name)
+                        .build()
+        );
+    }
+
     public static String encrypt(String password) {
         try {
             StringBuilder sb = new StringBuilder();
