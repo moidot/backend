@@ -12,26 +12,35 @@ import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import static com.moim.backend.global.common.Result.*;
+import static com.moim.backend.global.common.Result.NOT_FOUND_PARTICIPATE;
+
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class GroupService {
 
     private final GroupRepository groupRepository;
     private final ParticipationRepository participationRepository;
 
+    // 모임 생성
+    @Transactional
     public GroupResponse.Create createGroup(GroupServiceRequest.Create request, Users user) {
         Groups group = groupRepository.save(toGroupEntity(request, user));
 
         return GroupResponse.Create.response(group);
     }
 
+    // 모임 참여
+    @Transactional
     public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request, Users user) {
         if (!request.getTransportation().equals("BUS") && !request.getTransportation().equals("SUBWAY")) {
-            throw new CustomException(Result.INVALID_TRANSPORTATION);
+            throw new CustomException(INVALID_TRANSPORTATION);
         }
 
         Groups group = getGroup(request);
@@ -43,12 +52,28 @@ public class GroupService {
         return GroupResponse.Participate.response(participation);
     }
 
+    // 내 참여 정보 수정
+    @Transactional
+    public GroupResponse.ParticipateUpdate participateUpdate(
+            GroupServiceRequest.ParticipateUpdate request, Users user
+    ) {
+        Participation myParticipate = getParticipate(request);
+
+        if (!myParticipate.getUserId().equals(user.getUserId())) {
+            throw new CustomException(NOT_MATCHED_PARTICIPATE);
+        }
+
+        myParticipate.update(request);
+
+        return GroupResponse.ParticipateUpdate.response(myParticipate);
+    }
+
     // method
 
     private Groups getGroup(GroupServiceRequest.Participate request) {
         return groupRepository.findById(request.getGroupId())
                 .orElseThrow(
-                        () -> new CustomException(Result.NOT_FOUND_GROUP)
+                        () -> new CustomException(NOT_FOUND_GROUP)
                 );
     }
 
@@ -65,7 +90,7 @@ public class GroupService {
                 }
                 return sb.toString();
             } catch (NoSuchAlgorithmException e) {
-                throw new CustomException(Result.FAIL);
+                throw new CustomException(FAIL);
             }
         }
     }
@@ -93,4 +118,9 @@ public class GroupService {
                 .build();
     }
 
+    private Participation getParticipate(GroupServiceRequest.ParticipateUpdate request) {
+        return participationRepository.findById(request.getParticipateId()).orElseThrow(
+                () -> new CustomException(NOT_FOUND_PARTICIPATE)
+        );
+    }
 }
