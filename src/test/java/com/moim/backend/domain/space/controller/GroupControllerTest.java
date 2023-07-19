@@ -56,7 +56,7 @@ class GroupControllerTest extends ControllerTestSupport {
     void participationGroup() throws Exception {
         // given
         GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, 37.5660, 126.9784, "BUS", "123456");
+                = new GroupRequest.Participate(1L,"꿀보이스", 37.5660, 126.9784, "BUS", "123456");
 
         // when // then
         mockMvc.perform(
@@ -74,7 +74,7 @@ class GroupControllerTest extends ControllerTestSupport {
     void participationGroupFailsWhenLatitudeNotProvided() throws Exception {
         // given
         GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, null, 126.9784, "BUS", "abc123");
+                = new GroupRequest.Participate(1L,"꿀보이스", null, 126.9784, "BUS", "abc123");
 
         // when // then
         mockMvc.perform(

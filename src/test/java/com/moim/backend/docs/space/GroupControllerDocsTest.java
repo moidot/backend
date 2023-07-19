@@ -98,7 +98,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     void participationGroup() throws Exception {
         // given
         GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, 37.5660, 126.9784, "BUS", "123456");
+                = new GroupRequest.Participate(1L, "안지영", 37.5660, 126.9784, "BUS", "123456");
 
         given(groupService.participateGroup(any(), any()))
                 .willReturn(
@@ -132,6 +132,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         requestFields(
                                 fieldWithPath("groupId").type(JsonFieldType.NUMBER)
                                         .description("그룹 ID / Long"),
+                                fieldWithPath("userName").type(JsonFieldType.STRING)
+                                        .description("유저 별명"),
                                 fieldWithPath("latitude").type(JsonFieldType.NUMBER)
                                         .description("위도 / Double"),
                                 fieldWithPath("longitude").type(JsonFieldType.NUMBER)
@@ -154,7 +156,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("data.userId").type(JsonFieldType.NUMBER)
                                         .description("유저 ID / Long"),
                                 fieldWithPath("data.userName").type(JsonFieldType.STRING)
-                                        .description("유저 이름"),
+                                        .description("유저 별명"),
                                 fieldWithPath("data.latitude").type(JsonFieldType.NUMBER)
                                         .description("위도 / Double"),
                                 fieldWithPath("data.longitude").type(JsonFieldType.NUMBER)

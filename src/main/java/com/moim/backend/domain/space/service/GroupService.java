@@ -33,33 +33,40 @@ public class GroupService {
         if (!request.getTransportation().equals("BUS") && !request.getTransportation().equals("SUBWAY")) {
             throw new CustomException(Result.INVALID_TRANSPORTATION);
         }
-        Groups group = groupRepository.findById(request.getGroupId())
-                .orElseThrow(
-                        () -> new CustomException(Result.NOT_FOUND_GROUP)
-                );
-        String encryptedPassword = (request.getPassword() != null) ?
-                encrypt(request.getPassword()) : null;
 
+        Groups group = getGroup(request);
+        String encryptedPassword = encrypt(request.getPassword());
         Participation participation = participationRepository.save(
-                toParticipationEntity(request, group, user, encryptedPassword)
+                toParticipationEntity(request, group, user.getUserId(), encryptedPassword)
         );
 
         return GroupResponse.Participate.response(participation);
     }
 
     // method
+
+    private Groups getGroup(GroupServiceRequest.Participate request) {
+        return groupRepository.findById(request.getGroupId())
+                .orElseThrow(
+                        () -> new CustomException(Result.NOT_FOUND_GROUP)
+                );
+    }
+
     public static String encrypt(String password) {
-        try {
-            StringBuilder sb = new StringBuilder();
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(password.getBytes());
-            byte[] bytes = md.digest();
-            for (byte aByte : bytes) {
-                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+        if (password == null) return null;
+        else {
+            try {
+                StringBuilder sb = new StringBuilder();
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                md.update(password.getBytes());
+                byte[] bytes = md.digest();
+                for (byte aByte : bytes) {
+                    sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+                }
+                return sb.toString();
+            } catch (NoSuchAlgorithmException e) {
+                throw new CustomException(Result.FAIL);
             }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new CustomException(Result.FAIL);
         }
     }
 
@@ -72,12 +79,12 @@ public class GroupService {
     }
 
     private Participation toParticipationEntity(
-            GroupServiceRequest.Participate request, Groups group, Users user, String encryptedPassword
+            GroupServiceRequest.Participate request, Groups group, long userId, String encryptedPassword
     ) {
         return Participation.builder()
                 .group(group)
-                .userId(user.getUserId())
-                .userName(user.getName())
+                .userId(userId)
+                .userName(request.getUserName())
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
                 .transportation(TransportationType.valueOf(request.getTransportation()))
