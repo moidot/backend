@@ -1,9 +1,6 @@
 package com.moim.backend.domain.space.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -11,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -31,12 +29,16 @@ public class Groups {
 
     private String place;
 
+    @OneToMany(mappedBy = "group", orphanRemoval = true)
+    private List<Participation> participations;
+
     @Builder
-    private Groups(Long groupId, Long adminId, String name, LocalDate date, String place) {
+    private Groups(Long groupId, Long adminId, String name, LocalDate date, String place, List<Participation> participations) {
         this.groupId = groupId;
         this.adminId = adminId;
         this.name = name;
         this.date = date;
         this.place = (place == null) ? "none" : place;
+        this.participations = participations;
     }
 }

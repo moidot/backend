@@ -8,10 +8,7 @@ import com.moim.backend.global.auth.Login;
 import com.moim.backend.global.common.CustomResponseEntity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,5 +38,13 @@ public class GroupController {
             @RequestBody @Valid GroupRequest.ParticipateUpdate request, @Login Users user
     ) {
         return CustomResponseEntity.success(groupService.participateUpdate(request.toServiceRequest(), user));
+    }
+
+    // 모임 나가기
+    @DeleteMapping("/api/v1/group/participate")
+    public CustomResponseEntity<GroupResponse.Exit> participateExit(
+            @RequestParam Long participateId, @Login Users user
+    ) {
+        return CustomResponseEntity.success(groupService.participateExit(participateId, user));
     }
 }
