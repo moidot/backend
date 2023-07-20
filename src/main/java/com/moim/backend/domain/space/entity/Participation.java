@@ -1,5 +1,6 @@
 package com.moim.backend.domain.space.entity;
 
+import com.moim.backend.domain.space.request.GroupServiceRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -52,5 +53,13 @@ public class Participation {
         this.longitude = longitude;
         this.transportation = transportation;
         this.password = password;
+    }
+
+    public void update(GroupServiceRequest.ParticipateUpdate request) {
+        this.userName = request.getUserName();
+        this.locationName = request.getLocationName();
+        this.latitude = request.getLatitude();
+        this.longitude = request.getLongitude();
+        this.transportation = TransportationType.valueOf(request.getTransportation());
     }
 }

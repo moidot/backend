@@ -23,3 +23,16 @@ include::{snippets}/group-participation/request-fields.adoc[]
 ==== HTTP Response
 include::{snippets}/group-participation/http-response.adoc[]
 include::{snippets}/group-participation/response-fields.adoc[]
+
+=== 내 참여 정보 수정 API
+
+==== HTTP Request Headers
+include::{snippets}/participate-update/request-headers.adoc[]
+
+==== HTTP Request Body
+include::{snippets}/participate-update/http-request.adoc[]
+include::{snippets}/participate-update/request-fields.adoc[]
+
+==== HTTP Response Body
+include::{snippets}/participate-update/http-response.adoc[]
+include::{snippets}/participate-update/response-fields.adoc[]

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
 
@@ -166,6 +167,64 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("위도 / Double"),
                                 fieldWithPath("data.longitude").type(JsonFieldType.NUMBER)
                                         .description("경도 / Long"),
+                                fieldWithPath("data.transportation").type(JsonFieldType.STRING)
+                                        .description("내 이동수단")
+                        )
+                ));
+    }
+
+    @DisplayName("내 참여 정보 수정 API")
+    @Test
+    void participationUpdate() throws Exception {
+        // given
+        GroupRequest.ParticipateUpdate request
+                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, "SUBWAY");
+
+        given(groupService.participateUpdate(any(), any()))
+                .willReturn(
+                        GroupResponse.ParticipateUpdate.builder()
+                                .locationName("쇼파르")
+                                .transportation("SUBWAY")
+                                .build()
+                );
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.patch("/api/v1/group/participate")
+                                .header("Authorization", "JWT AccessToken")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("participate-update",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization")
+                                        .description("insert the AccessToken")
+                        ),
+                        requestFields(
+                                fieldWithPath("participateId").type(JsonFieldType.NUMBER)
+                                        .description("참여 정보 ID / Long"),
+                                fieldWithPath("userName").type(JsonFieldType.STRING)
+                                        .description("유저 별명"),
+                                fieldWithPath("locationName").type(JsonFieldType.STRING)
+                                        .description("출발 위치 이름"),
+                                fieldWithPath("latitude").type(JsonFieldType.NUMBER)
+                                        .description("위도 / Double"),
+                                fieldWithPath("longitude").type(JsonFieldType.NUMBER)
+                                        .description("경도 / Double"),
+                                fieldWithPath("transportation").type(JsonFieldType.STRING)
+                                        .description("'BUS' / 'SUBWAY'")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data.locationName").type(JsonFieldType.STRING)
+                                        .description("출발 위치"),
                                 fieldWithPath("data.transportation").type(JsonFieldType.STRING)
                                         .description("내 이동수단")
                         )

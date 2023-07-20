@@ -2,9 +2,7 @@ package com.moim.backend.domain.space.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -62,6 +60,41 @@ public class GroupRequest {
                     .longitude(longitude)
                     .transportation(transportation)
                     .password(password)
+                    .build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ParticipateUpdate {
+
+        @NotNull
+        private Long participateId;
+
+        @NotBlank(message = "별명을 입력하지 않았습니다.")
+        private String userName;
+
+        @NotBlank(message = "출발 위치가 입력되지 않았습니다.")
+        private String locationName;
+
+        @NotNull
+        private Double latitude;
+
+        @NotNull
+        private Double longitude;
+
+        @NotNull
+        private String transportation;
+
+        public GroupServiceRequest.ParticipateUpdate toServiceRequest() {
+            return GroupServiceRequest.ParticipateUpdate.builder()
+                    .participateId(participateId)
+                    .userName(userName)
+                    .locationName(locationName)
+                    .latitude(latitude)
+                    .longitude(longitude)
+                    .transportation(transportation)
                     .build();
         }
     }
