@@ -93,4 +93,20 @@ public class GroupResponse {
                     .build();
         }
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Builder
+    public static class Exit {
+        private Boolean isDeletedSpace;
+        private String message;
+
+        public static GroupResponse.Exit response(Boolean isDeletedSpace, String message) {
+            return Exit.builder()
+                    .isDeletedSpace(isDeletedSpace)
+                    .message(message)
+                    .build();
+        }
+    }
 }

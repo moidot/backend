@@ -123,4 +123,31 @@ class GroupControllerTest extends ControllerTestSupport {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
+
+    @DisplayName("모임 나가기 API")
+    @Test
+    void participationExit() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/v1/group/participate")
+                        .header("Authorization", "JWT AccessToken")
+                        .param("participateId", String.valueOf(123L))
+        )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("모임 나가기 API - 참여자 ID 미입력 실패")
+    @Test
+    void failWhenParticipantIdNotProvided() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/api/v1/group/participate")
+                                .header("Authorization", "JWT AccessToken")
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
 }

@@ -8,7 +8,6 @@ import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.user.entity.Users;
-import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,15 +56,39 @@ public class GroupService {
     public GroupResponse.ParticipateUpdate participateUpdate(
             GroupServiceRequest.ParticipateUpdate request, Users user
     ) {
-        Participation myParticipate = getParticipate(request);
+        Participation myParticipate = getParticipate(request.getParticipateId());
+        validateParticipationMyInfo(user, myParticipate);
+        myParticipate.update(request);
+        return GroupResponse.ParticipateUpdate.response(myParticipate);
+    }
 
+    // 내 모임 나가기
+    @Transactional
+    public GroupResponse.Exit participateExit(Long participateId, Users user) {
+        Participation myParticipate = getParticipate(participateId);
+        validateParticipationMyInfo(user, myParticipate);
+        // TODO : fetchJoin 적용여부 판단
+        Groups group = myParticipate.getGroup();
+
+        // TODO : 추후 투표도 같이 삭제해야함
+
+        // 모임장이 나가는 경우 스페이스 삭제
+        if (group.getAdminId().equals(user.getUserId())) {
+            groupRepository.delete(group);
+            return GroupResponse.Exit.response(true, "모임이 삭제되었습니다.");
+        }
+
+        participationRepository.delete(myParticipate);
+        return GroupResponse.Exit.response(false, "모임에서 나갔습니다.");
+    }
+
+
+    // validate
+
+    private static void validateParticipationMyInfo(Users user, Participation myParticipate) {
         if (!myParticipate.getUserId().equals(user.getUserId())) {
             throw new CustomException(NOT_MATCHED_PARTICIPATE);
         }
-
-        myParticipate.update(request);
-
-        return GroupResponse.ParticipateUpdate.response(myParticipate);
     }
 
     // method
@@ -118,8 +141,8 @@ public class GroupService {
                 .build();
     }
 
-    private Participation getParticipate(GroupServiceRequest.ParticipateUpdate request) {
-        return participationRepository.findById(request.getParticipateId()).orElseThrow(
+    private Participation getParticipate(Long id) {
+        return participationRepository.findById(id).orElseThrow(
                 () -> new CustomException(NOT_FOUND_PARTICIPATE)
         );
     }

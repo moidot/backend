@@ -11,6 +11,7 @@ import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -29,6 +31,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ActiveProfiles("test")
 @Transactional
 class GroupServiceTest {
+
+    @Autowired
+    private EntityManager em;
 
     @Autowired
     private GroupService groupService;
@@ -88,8 +93,11 @@ class GroupServiceTest {
         Users participateUser = savedUser("test2@test.com", "테스트 이름2");
 
         Groups saveGroup = savedGroup(user.getUserId(), "테스트 그룹");
-        GroupRequest.Participate request = savedParticipate(saveGroup);
 
+        GroupRequest.Participate request = new GroupRequest.Participate(
+                saveGroup.getGroupId(), "경기도불주먹", "커피나무", 37.5660, 126.9784,
+                "BUS", "2345"
+        );
         // when
         GroupResponse.Participate response =
                 groupService.participateGroup(request.toServiceRequest(), participateUser);
@@ -110,15 +118,6 @@ class GroupServiceTest {
 
         Participation participation = participationRepository.findById(response.getParticipationId()).get();
         assertThat(participation.getPassword()).isEqualTo(encrypt("2345"));
-    }
-
-    private static GroupRequest.Participate savedParticipate(Groups saveGroup) {
-        GroupRequest.Participate request =
-                new GroupRequest.Participate(
-                        saveGroup.getGroupId(), "경기도불주먹", "커피나무",
-                        37.5660, 126.9784, "BUS", "2345"
-                );
-        return request;
     }
 
     @DisplayName("하나의 유저가 하나의 그룹에 참가할때 비밀번호를 입력하지 않는다.")
@@ -235,6 +234,67 @@ class GroupServiceTest {
         assertThatThrownBy(() -> groupService.participateUpdate(request.toServiceRequest(), admin))
                 .extracting("result.code", "result.message")
                 .contains(-1004, "자신의 참여 정보가 아닙니다.");
+    }
+
+    @DisplayName("모임원이 속해있는 모임에서 나가기를 한다.")
+    @Test
+    void participateExit() {
+        // given
+        Users admin = savedUser("admin@test.com", "테스트 어드민");
+        Users user = savedUser("test@test.com", "테스트 이름");
+        Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
+        Participation participationAdmin =
+                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, "BUS");
+        Participation participationUser =
+                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, "BUS");
+
+        // when
+        GroupResponse.Exit response =
+                groupService.participateExit(participationUser.getParticipationId(), user);
+
+        // then
+        assertThat(response)
+                .extracting("isDeletedSpace", "message")
+                .contains(false, "모임에서 나갔습니다.");
+
+        Optional<Participation> optionalParticipation =
+                participationRepository.findById(participationUser.getParticipationId());
+
+        assertThat(optionalParticipation.isEmpty()).isTrue();
+    }
+
+    @DisplayName("모임장이 모임에서 나가기를 하면 해당 모임이 삭제된다.")
+    @Test
+    void groupAdminExitsThenGroupIsDeleted() {
+
+        // given
+        Users admin = savedUser("admin@test.com", "테스트 어드민");
+        Users user = savedUser("test@test.com", "테스트 이름");
+        Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
+        Participation participationAdmin =
+                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, "BUS");
+        Participation participationUser =
+                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, "BUS");
+
+        em.flush();
+        em.clear();
+
+        // when
+        GroupResponse.Exit response =
+                groupService.participateExit(participationAdmin.getParticipationId(), admin);
+
+        // then
+        assertThat(response)
+                .extracting("isDeletedSpace", "message")
+                .contains(true, "모임이 삭제되었습니다.");
+
+        Optional<Groups> optionalGroup = groupRepository.findById(group.getGroupId());
+
+        Optional<Participation> optionalParticipation =
+                participationRepository.findById(participationUser.getParticipationId());
+
+        assertThat(optionalGroup.isEmpty()).isTrue();
+        assertThat(optionalParticipation.isEmpty()).isTrue();
     }
 
     // method

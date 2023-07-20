@@ -36,3 +36,18 @@ include::{snippets}/participate-update/request-fields.adoc[]
 ==== HTTP Response Body
 include::{snippets}/participate-update/http-response.adoc[]
 include::{snippets}/participate-update/response-fields.adoc[]
+
+=== 모임 나가기 API
+
+==== 모임장이 나가면 모임이 삭제 / 모임원이 나가면 모임 나가기
+
+==== HTTP Request Headers
+include::{snippets}/participation-exit/request-headers.adoc[]
+
+==== HTTP Request Parameters
+include::{snippets}/participation-exit/http-request.adoc[]
+include::{snippets}/participation-exit/form-parameters.adoc[]
+
+==== HTTP Response Body
+include::{snippets}/participation-exit/http-response.adoc[]
+include::{snippets}/participation-exit/response-fields.adoc[]

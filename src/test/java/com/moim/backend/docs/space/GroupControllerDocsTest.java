@@ -22,6 +22,8 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.formParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -190,7 +192,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.patch("/api/v1/group/participate")
+                        RestDocumentationRequestBuilders.patch("/api/v1/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -227,6 +229,48 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("출발 위치"),
                                 fieldWithPath("data.transportation").type(JsonFieldType.STRING)
                                         .description("내 이동수단")
+                        )
+                ));
+    }
+
+    @DisplayName("모임 나가기 API")
+    @Test
+    void participationExit() throws Exception {
+        // given
+        given(groupService.participateExit(any(),any()))
+                .willReturn(
+                        GroupResponse.Exit.builder()
+                                .isDeletedSpace(false)
+                                .message("모임에서 나갔습니다.")
+                                .build()
+                );
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.delete("/api/v1/group/participate")
+                                .header("Authorization", "JWT AccessToken")
+                                .param("participateId", String.valueOf(123L))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("participation-exit",
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization")
+                                        .description("insert the AccessToken")
+                        ),
+                        formParameters(
+                                parameterWithName("participateId")
+                                        .description("참여자 정보 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data.isDeletedSpace").type(JsonFieldType.BOOLEAN)
+                                        .description("모임 삭제 여부 : 어드민이 나간경우 모임이 삭제 / 참가자가 나간경우 모임 나가기"),
+                                fieldWithPath("data.message").type(JsonFieldType.STRING)
+                                        .description("모임이 삭제되었습니다. / 모임에서 나갔습니다.")
                         )
                 ));
     }
