@@ -5,6 +5,8 @@ import com.moim.backend.domain.space.controller.GroupController;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.service.GroupService;
+import com.moim.backend.domain.subway.response.BestSubway;
+import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.exceptions.misusing.CannotStubVoidMethodWithReturnValue;
@@ -14,6 +16,8 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -26,6 +30,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.formParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -331,6 +336,38 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         formParameters(
                                 parameterWithName("groupId")
                                         .description("그룹 ID")
+                          
+    @DisplayName("모임 추천 지역 조회하기 API")
+    @Test
+    void getBestRegion() throws Exception {
+        // given
+        List<BestSubwayInterface> bestSubwayList = List.of(
+                new BestSubway("독바위", 37.618456, 126.933031, 2842.204594299132),
+                new BestSubway("불광", 37.610553, 126.92982, 3392.8990231398966),
+                new BestSubway("불광", 37.610873, 126.92939, 3412.2536548883427),
+                new BestSubway("녹번", 37.600927, 126.935756, 3582.0186756314224),
+                new BestSubway("연신내", 37.619229, 126.921038, 3870.912704056272),
+                new BestSubway("연신내", 37.618636, 126.920625, 3915.770625983176),
+                new BestSubway("북한산보국문", 37.612072, 127.008251, 4049.387636179618),
+                new BestSubway("역촌", 37.606021, 126.922744, 4176.163056775289),
+                new BestSubway("홍제", 37.589066, 126.943736, 4258.981576036244),
+                new BestSubway("구파발", 37.636763, 126.918821, 4292.193359562507)
+        );
+        given(groupService.getBestRegion(any()))
+                .willReturn(bestSubwayList);
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.get("/api/v1/group/best-region")
+                                .param("groupId", String.valueOf(14L))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("get-best-region",
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("groupId")
+                                        .description("모이닷 스페이스 ID")
                         ),
                         responseFields(
                                 fieldWithPath("code").type(JsonFieldType.NUMBER)
@@ -339,6 +376,17 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("상태 메세지"),
                                 fieldWithPath("data").type(JsonFieldType.NULL)
                                         .description("Always NULL")
+                        )
+                ));
+    }
+                                fieldWithPath("data.[].name").type(JsonFieldType.STRING)
+                                        .description("지하철역 이름"),
+                                fieldWithPath("data.[].latitude").type(JsonFieldType.NUMBER)
+                                        .description("지하철역 위도"),
+                                fieldWithPath("data.[].longitude").type(JsonFieldType.NUMBER)
+                                        .description("지하철역 경도"),
+                                fieldWithPath("data.[].distanceFromMiddlePoint").type(JsonFieldType.NUMBER)
+                                        .description("중간좌표로부터 지하철역까지의 거리(단위: m)")
                         )
                 ));
     }

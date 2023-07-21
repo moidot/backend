@@ -1,7 +1,7 @@
 package com.moim.backend.domain.space.service;
 
-import com.moim.backend.domain.space.Repository.GroupRepository;
-import com.moim.backend.domain.space.Repository.ParticipationRepository;
+import com.moim.backend.domain.space.repository.GroupRepository;
+import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
