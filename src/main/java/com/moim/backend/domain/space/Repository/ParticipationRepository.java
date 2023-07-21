@@ -1,5 +1,6 @@
 package com.moim.backend.domain.space.repository;
 
+import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.response.MiddlePoint;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,8 +14,8 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     @Query("SELECT "
             + "new com.moim.backend.domain.space.response.MiddlePoint(SUM(p.latitude), SUM(p.longitude), COUNT(*)) "
             + "FROM Participation p "
-            + "GROUP BY p.group.groupId "
-            + "HAVING p.group.groupId = :groupId")
-    MiddlePoint getMiddlePoint(@Param("groupId") Long groupId);
+            + "GROUP BY p.group "
+            + "HAVING p.group = :group")
+    MiddlePoint getMiddlePoint(@Param("group") Groups group);
 
 }

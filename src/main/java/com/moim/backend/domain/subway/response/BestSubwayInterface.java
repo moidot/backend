@@ -2,9 +2,9 @@ package com.moim.backend.domain.subway.response;
 
 public interface BestSubwayInterface {
 
-    String getName();
-    double getLatitude();
-    double getLongitude();
-    double getDistanceFromMiddlePoint();
+    public String getName();
+    public double getLatitude();
+    public double getLongitude();
+    public double getDistanceFromMiddlePoint();
 
 }

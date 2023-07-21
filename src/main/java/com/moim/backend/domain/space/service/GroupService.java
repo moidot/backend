@@ -47,7 +47,7 @@ public class GroupService {
             throw new CustomException(INVALID_TRANSPORTATION);
         }
 
-        Groups group = getGroup(request);
+        Groups group = getGroup(request.getGroupId());
         String encryptedPassword = encrypt(request.getPassword());
         Participation participation = participationRepository.save(
                 toParticipationEntity(request, group, user.getUserId(), encryptedPassword)
@@ -87,6 +87,19 @@ public class GroupService {
         return GroupResponse.Exit.response(false, "모임에서 나갔습니다.");
     }
 
+    // 모임 추천 지역 조회하기
+    public List<BestSubwayInterface> getBestRegion(Long groupId) {
+        Groups group = getGroup(groupId);
+        MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
+        List<BestSubwayInterface> bestSubwayList = subwayRepository.getBestSubwayList(
+                middlePoint.getLatitude(), middlePoint.getLongitude()
+        );
+        // TODO : 이름이 같은 역일 경우 중간 지점에 더 가까운 역으로 조회(DB 또는 Application 계층 중 어디에서 처리해야할지 고민)
+        // TODO : 조회한 역이 적절하지 않은 경우 인기 지역 조회
+
+        return bestSubwayList;
+    }
+
 
     // validate
 
@@ -98,8 +111,8 @@ public class GroupService {
 
     // method
 
-    private Groups getGroup(GroupServiceRequest.Participate request) {
-        return groupRepository.findById(request.getGroupId())
+    private Groups getGroup(Long groupId) {
+        return groupRepository.findById(groupId)
                 .orElseThrow(
                         () -> new CustomException(NOT_FOUND_GROUP)
                 );
@@ -121,17 +134,6 @@ public class GroupService {
                 throw new CustomException(FAIL);
             }
         }
-    }
-
-    public List<BestSubwayInterface> getBestRegion(Long groupId) {
-        MiddlePoint middlePoint = participationRepository.getMiddlePoint(groupId);
-        List<BestSubwayInterface> bestSubwayList = subwayRepository.getBestSubwayList(
-                middlePoint.getLatitude(), middlePoint.getLongitude()
-        );
-        // TODO : 이름이 같은 역일 경우 중간 지점에 더 가까운 역으로 조회(DB 또는 Application 계층 중 어디에서 처리해야할지 고민)
-        // TODO : 조회한 역이 적절하지 않은 경우 인기 지역 조회
-
-        return bestSubwayList;
     }
 
     private Groups toGroupEntity(GroupServiceRequest.Create request, Users user) {
