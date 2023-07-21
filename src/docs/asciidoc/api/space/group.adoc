@@ -64,8 +64,8 @@ include::{snippets}/participation-exit/form-parameters.adoc[]
 ==== HTTP Response Body
 include::{snippets}/participate-removal/http-response.adoc[]
 include::{snippets}/participate-removal/response-fields.adoc[]
-=======
-=== 모임 추천 지역 조회하기
+
+=== 모임 추천 지역 조회하기 API
 
 ==== HTTP Request Parameters
 include::{snippets}/get-best-region/http-request.adoc[]
