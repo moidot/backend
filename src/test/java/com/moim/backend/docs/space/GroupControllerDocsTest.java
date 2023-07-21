@@ -7,6 +7,7 @@ import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.service.GroupService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.exceptions.misusing.CannotStubVoidMethodWithReturnValue;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
@@ -237,7 +239,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void participationExit() throws Exception {
         // given
-        given(groupService.participateExit(any(),any()))
+        given(groupService.participateExit(any(), any()))
                 .willReturn(
                         GroupResponse.Exit.builder()
                                 .isDeletedSpace(false)
@@ -248,7 +250,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         mockMvc.perform(
                         RestDocumentationRequestBuilders.delete("/api/v1/group/participate")
                                 .header("Authorization", "JWT AccessToken")
-                                .param("participateId", String.valueOf(123L))
+                                .param("participateId", String.valueOf(1L))
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -271,6 +273,39 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("모임 삭제 여부 : 어드민이 나간경우 모임이 삭제 / 참가자가 나간경우 모임 나가기"),
                                 fieldWithPath("data.message").type(JsonFieldType.STRING)
                                         .description("모임이 삭제되었습니다. / 모임에서 나갔습니다.")
+                        )
+                ));
+    }
+
+    @DisplayName("모임원 내보내기 API")
+    @Test
+    void participateRemoval() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.delete("/api/v1/group/participate/removal")
+                                .header("Authorization", "JWT AccessToken")
+                                .param("participateId", String.valueOf(1L))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("participate-removal",
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization")
+                                        .description("insert the AccessToken")
+                        ),
+                        formParameters(
+                                parameterWithName("participateId")
+                                        .description("참여자 정보 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data").type(JsonFieldType.NULL)
+                                        .description("Always NULL")
                         )
                 ));
     }

@@ -130,10 +130,10 @@ class GroupControllerTest extends ControllerTestSupport {
         // given
         // when // then
         mockMvc.perform(
-                MockMvcRequestBuilders.delete("/api/v1/group/participate")
-                        .header("Authorization", "JWT AccessToken")
-                        .param("participateId", String.valueOf(123L))
-        )
+                        MockMvcRequestBuilders.delete("/api/v1/group/participate")
+                                .header("Authorization", "JWT AccessToken")
+                                .param("participateId", String.valueOf(123L))
+                )
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -149,5 +149,19 @@ class GroupControllerTest extends ControllerTestSupport {
                 )
                 .andDo(print())
                 .andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("모임원 내보내기 API")
+    @Test
+    void participateRemoval() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/api/v1/group/participate/removal")
+                                .header("Authorization", "JWT AccessToken")
+                                .param("participateId", String.valueOf(1L))
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 }
