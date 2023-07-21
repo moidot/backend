@@ -32,6 +32,14 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.participateGroup(request.toServiceRequest(), user));
     }
 
+    // 모임 삭제하기
+    @DeleteMapping("/api/v1/group")
+    public CustomResponseEntity<Void> deleteGroup(
+            @RequestParam Long groupId, @Login Users user
+    ) {
+        return CustomResponseEntity.success(groupService.participateDelete(groupId, user));
+    }
+
     // 모임 참여 정보 수정
     @PatchMapping("/api/v1/group/participate")
     public CustomResponseEntity<GroupResponse.ParticipateUpdate> participateUpdate(
@@ -55,4 +63,5 @@ public class GroupController {
     ) {
         return CustomResponseEntity.success(groupService.participateRemoval(participateId, user));
     }
+
 }

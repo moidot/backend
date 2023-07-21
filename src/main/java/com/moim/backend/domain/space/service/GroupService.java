@@ -43,7 +43,7 @@ public class GroupService {
             throw new CustomException(INVALID_TRANSPORTATION);
         }
 
-        Groups group = getGroup(request);
+        Groups group = getGroup(request.getGroupId());
         String encryptedPassword = encrypt(request.getPassword());
         Participation participation = participationRepository.save(
                 toParticipationEntity(request, group, user.getUserId(), encryptedPassword)
@@ -93,6 +93,15 @@ public class GroupService {
         return null;
     }
 
+    // 모임 삭제
+    @Transactional
+    public Void participateDelete(Long groupId, Users user) {
+        Groups group = getGroup(groupId);
+        validateAdminStatus(user.getUserId(), group.getAdminId());
+        groupRepository.delete(group);
+        return null;
+    }
+
     // validate
 
     private static void validateAdminStatus(Long userId, Long adminId) {
@@ -109,8 +118,8 @@ public class GroupService {
 
     // method
 
-    private Groups getGroup(GroupServiceRequest.Participate request) {
-        return groupRepository.findById(request.getGroupId())
+    private Groups getGroup(Long id) {
+        return groupRepository.findById(id)
                 .orElseThrow(
                         () -> new CustomException(NOT_FOUND_GROUP)
                 );
@@ -162,4 +171,5 @@ public class GroupService {
                 () -> new CustomException(NOT_FOUND_PARTICIPATE)
         );
     }
+
 }
