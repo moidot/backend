@@ -121,8 +121,6 @@ public class GroupService {
         return bestSubwayList;
     }
 
-
-
     // validate
 
     private static void validateAdminStatus(Long userId, Long adminId) {
@@ -138,10 +136,6 @@ public class GroupService {
     }
 
     // method
-
-
-    private Groups getGroup(Long id) {
-        return groupRepository.findById(id)
 
     private Groups getGroup(Long groupId) {
         return groupRepository.findById(groupId)

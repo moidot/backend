@@ -336,7 +336,10 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         formParameters(
                                 parameterWithName("groupId")
                                         .description("그룹 ID")
-                          
+                        )
+                ));
+    }
+
     @DisplayName("모임 추천 지역 조회하기 API")
     @Test
     void getBestRegion() throws Exception {
@@ -374,18 +377,13 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("상태 코드"),
                                 fieldWithPath("message").type(JsonFieldType.STRING)
                                         .description("상태 메세지"),
-                                fieldWithPath("data").type(JsonFieldType.NULL)
-                                        .description("Always NULL")
-                        )
-                ));
-    }
-                                fieldWithPath("data.[].name").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].name").type(JsonFieldType.STRING)
                                         .description("지하철역 이름"),
-                                fieldWithPath("data.[].latitude").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER)
                                         .description("지하철역 위도"),
-                                fieldWithPath("data.[].longitude").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER)
                                         .description("지하철역 경도"),
-                                fieldWithPath("data.[].distanceFromMiddlePoint").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data[].distanceFromMiddlePoint").type(JsonFieldType.NUMBER)
                                         .description("중간좌표로부터 지하철역까지의 거리(단위: m)")
                         )
                 ));

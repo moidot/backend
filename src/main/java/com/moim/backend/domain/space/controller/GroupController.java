@@ -64,10 +64,13 @@ public class GroupController {
             @RequestParam Long participateId, @Login Users user
     ) {
         return CustomResponseEntity.success(groupService.participateRemoval(participateId, user));
-      
+    }
+
     // 모임 추천 지역 조회하기
     @GetMapping("/best-region")
-    public CustomResponseEntity<List<BestSubwayInterface>> getBestRegion(@RequestParam Long groupId) {
+    public CustomResponseEntity<List<BestSubwayInterface>> getBestRegion(
+            @RequestParam Long groupId
+    ) {
         return CustomResponseEntity.success(groupService.getBestRegion(groupId));
     }
 
