@@ -164,4 +164,18 @@ class GroupControllerTest extends ControllerTestSupport {
                 .andDo(print())
                 .andExpect(status().isOk());
     }
+
+    @DisplayName("모임 삭제하기 API")
+    @Test
+    void groupDelete() throws Exception {
+        // given
+        // when// then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/api/v1/group")
+                                .header("Authorization", "JWT AccessToken")
+                                .param("groupId", String.valueOf(1L))
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }
