@@ -51,3 +51,16 @@ include::{snippets}/participation-exit/form-parameters.adoc[]
 ==== HTTP Response Body
 include::{snippets}/participation-exit/http-response.adoc[]
 include::{snippets}/participation-exit/response-fields.adoc[]
+
+=== 모임원 내보내기 API
+
+==== HTTP Request Headers
+include::{snippets}/participate-removal/request-headers.adoc[]
+
+==== HTTP Request Parameters
+include::{snippets}/participation-exit/http-request.adoc[]
+include::{snippets}/participation-exit/form-parameters.adoc[]
+
+==== HTTP Response Body
+include::{snippets}/participate-removal/http-response.adoc[]
+include::{snippets}/participate-removal/response-fields.adoc[]
