@@ -324,7 +324,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("data.[].longitude").type(JsonFieldType.NUMBER)
                                         .description("지하철역 경도"),
                                 fieldWithPath("data.[].distanceFromMiddlePoint").type(JsonFieldType.NUMBER)
-                                        .description("중간좌표로부터 지하철역까지의 거리")
+                                        .description("중간좌표로부터 지하철역까지의 거리(단위: m)")
                         )
                 ));
     }
