@@ -51,3 +51,13 @@ include::{snippets}/participation-exit/form-parameters.adoc[]
 ==== HTTP Response Body
 include::{snippets}/participation-exit/http-response.adoc[]
 include::{snippets}/participation-exit/response-fields.adoc[]
+
+=== 모임 추천 지역 조회하기
+
+==== HTTP Request Parameters
+include::{snippets}/get-best-region/http-request.adoc[]
+include::{snippets}/get-best-region/query-parameters.adoc[]
+
+==== HTTP Response Body
+include::{snippets}/get-best-region/http-response.adoc[]
+include::{snippets}/get-best-region/response-fields.adoc[]

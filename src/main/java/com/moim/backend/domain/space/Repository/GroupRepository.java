@@ -1,4 +1,4 @@
-package com.moim.backend.domain.space.Repository;
+package com.moim.backend.domain.space.repository;
 
 import com.moim.backend.domain.space.entity.Groups;
 import org.springframework.data.jpa.repository.JpaRepository;

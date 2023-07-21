@@ -1,12 +1,15 @@
 package com.moim.backend.domain.space.service;
 
-import com.moim.backend.domain.space.Repository.GroupRepository;
-import com.moim.backend.domain.space.Repository.ParticipationRepository;
+import com.moim.backend.domain.space.repository.GroupRepository;
+import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
+import com.moim.backend.domain.space.response.MiddlePoint;
+import com.moim.backend.domain.subway.repository.SubwayRepository;
+import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import static com.moim.backend.global.common.Result.*;
 import static com.moim.backend.global.common.Result.NOT_FOUND_PARTICIPATE;
@@ -26,6 +30,7 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final ParticipationRepository participationRepository;
+    private final SubwayRepository subwayRepository;
 
     // 모임 생성
     @Transactional
@@ -42,7 +47,7 @@ public class GroupService {
             throw new CustomException(INVALID_TRANSPORTATION);
         }
 
-        Groups group = getGroup(request);
+        Groups group = getGroup(request.getGroupId());
         String encryptedPassword = encrypt(request.getPassword());
         Participation participation = participationRepository.save(
                 toParticipationEntity(request, group, user.getUserId(), encryptedPassword)
@@ -82,6 +87,19 @@ public class GroupService {
         return GroupResponse.Exit.response(false, "모임에서 나갔습니다.");
     }
 
+    // 모임 추천 지역 조회하기
+    public List<BestSubwayInterface> getBestRegion(Long groupId) {
+        Groups group = getGroup(groupId);
+        MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
+        List<BestSubwayInterface> bestSubwayList = subwayRepository.getBestSubwayList(
+                middlePoint.getLatitude(), middlePoint.getLongitude()
+        );
+        // TODO : 이름이 같은 역일 경우 중간 지점에 더 가까운 역으로 조회(DB 또는 Application 계층 중 어디에서 처리해야할지 고민)
+        // TODO : 조회한 역이 적절하지 않은 경우 인기 지역 조회
+
+        return bestSubwayList;
+    }
+
 
     // validate
 
@@ -93,8 +111,8 @@ public class GroupService {
 
     // method
 
-    private Groups getGroup(GroupServiceRequest.Participate request) {
-        return groupRepository.findById(request.getGroupId())
+    private Groups getGroup(Long groupId) {
+        return groupRepository.findById(groupId)
                 .orElseThrow(
                         () -> new CustomException(NOT_FOUND_GROUP)
                 );
