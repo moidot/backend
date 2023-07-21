@@ -8,6 +8,7 @@ import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.user.entity.Users;
+import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -82,8 +83,23 @@ public class GroupService {
         return GroupResponse.Exit.response(false, "모임에서 나갔습니다.");
     }
 
+    // 모임원 내보내기
+    @Transactional
+    public Void participateRemoval(Long participateId, Users user) {
+        Participation participate = getParticipate(participateId);
+        Groups group = participate.getGroup();
+        validateAdminStatus(user.getUserId(), group.getAdminId());
+        participationRepository.delete(participate);
+        return null;
+    }
 
     // validate
+
+    private static void validateAdminStatus(Long userId, Long adminId) {
+        if (!adminId.equals(userId)) {
+            throw new CustomException(NOT_ADMIN_USER);
+        }
+    }
 
     private static void validateParticipationMyInfo(Users user, Participation myParticipate) {
         if (!myParticipate.getUserId().equals(user.getUserId())) {
