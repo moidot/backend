@@ -9,6 +9,7 @@ import com.moim.backend.domain.subway.response.BestSubway;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.exceptions.misusing.CannotStubVoidMethodWithReturnValue;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
@@ -253,7 +255,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         mockMvc.perform(
                         RestDocumentationRequestBuilders.delete("/api/v1/group/participate")
                                 .header("Authorization", "JWT AccessToken")
-                                .param("participateId", String.valueOf(123L))
+                                .param("participateId", String.valueOf(1L))
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -280,6 +282,61 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 ));
     }
 
+    @DisplayName("모임원 내보내기 API")
+    @Test
+    void participateRemoval() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.delete("/api/v1/group/participate/removal")
+                                .header("Authorization", "JWT AccessToken")
+                                .param("participateId", String.valueOf(1L))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("participate-removal",
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization")
+                                        .description("insert the AccessToken")
+                        ),
+                        formParameters(
+                                parameterWithName("participateId")
+                                        .description("참여자 정보 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data").type(JsonFieldType.NULL)
+                                        .description("Always NULL")
+                        )
+                ));
+    }
+
+    @DisplayName("모임 삭제하기 API")
+    @Test
+    void groupDelete() throws Exception {
+        // given
+        // when// then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.delete("/api/v1/group")
+                                .header("Authorization", "JWT AccessToken")
+                                .param("groupId", String.valueOf(1L))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("group-delete",
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization")
+                                        .description("insert the AccessToken")
+                        ),
+                        formParameters(
+                                parameterWithName("groupId")
+                                        .description("그룹 ID")
+                          
     @DisplayName("모임 추천 지역 조회하기 API")
     @Test
     void getBestRegion() throws Exception {
@@ -317,6 +374,11 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("상태 코드"),
                                 fieldWithPath("message").type(JsonFieldType.STRING)
                                         .description("상태 메세지"),
+                                fieldWithPath("data").type(JsonFieldType.NULL)
+                                        .description("Always NULL")
+                        )
+                ));
+    }
                                 fieldWithPath("data.[].name").type(JsonFieldType.STRING)
                                         .description("지하철역 이름"),
                                 fieldWithPath("data.[].latitude").type(JsonFieldType.NUMBER)
@@ -328,5 +390,4 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         )
                 ));
     }
-
 }

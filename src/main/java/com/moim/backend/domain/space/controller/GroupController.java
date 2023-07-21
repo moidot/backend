@@ -34,6 +34,14 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.participateGroup(request.toServiceRequest(), user));
     }
 
+    // 모임 삭제하기
+    @DeleteMapping("")
+    public CustomResponseEntity<Void> deleteGroup(
+            @RequestParam Long groupId, @Login Users user
+    ) {
+        return CustomResponseEntity.success(groupService.participateDelete(groupId, user));
+    }
+
     // 모임 참여 정보 수정
     @PatchMapping("/participate")
     public CustomResponseEntity<GroupResponse.ParticipateUpdate> participateUpdate(
@@ -50,6 +58,13 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.participateExit(participateId, user));
     }
 
+    // 모임원 내보내기 (Admin)
+    @DeleteMapping("/participate/removal")
+    public CustomResponseEntity<Void> participateRemoval(
+            @RequestParam Long participateId, @Login Users user
+    ) {
+        return CustomResponseEntity.success(groupService.participateRemoval(participateId, user));
+      
     // 모임 추천 지역 조회하기
     @GetMapping("/best-region")
     public CustomResponseEntity<List<BestSubwayInterface>> getBestRegion(@RequestParam Long groupId) {

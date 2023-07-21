@@ -11,6 +11,7 @@ import com.moim.backend.domain.space.response.MiddlePoint;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.entity.Users;
+import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -87,6 +88,26 @@ public class GroupService {
         return GroupResponse.Exit.response(false, "모임에서 나갔습니다.");
     }
 
+
+    // 모임원 내보내기
+    @Transactional
+    public Void participateRemoval(Long participateId, Users user) {
+        Participation participate = getParticipate(participateId);
+        Groups group = participate.getGroup();
+        validateAdminStatus(user.getUserId(), group.getAdminId());
+        participationRepository.delete(participate);
+        return null;
+    }
+
+    // 모임 삭제
+    @Transactional
+    public Void participateDelete(Long groupId, Users user) {
+        Groups group = getGroup(groupId);
+        validateAdminStatus(user.getUserId(), group.getAdminId());
+        groupRepository.delete(group);
+        return null;
+    }
+
     // 모임 추천 지역 조회하기
     public List<BestSubwayInterface> getBestRegion(Long groupId) {
         Groups group = getGroup(groupId);
@@ -101,7 +122,14 @@ public class GroupService {
     }
 
 
+
     // validate
+
+    private static void validateAdminStatus(Long userId, Long adminId) {
+        if (!adminId.equals(userId)) {
+            throw new CustomException(NOT_ADMIN_USER);
+        }
+    }
 
     private static void validateParticipationMyInfo(Users user, Participation myParticipate) {
         if (!myParticipate.getUserId().equals(user.getUserId())) {
@@ -110,6 +138,10 @@ public class GroupService {
     }
 
     // method
+
+
+    private Groups getGroup(Long id) {
+        return groupRepository.findById(id)
 
     private Groups getGroup(Long groupId) {
         return groupRepository.findById(groupId)
@@ -164,4 +196,5 @@ public class GroupService {
                 () -> new CustomException(NOT_FOUND_PARTICIPATE)
         );
     }
+
 }
