@@ -309,4 +309,37 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         )
                 ));
     }
+
+    @DisplayName("모임 삭제하기 API")
+    @Test
+    void groupDelete() throws Exception {
+        // given
+        // when// then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.delete("/api/v1/group")
+                                .header("Authorization", "JWT AccessToken")
+                                .param("groupId", String.valueOf(1L))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("group-delete",
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization")
+                                        .description("insert the AccessToken")
+                        ),
+                        formParameters(
+                                parameterWithName("groupId")
+                                        .description("그룹 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data").type(JsonFieldType.NULL)
+                                        .description("Always NULL")
+                        )
+                ));
+    }
 }
