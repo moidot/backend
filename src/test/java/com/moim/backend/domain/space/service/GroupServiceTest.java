@@ -1,10 +1,13 @@
 package com.moim.backend.domain.space.service;
 
-import com.moim.backend.domain.space.repository.GroupRepository;
-import com.moim.backend.domain.space.repository.ParticipationRepository;
+import com.moim.backend.TestQueryDSLConfig;
+import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
+import com.moim.backend.domain.space.repository.BestPlaceRepository;
+import com.moim.backend.domain.space.repository.GroupRepository;
+import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.user.entity.Users;
@@ -16,12 +19,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -29,13 +34,16 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@Import(TestQueryDSLConfig.class)
 class GroupServiceTest {
+    @Autowired
+    private GroupService groupService;
 
     @Autowired
     private EntityManager em;
 
     @Autowired
-    private GroupService groupService;
+    private BestPlaceRepository bestPlaceRepository;
 
     @Autowired
     private GroupRepository groupRepository;
@@ -83,6 +91,49 @@ class GroupServiceTest {
                 .contains(user.getUserId(), "테스트 그룹", "none", "none");
     }
 
+    @DisplayName("그룹이 생성된 후 어드민이 모임에 참여하게되면, 추천장소는 어드민 위치 중심으로 3개의 역이 추천된다.")
+    @Test
+    void participateAdmin() {
+        // given
+        Users admin = savedUser("admin@test.com", "어드민");
+        Users participateUser = savedUser("test2@test.com", "테스트 이름2");
+        Groups saveGroup = savedGroup(admin.getUserId(), "테스트 그룹");
+        GroupRequest.Participate request = new GroupRequest.Participate(
+                saveGroup.getGroupId(), "어드민", "커피나무", 37.591043, 127.019721,
+                "BUS", "2345"
+        );
+
+        em.flush();
+        em.clear();
+        // when
+        GroupResponse.Participate response =
+                groupService.participateGroup(request.toServiceRequest(), admin);
+
+        // then
+        Participation participation = participationRepository.findById(response.getParticipationId()).get();
+        Groups group = groupRepository.findById(saveGroup.getGroupId()).get();
+
+        assertThat(response.getParticipationId()).isNotNull();
+        assertThat(response)
+                .extracting(
+                        "groupId", "userId", "locationName",
+                        "userName", "latitude", "longitude",
+                        "transportation"
+                )
+                .contains(
+                        saveGroup.getGroupId(), admin.getUserId(), "커피나무",
+                        "어드민", 37.591043, 127.019721,
+                        "BUS"
+                );
+
+        assertThat(participation.getPassword()).isEqualTo(encrypt("2345"));
+        assertThat(group.getBestPlaces())
+                .hasSize(3)
+                .extracting("placeName")
+                .contains("성신여대입구(돈암)", "보문", "안암(고대병원앞)");
+
+    }
+
     @DisplayName("하나의 유저가 하나의 그룹에 참가한다.")
     @Test
     void participate() {
@@ -97,6 +148,7 @@ class GroupServiceTest {
                 saveGroup.getGroupId(), "경기도불주먹", "커피나무", 37.5660, 126.9784,
                 "BUS", "2345"
         );
+
         // when
         GroupResponse.Participate response =
                 groupService.participateGroup(request.toServiceRequest(), participateUser);
@@ -378,7 +430,67 @@ class GroupServiceTest {
 
     }
 
+    @DisplayName("유저가 자신의 모임들을 확인한다.")
+    @Test
+    void getMyParticipate() {
+        // given
+        Users admin1 = savedUser("admin1@test.com", "어드민1");
+        Users admin2 = savedUser("admin2@test.com", "어드민2");
+        Users admin3 = savedUser("admin3@test.com", "어드민3");
+
+        Groups group1 = savedGroup(admin1.getUserId(), "그룹1");
+        Groups group2 = savedGroup(admin2.getUserId(), "그룹2");
+        Groups group3 = savedGroup(admin3.getUserId(), "그룹3");
+
+        saveBestPlace(group1, "의정부역", 127.123456, 36.123456);
+        saveBestPlace(group1, "서울역", 127.123457, 36.123457);
+        saveBestPlace(group1, "개봉역", 127.123458, 36.123458);
+
+        Users user1 = savedUser("test1@test.com", "테스트1");
+        Users user2 = savedUser("test2@test.com", "테스트2");
+
+        savedParticipation(admin1, group1, "어드민", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(admin2, group2, "어드민", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(admin3, group3, "어드민", "아무데나", 36.23423, 127.32423, "BUS");
+
+        savedParticipation(user1, group1, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(user1, group2, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(user1, group3, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+
+        savedParticipation(user2, group1, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(user2, group3, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+
+        em.flush();
+        em.clear();
+
+        // when
+        List<GroupResponse.MyParticipate> response = groupService.getMyParticipate(user1);
+
+        // then
+        assertThat(response).hasSize(3);
+
+        assertThat(response.get(0))
+                .extracting("groupId", "groupName", "groupDate", "groupParticipates")
+                .contains(group1.getGroupId(), "그룹1", "2023-07-10", 3);
+
+        assertThat(response.get(0).getBestPlaces())
+                .hasSize(3)
+                .extracting("bestPlaceName")
+                .contains("의정부역","서울역","개봉역");
+    }
+
     // method
+
+    private void saveBestPlace(Groups group, String placeName, double longitude, double latitude) {
+        bestPlaceRepository.save(
+                BestPlace.builder()
+                        .group(group)
+                        .placeName(placeName)
+                        .longitude(longitude)
+                        .latitude(latitude)
+                        .build()
+        );
+    }
 
     private Groups savedGroup(Long userId, String name) {
         return groupRepository.save(
