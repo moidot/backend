@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Getter
 @AllArgsConstructor
@@ -29,4 +30,16 @@ public class Subway {
     @Column(precision = 10, scale = 6)
     private BigDecimal longitude;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Subway subway = (Subway) o;
+        return Objects.equals(getName(), subway.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getName());
+    }
 }
