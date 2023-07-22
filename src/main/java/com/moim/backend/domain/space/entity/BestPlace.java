@@ -21,14 +21,18 @@ public class BestPlace {
     private Groups group;
 
     @NotNull
+    private String placeName;
+
+    @NotNull
     private Double latitude;
     @NotNull
     private Double longitude;
 
     @Builder
-    private BestPlace(Long bestPlaceId, Groups group, Double latitude, Double longitude) {
+    private BestPlace(Long bestPlaceId, Groups group, String placeName, Double latitude, Double longitude) {
         this.bestPlaceId = bestPlaceId;
         this.group = group;
+        this.placeName = placeName;
         this.latitude = latitude;
         this.longitude = longitude;
     }
