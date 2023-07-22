@@ -388,4 +388,93 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         )
                 ));
     }
+
+    @DisplayName("내 모임 확인하기 API")
+    @Test
+    void getMyParticipate() throws Exception {
+        // given
+        GroupResponse.MyParticipate data1 = GroupResponse.MyParticipate.builder()
+                .groupId(1L)
+                .groupName("그룹1")
+                .groupDate("2023-07-15")
+                .groupParticipates(3)
+                .bestPlaces(
+                        List.of(
+                                GroupResponse.BestPlaces.builder()
+                                        .bestPlaceId(764L)
+                                        .bestPlaceName("종로5가역")
+                                        .build(),
+                                GroupResponse.BestPlaces.builder()
+                                        .bestPlaceId(765L)
+                                        .bestPlaceName("종로3가역")
+                                        .build(),
+                                GroupResponse.BestPlaces.builder()
+                                        .bestPlaceId(763L)
+                                        .bestPlaceName("동대문역")
+                                        .build()
+                        )
+                )
+                .build();
+
+        GroupResponse.MyParticipate data2 = GroupResponse.MyParticipate.builder()
+                .groupId(2L)
+                .groupName("그룹2")
+                .groupDate("2023-07-28")
+                .groupParticipates(7)
+                .bestPlaces(
+                        List.of(
+                                GroupResponse.BestPlaces.builder()
+                                        .bestPlaceId(737L)
+                                        .bestPlaceName("강남역")
+                                        .build(),
+                                GroupResponse.BestPlaces.builder()
+                                        .bestPlaceId(736L)
+                                        .bestPlaceName("교대역")
+                                        .build(),
+                                GroupResponse.BestPlaces.builder()
+                                        .bestPlaceId(738L)
+                                        .bestPlaceName("역삼역")
+                                        .build()
+                        )
+                )
+                .build();
+
+        given(groupService.getMyParticipate(any()))
+                .willReturn(List.of(data1, data2));
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/v1/group/participate")
+                                .header("Authorization", "JWT AccessToken")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("my-participate",
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization")
+                                        .description("insert the AccessToken")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data[].groupId").type(JsonFieldType.NUMBER)
+                                        .description("그룹 ID"),
+                                fieldWithPath("data[].groupName").type(JsonFieldType.STRING)
+                                        .description("그룹 이름"),
+                                fieldWithPath("data[].groupDate").type(JsonFieldType.STRING)
+                                        .description("그룹 모임날짜"),
+                                fieldWithPath("data[].groupParticipates").type(JsonFieldType.NUMBER)
+                                        .description("그룹 참여자 수 / Integer"),
+                                fieldWithPath("data[].bestPlaces[]").type(JsonFieldType.ARRAY)
+                                        .description("그룹 추천장소 현황"),
+                                fieldWithPath("data[].bestPlaces[].bestPlaceId").type(JsonFieldType.NUMBER)
+                                        .description("그룹 추천장소 ID / Long"),
+                                fieldWithPath("data[].bestPlaces[].bestPlaceName").type(JsonFieldType.STRING)
+                                        .description("그룹 추천장소 이름")
+                                )
+                ));
+    }
 }
