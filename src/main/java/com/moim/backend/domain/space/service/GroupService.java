@@ -1,5 +1,7 @@
 package com.moim.backend.domain.space.service;
 
+import com.moim.backend.domain.space.entity.BestPlace;
+import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.entity.Groups;
@@ -8,6 +10,7 @@ import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.MiddlePoint;
+import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.entity.Users;
@@ -19,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.moim.backend.global.common.Result.*;
 import static com.moim.backend.global.common.Result.NOT_FOUND_PARTICIPATE;
@@ -31,6 +36,7 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final ParticipationRepository participationRepository;
+    private final BestPlaceRepository bestPlaceRepository;
     private final SubwayRepository subwayRepository;
 
     // 모임 생성
@@ -49,6 +55,24 @@ public class GroupService {
         }
 
         Groups group = getGroup(request.getGroupId());
+
+        // 어드민이 참여하는 경우 (즉, 모임이 생성된 직후)
+        if (group.getAdminId().equals(user.getUserId())) {
+            List<Subway> nearestStationsList =
+                    subwayRepository.getNearestStationsList(request.getLatitude(), request.getLongitude());
+
+            for (Subway subway : nearestStationsList) {
+                bestPlaceRepository.save(
+                        BestPlace.builder()
+                                .group(group)
+                                .placeName(subway.getName())
+                                .latitude(subway.getLatitude().doubleValue())
+                                .longitude(subway.getLongitude().doubleValue())
+                                .build()
+                );
+            }
+        }
+
         String encryptedPassword = encrypt(request.getPassword());
         Participation participation = participationRepository.save(
                 toParticipationEntity(request, group, user.getUserId(), encryptedPassword)
@@ -121,6 +145,15 @@ public class GroupService {
         return bestSubwayList;
     }
 
+    // 내 모임 확인하기
+    public List<GroupResponse.MyParticipate> getMyParticipate(Users user) {
+        List<Groups> groups = groupRepository.myParticipationGroups(user.getUserId());
+        return groups.stream()
+                .map(group -> GroupResponse.MyParticipate.response(
+                        group, groupBestPlaceToList(group))
+                ).toList();
+    }
+
     // validate
 
     private static void validateAdminStatus(Long userId, Long adminId) {
@@ -191,4 +224,11 @@ public class GroupService {
         );
     }
 
+    private static List<GroupResponse.BestPlaces> groupBestPlaceToList(Groups group) {
+        // 로직상 NPE 가 발생할 수 없음
+        List<BestPlace> bestPlaces = group.getBestPlaces();
+        return bestPlaces.stream()
+                .map(GroupResponse.BestPlaces::response)
+                .toList();
+    }
 }

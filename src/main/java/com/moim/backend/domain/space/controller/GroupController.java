@@ -20,6 +20,7 @@ public class GroupController {
 
     private final GroupService groupService;
 
+    // 모임 생성하기
     @PostMapping("")
     public CustomResponseEntity<GroupResponse.Create> createGroup(
             @RequestBody @Valid GroupRequest.Create request, @Login Users user
@@ -27,6 +28,7 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.createGroup(request.toServiceRequest(), user));
     }
 
+    // 모임 참여하기
     @PostMapping("/participate")
     public CustomResponseEntity<GroupResponse.Participate> participateGroup(
             @RequestBody @Valid GroupRequest.Participate request, @Login Users user
@@ -72,6 +74,14 @@ public class GroupController {
             @RequestParam Long groupId
     ) {
         return CustomResponseEntity.success(groupService.getBestRegion(groupId));
+    }
+
+    // 내 모임 확인하기
+    @GetMapping("/participate")
+    public CustomResponseEntity<List<GroupResponse.MyParticipate>> getMyParticipate(
+            @Login Users user
+    ) {
+        return CustomResponseEntity.success(groupService.getMyParticipate(user));
     }
 
 }
