@@ -27,12 +27,12 @@ class SubwayRepositoryTest {
     @Test
     void getNearestStations() {
         // when
-        List<Subway> subwayList = subwayRepository.getNearestStationsList(37.819397, 127.091754);
+        List<Subway> subwayList = subwayRepository.getNearestStationsList(37.498085, 127.027706);
 
         // then
         assertThat(subwayList)
                 .hasSize(3)
                 .extracting("name")
-                .contains("덕계", "덕정", "양주");
+                .contains("강남", "신논현", "역삼");
     }
 }

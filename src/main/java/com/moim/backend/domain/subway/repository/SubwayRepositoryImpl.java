@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.moim.backend.domain.subway.entity.QSubway.subway;
 import static com.querydsl.core.types.dsl.MathExpressions.*;
@@ -49,9 +50,15 @@ public class SubwayRepositoryImpl implements SubwayCustomRepository {
         NumberExpression<Double> distanceExpression =
                 Expressions.numberTemplate(Double.class, "6371 * {0}", acosExpression);
 
-        return queryFactory.selectFrom(subway)
+        List<Subway> findByNearestStationList = queryFactory.selectFrom(subway)
                 .orderBy(distanceExpression.asc())
-                .limit(3)
+                .limit(10)
                 .fetch();
+
+        return findByNearestStationList
+                .stream()
+                .distinct()
+                .limit(3)
+                .collect(Collectors.toList());
     }
 }
