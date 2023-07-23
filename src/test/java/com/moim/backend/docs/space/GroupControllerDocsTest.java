@@ -4,6 +4,7 @@ import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
+import com.moim.backend.domain.space.response.KakaoMapDetailDto;
 import com.moim.backend.domain.space.service.GroupService;
 import com.moim.backend.domain.subway.response.BestSubway;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -28,9 +30,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.formParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -475,6 +475,110 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("data[].bestPlaces[].bestPlaceName").type(JsonFieldType.STRING)
                                         .description("그룹 추천장소 이름")
                                 )
+                ));
+    }
+
+    @DisplayName("추천된 장소 상세보기 API")
+    @Test
+    void RecommendedPlaceDetails() throws Exception {
+        // given
+        List<KakaoMapDetailDto.TimeList> timeList = List.of(new KakaoMapDetailDto.TimeList("영업시간", "09:30 ~ 21:00", "매일"));
+        List<String> tags = List.of("스터디카페", "제로페이");
+        List<GroupResponse.Photos> photos = List.of(
+                new GroupResponse.Photos("M", "http://t1.kakaocdn.net/fiy_reboot/place/D02C1C1162A548B58894B236B754CFD6"),
+                new GroupResponse.Photos("R2", "http://t1.kakaocdn.net/fiy_reboot/place/7F10166652F94503872F7A8B07A55F42"),
+                new GroupResponse.Photos("R3", "http://t1.kakaocdn.net/fiy_reboot/place/5B14072B5D18448C81CF530950F0F571"),
+                new GroupResponse.Photos("R4", "http://t1.kakaocdn.net/fiy_reboot/place/8BC6FCB8CCEC45B1804B3557E72F8721"),
+                new GroupResponse.Photos("R5", "http://t1.kakaocdn.net/fiy_reboot/place/B2F2340363F44F18A76773AB8CADAC72")
+        );
+
+        List<KakaoMapDetailDto.MenuList> menuLists = List.of(
+                new KakaoMapDetailDto.MenuList("3,300", false, "아메리카노"),
+                new KakaoMapDetailDto.MenuList("3,800", false, "카페라떼"),
+                new KakaoMapDetailDto.MenuList("3,800", false, "자몽에이드"),
+                new KakaoMapDetailDto.MenuList("4,000", false, "유자차"),
+                new KakaoMapDetailDto.MenuList("4,000", false, "자몽차")
+        );
+
+        KakaoMapDetailDto.MenuInfo menuInfo = new KakaoMapDetailDto.MenuInfo(5, menuLists, "N", 0, "2022.11.11.");
+
+        given(groupService.detailRecommendedPlace(anyLong()))
+                .willReturn(
+                        GroupResponse.detailRecommendedPlace.builder()
+                                .placeName("커피나무 성신여대점")
+                                .mainPhotoUrl("http://t1.kakaocdn.net/fiy_reboot/place/D02C1C1162A548B58894B236B754CFD6")
+                                .detailPlace("서울 성북구 보문로30길 79 1, 2층")
+                                .isOpen("영업중")
+                                .openTime(timeList)
+                                .url("http://www.coffeenamu.co.kr")
+                                .phone("02-922-1672")
+                                .tags(tags)
+                                .delivery("배달불가")
+                                .pagekage("포장가능")
+                                .photos(photos)
+                                .menuInfo(menuInfo)
+                                .build()
+                );
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.get("/api/v1/group/{id}", 26974293L)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("detail-recommended",
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(
+                                parameterWithName("id")
+                                        .description("카카오맵의 추천장소 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data.placeName").type(JsonFieldType.STRING)
+                                        .description("장소 이름"),
+                                fieldWithPath("data.mainPhotoUrl").type(JsonFieldType.STRING)
+                                        .description("장소 사진"),
+                                fieldWithPath("data.detailPlace").type(JsonFieldType.STRING)
+                                        .description("서울 성북구 보문로30길 79 1, 2층"),
+                                fieldWithPath("data.isOpen").type(JsonFieldType.STRING)
+                                        .description("현재 영업 여부"),
+                                fieldWithPath("data.openTime[].timeName").type(JsonFieldType.STRING)
+                                        .description("영업 시간 이름"),
+                                fieldWithPath("data.openTime[].timeSE").type(JsonFieldType.STRING)
+                                        .description("영업 시간"),
+                                fieldWithPath("data.openTime[].dayOfWeek").type(JsonFieldType.STRING)
+                                        .description("해당 요일"),
+                                fieldWithPath("data.url").type(JsonFieldType.STRING)
+                                        .description("장소 홈페이지 URL"),
+                                fieldWithPath("data.phone").type(JsonFieldType.STRING)
+                                        .description("장소 대표번호"),
+                                fieldWithPath("data.tags[]").type(JsonFieldType.ARRAY)
+                                        .description("장소 특징 / StringArray"),
+                                fieldWithPath("data.delivery").type(JsonFieldType.STRING)
+                                        .description("배달 가능 여부"),
+                                fieldWithPath("data.pagekage").type(JsonFieldType.STRING)
+                                        .description("포장 가능 여부"),
+                                fieldWithPath("data.photos[].photoId").type(JsonFieldType.STRING)
+                                        .description("카카오맵에서 사진 메인 및 사이드 여부"),
+                                fieldWithPath("data.photos[].photoUrl").type(JsonFieldType.STRING)
+                                        .description("사진 URL"),
+                                fieldWithPath("data.menuInfo.menucount").type(JsonFieldType.NUMBER)
+                                        .description("메뉴 개수"),
+                                fieldWithPath("data.menuInfo.menuList[].price").type(JsonFieldType.STRING)
+                                        .description("메뉴 가격"),
+                                fieldWithPath("data.menuInfo.menuList[].recommend").type(JsonFieldType.BOOLEAN)
+                                        .description("메뉴 추천 여부"),
+                                fieldWithPath("data.menuInfo.menuList[].menu").type(JsonFieldType.STRING)
+                                        .description("메뉴 이름"),
+                                fieldWithPath("data.menuInfo.productyn").type(JsonFieldType.STRING)
+                                        .description("상품 확인 여부"),
+                                fieldWithPath("data.menuInfo.menuboardphotocount").type(JsonFieldType.NUMBER)
+                                        .description("메뉴판 사진 개수"),
+                                fieldWithPath("data.menuInfo.timeexp").type(JsonFieldType.STRING)
+                                        .description("메뉴 갱신 날짜")
+                        )
                 ));
     }
 }
