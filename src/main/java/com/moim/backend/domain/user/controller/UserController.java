@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -33,6 +34,13 @@ public class UserController {
     public CustomResponseEntity<UserResponse.Login> loginByEmail(@Valid @RequestBody UserRequest.Login request) {
         return CustomResponseEntity.success(
                 userService.login(request)
+        );
+    }
+
+    @PostMapping("/login/kakao")
+    public CustomResponseEntity<UserResponse.Login> loginByKakao(@RequestParam String authorizationCode) {
+        return CustomResponseEntity.success(
+                userService.loginByKakao(authorizationCode)
         );
     }
 
