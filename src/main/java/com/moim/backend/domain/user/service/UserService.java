@@ -37,7 +37,11 @@ public class UserService {
     public UserResponse.Login login(UserRequest.Login request) {
         Users user = saveOrUpdate(request);
 
-        return new UserResponse.Login(jwtService.createToken(user.getEmail()));
+        return UserResponse.Login.builder()
+                .email(request.getEmail())
+                .name(request.getName())
+                .token(jwtService.createToken(user.getEmail()))
+                .build();
     }
 
     public UserResponse.Login loginByKakao(String authorizationCode) {
