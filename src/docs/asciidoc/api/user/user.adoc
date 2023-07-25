@@ -16,3 +16,13 @@ include::{snippets}/login-by-email/request-fields.adoc[]
 ==== HTTP Response
 include::{snippets}/login-by-email/http-response.adoc[]
 include::{snippets}/login-by-email/response-fields.adoc[]
+
+=== 카카오 로그인 API
+
+==== HTTP Request Body
+include::{snippets}/login-by-kakao/http-request.adoc[]
+include::{snippets}/login-by-kakao/form-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/login-by-kakao/http-response.adoc[]
+include::{snippets}/login-by-kakao/response-fields.adoc[]
