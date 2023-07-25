@@ -46,7 +46,11 @@ public class UserControllerDocsTest extends RestDocsSupport {
         UserRequest.Login request = new UserRequest.Login("yujung-31476@naver.com", "김유정");
 
         given(userService.login(any()))
-                .willReturn(new UserResponse.Login(token));
+                .willReturn(UserResponse.Login.builder()
+                        .email("test@gmail.com")
+                        .name("테스터")
+                        .token(token)
+                        .build());
 
         // when // then
         mockMvc.perform(
@@ -70,6 +74,10 @@ public class UserControllerDocsTest extends RestDocsSupport {
                                         .description("상태 코드"),
                                 fieldWithPath("message").type(JsonFieldType.STRING)
                                         .description("상태 메세지"),
+                                fieldWithPath("data.email").type(JsonFieldType.STRING)
+                                        .description("유저 이메일"),
+                                fieldWithPath("data.name").type(JsonFieldType.STRING)
+                                        .description("유저 이름"),
                                 fieldWithPath("data.token").type(JsonFieldType.STRING)
                                         .description("엑세스 토큰(시간, 이메일, 이름에 따라 달라짐)")
                         ))
@@ -80,13 +88,8 @@ public class UserControllerDocsTest extends RestDocsSupport {
     @Test
     void getUserNameByToken() throws Exception {
         // given
-        Users user = Users.builder()
-                        .email("yu-jung31476@naver.com")
-                        .name("김유정")
-                        .build();
-
         given(userService.getUserNameByToken(any()))
-                .willReturn(user.getName());
+                .willReturn("테스터");
 
         // when // then
         mockMvc.perform(
@@ -114,7 +117,11 @@ public class UserControllerDocsTest extends RestDocsSupport {
     void kakaoByLogin() throws Exception {
         // given
         given(userService.loginByKakao(any()))
-                .willReturn(new UserResponse.Login(token));
+                .willReturn(UserResponse.Login.builder()
+                        .email("test@gmail.com")
+                        .name("테스터")
+                        .token(token)
+                        .build());
 
         // when // then
         mockMvc.perform(
@@ -134,6 +141,10 @@ public class UserControllerDocsTest extends RestDocsSupport {
                                         .description("상태 코드"),
                                 fieldWithPath("message").type(JsonFieldType.STRING)
                                         .description("상태 메세지"),
+                                fieldWithPath("data.email").type(JsonFieldType.STRING)
+                                        .description("유저 이메일"),
+                                fieldWithPath("data.name").type(JsonFieldType.STRING)
+                                        .description("유저 이름"),
                                 fieldWithPath("data.token").type(JsonFieldType.STRING)
                                         .description("엑세스 토큰(시간, 이메일, 이름에 따라 달라짐)")
                         ))
