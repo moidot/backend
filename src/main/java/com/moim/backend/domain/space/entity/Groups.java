@@ -32,13 +32,17 @@ public class Groups {
     @OneToMany(mappedBy = "group", orphanRemoval = true)
     private List<Participation> participations;
 
+    @OneToMany(mappedBy = "group")
+    private List<BestPlace> bestPlaces;
+
     @Builder
-    private Groups(Long groupId, Long adminId, String name, LocalDate date, String place, List<Participation> participations) {
+    private Groups(Long groupId, Long adminId, String name, LocalDate date, String place, List<Participation> participations, List<BestPlace> bestPlaces) {
         this.groupId = groupId;
         this.adminId = adminId;
         this.name = name;
         this.date = date;
         this.place = (place == null) ? "none" : place;
         this.participations = participations;
+        this.bestPlaces = bestPlaces;
     }
 }

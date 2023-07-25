@@ -1,16 +1,19 @@
 package com.moim.backend.domain.admin.service;
 
+import com.moim.backend.TestQueryDSLConfig;
 import com.moim.backend.domain.admin.request.VersionRequest;
 import com.moim.backend.domain.admin.response.VersionResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
+@Import(TestQueryDSLConfig.class)
 class VersionServiceTest {
     @Autowired
     private VersionService versionService;

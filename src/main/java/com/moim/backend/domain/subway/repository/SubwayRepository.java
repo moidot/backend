@@ -1,8 +1,6 @@
 package com.moim.backend.domain.subway.repository;
 
-import com.moim.backend.domain.space.response.MiddlePoint;
 import com.moim.backend.domain.subway.entity.Subway;
-import com.moim.backend.domain.subway.response.BestSubway;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SubwayRepository extends JpaRepository<Subway, Long> {
+public interface SubwayRepository extends JpaRepository<Subway, Long>, SubwayCustomRepository {
 
     @Query(value = "select name, latitude, longitude, "
             + "ST_DISTANCE_SPHERE(POINT(longitude, latitude), POINT(:middleLongitude, :middleLatitude)) AS distanceFromMiddlePoint "

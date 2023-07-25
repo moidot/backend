@@ -1,10 +1,12 @@
 package com.moim.backend.domain.space.response;
 
+import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
 import lombok.*;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class GroupResponse {
 
@@ -106,6 +108,46 @@ public class GroupResponse {
             return Exit.builder()
                     .isDeletedSpace(isDeletedSpace)
                     .message(message)
+                    .build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Builder
+    public static class MyParticipate {
+        private Long groupId;
+        private String groupName;
+        private String groupDate;
+        private Integer groupParticipates;
+        private List<BestPlaces> bestPlaces;
+
+        public static GroupResponse.MyParticipate response(
+                Groups group, List<GroupResponse.BestPlaces> bestPlaces
+        ) {
+            return MyParticipate.builder()
+                    .groupId(group.getGroupId())
+                    .groupName(group.getName())
+                    .groupDate(group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .groupParticipates(group.getParticipations().size())
+                    .bestPlaces(bestPlaces)
+                    .build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BestPlaces {
+        private Long bestPlaceId;
+        private String bestPlaceName;
+
+        public static GroupResponse.BestPlaces response(BestPlace bestPlace) {
+            return GroupResponse.BestPlaces.builder()
+                    .bestPlaceId(bestPlace.getBestPlaceId())
+                    .bestPlaceName(bestPlace.getPlaceName())
                     .build();
         }
     }

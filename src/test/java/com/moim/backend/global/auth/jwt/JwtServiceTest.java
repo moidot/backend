@@ -1,5 +1,6 @@
 package com.moim.backend.global.auth.jwt;
 
+import com.moim.backend.TestQueryDSLConfig;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import org.junit.jupiter.api.DisplayName;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.util.Optional;
 
@@ -15,6 +17,7 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 @SpringBootTest
 @EnableConfigurationProperties({JwtProperties.class})
+@Import(TestQueryDSLConfig.class)
 public class JwtServiceTest {
 
     @Autowired

@@ -178,4 +178,17 @@ class GroupControllerTest extends ControllerTestSupport {
                 .andDo(print())
                 .andExpect(status().isOk());
     }
+
+    @DisplayName("내 모임 확인하기 API")
+    @Test
+    void getMyParticipate() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/v1/group/participate")
+                                .header("Authorization", "JWT AccessToken")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }
