@@ -2,6 +2,7 @@ package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
+import com.moim.backend.domain.space.response.KakaoMapDetailDto;
 import com.moim.backend.domain.space.service.GroupService;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.entity.Users;
@@ -84,4 +85,11 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.getMyParticipate(user));
     }
 
+    // 추천된 장소 상세보기
+    @GetMapping("/{id}")
+    public CustomResponseEntity<GroupResponse.detailRecommendedPlace> RecommendedPlaceDetails(
+            @PathVariable(name = "id") Long id
+    ) {
+        return CustomResponseEntity.success(groupService.detailRecommendedPlace(id));
+    }
 }

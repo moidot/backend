@@ -10,6 +10,7 @@ import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
+import com.moim.backend.domain.space.response.KakaoMapDetailDto;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.global.common.Result;
@@ -34,7 +35,6 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-@Import(TestQueryDSLConfig.class)
 class GroupServiceTest {
     @Autowired
     private GroupService groupService;
@@ -476,7 +476,50 @@ class GroupServiceTest {
         assertThat(response.get(0).getBestPlaces())
                 .hasSize(3)
                 .extracting("bestPlaceName")
-                .contains("의정부역","서울역","개봉역");
+                .contains("의정부역", "서울역", "개봉역");
+    }
+
+    @DisplayName("카카오맵을 이용해 해당 장소의 상세 정보를 가져온다.")
+    @Test
+    void RecommendedPlaceDetails() {
+        // given
+        List<KakaoMapDetailDto.TimeList> timeList = List.of(new KakaoMapDetailDto.TimeList("영업시간", "09:30 ~ 21:00", "매일"));
+        List<String> tags = List.of("스터디카페", "제로페이");
+        List<GroupResponse.Photos> photos = List.of(
+                new GroupResponse.Photos("M", "http://t1.kakaocdn.net/fiy_reboot/place/D02C1C1162A548B58894B236B754CFD6"),
+                new GroupResponse.Photos("R2", "http://t1.kakaocdn.net/fiy_reboot/place/7F10166652F94503872F7A8B07A55F42"),
+                new GroupResponse.Photos("R3", "http://t1.kakaocdn.net/fiy_reboot/place/5B14072B5D18448C81CF530950F0F571"),
+                new GroupResponse.Photos("R4", "http://t1.kakaocdn.net/fiy_reboot/place/8BC6FCB8CCEC45B1804B3557E72F8721"),
+                new GroupResponse.Photos("R5", "http://t1.kakaocdn.net/fiy_reboot/place/B2F2340363F44F18A76773AB8CADAC72")
+        );
+
+        List<KakaoMapDetailDto.MenuList> menuLists = List.of(
+                new KakaoMapDetailDto.MenuList("3,300", false, "아메리카노"),
+                new KakaoMapDetailDto.MenuList("3,800", false, "카페라떼"),
+                new KakaoMapDetailDto.MenuList("3,800", false, "자몽에이드"),
+                new KakaoMapDetailDto.MenuList("4,000", false, "유자차"),
+                new KakaoMapDetailDto.MenuList("4,000", false, "자몽차")
+        );
+
+        KakaoMapDetailDto.MenuInfo menuInfo = new KakaoMapDetailDto.MenuInfo(5, menuLists, "N", 0, "2022.11.11.");
+
+        // when
+        GroupResponse.detailRecommendedPlace response = groupService.detailRecommendedPlace(26974293L);
+
+        // then
+        assertThat(response)
+                .extracting(
+                        "placeName", "mainPhotoUrl", "detailPlace",
+                        "isOpen", "openTime", "url",
+                        "phone", "tags", "delivery",
+                        "pagekage", "photos", "menuInfo"
+                )
+                .contains(
+                        "커피나무 성신여대점", "http://t1.kakaocdn.net/fiy_reboot/place/D02C1C1162A548B58894B236B754CFD6", "서울 성북구 보문로30길 79 1, 2층",
+                        "영업중", timeList, "http://www.coffeenamu.co.kr",
+                        "02-922-1672", tags, "배달불가",
+                        "포장가능", photos, menuInfo
+                );
     }
 
     // method

@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-@Import(TestQueryDSLConfig.class)
 class VersionServiceTest {
     @Autowired
     private VersionService versionService;

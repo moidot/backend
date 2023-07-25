@@ -6,7 +6,10 @@ import com.moim.backend.domain.space.entity.Participation;
 import lombok.*;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class GroupResponse {
 
@@ -148,6 +151,124 @@ public class GroupResponse {
             return GroupResponse.BestPlaces.builder()
                     .bestPlaceId(bestPlace.getBestPlaceId())
                     .bestPlaceName(bestPlace.getPlaceName())
+                    .build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class detailRecommendedPlace {
+        private String placeName;
+        private String mainPhotoUrl;
+        private String detailPlace;
+        private String isOpen;
+        private List<KakaoMapDetailDto.TimeList> openTime;
+        private String url;
+        private String phone;
+        private List<String> tags;
+        private String delivery;
+        private String pagekage;
+        private List<Photos> photos;
+        private KakaoMapDetailDto.MenuInfo menuInfo;
+
+        public static GroupResponse.detailRecommendedPlace response(KakaoMapDetailDto kakaoMapDetailDto) {
+            KakaoMapDetailDto.BasicInfo basicInfo = kakaoMapDetailDto.getBasicInfo();
+            KakaoMapDetailDto.Address address = basicInfo.getAddress();
+            String placeName = (basicInfo.getPlacenamefull() != null) ? basicInfo.getPlacenamefull() : "none";
+            String mainPhotoUrl = (basicInfo.getMainphotourl() != null) ? basicInfo.getMainphotourl() : "none";
+            String isOpen = "none";
+            List<KakaoMapDetailDto.TimeList> timeList = new ArrayList<>();
+            String homePage = (basicInfo.getHomepage() != null) ? basicInfo.getHomepage() : "none";
+            String phoneNum = (basicInfo.getPhonenum() != null) ? basicInfo.getPhonenum() : "none";
+            List<String> tags = new ArrayList<>();
+            String delivery = "none";
+            String pagekage = "none";
+            List<Photos> photos = new ArrayList<>();
+            KakaoMapDetailDto.MenuInfo menuInfo = (kakaoMapDetailDto.getMenuInfo() != null) ?
+                    kakaoMapDetailDto.getMenuInfo() : new KakaoMapDetailDto.MenuInfo();
+
+            if (basicInfo.getOpenHour() != null) {
+                if (basicInfo.getOpenHour().getRealtime().getOpen() != null) {
+                    isOpen = basicInfo.getOpenHour().getRealtime().getOpen().equals("Y") ? "영업중" : "영업종료";
+                }
+                if (basicInfo.getOpenHour().getRealtime().getCurrentPeriod() != null) {
+                    timeList = basicInfo.getOpenHour().getRealtime().getCurrentPeriod().getTimeList();
+                }
+            }
+
+            if (basicInfo.getTags() != null) {
+                tags = basicInfo.getTags();
+            }
+
+            if (basicInfo.getOperationInfo() != null && basicInfo.getOperationInfo().getDelivery() != null) {
+                delivery = basicInfo.getOperationInfo().getDelivery().equals("Y") ? "배달가능" : "배달불가";
+            }
+
+            if (basicInfo.getOperationInfo() != null && basicInfo.getOperationInfo().getPagekage() != null) {
+                pagekage = basicInfo.getOperationInfo().getPagekage().equals("Y") ? "포장가능" : "포장불가";
+            }
+
+            if (kakaoMapDetailDto.getPhoto() != null) {
+                photos = kakaoMapDetailDto.getPhoto().getPhotoList().get(0).getList()
+                        .stream()
+                        .map(Photos::response)
+                        .collect(Collectors.toList());
+            }
+
+            return detailRecommendedPlace.builder()
+                    .placeName(placeName)
+                    .mainPhotoUrl(mainPhotoUrl)
+                    .detailPlace(getDetailPlace(address))
+                    .isOpen(isOpen)
+                    .openTime(timeList)
+                    .url(homePage)
+                    .phone(phoneNum)
+                    .tags(tags)
+                    .delivery(delivery)
+                    .pagekage(pagekage)
+                    .photos(photos)
+                    .menuInfo(menuInfo)
+                    .build();
+        }
+
+        private static String getDetailPlace(KakaoMapDetailDto.Address address) {
+            String addFullName = (address.getRegion().getNewaddrfullname() != null) ? address.getRegion().getNewaddrfullname() : "";
+            String addMiddleName = (address.getNewaddr().getNewaddrfull() != null) ? address.getNewaddr().getNewaddrfull() : "";
+            String addDetail = (address.getAddrdetail() != null) ? address.getAddrdetail() : "";
+            return addFullName +
+                    " " +
+                    addMiddleName +
+                    " " +
+                    addDetail;
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @Builder
+    public static class Photos {
+        private String photoId;
+        private String photoUrl;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Photos photos = (Photos) o;
+            return Objects.equals(getPhotoUrl(), photos.getPhotoUrl());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getPhotoUrl());
+        }
+
+        public static GroupResponse.Photos response(KakaoMapDetailDto.PhotoListList photo) {
+            return Photos.builder()
+                    .photoId(photo.getPhotoid())
+                    .photoUrl(photo.getOrgurl())
                     .build();
         }
     }

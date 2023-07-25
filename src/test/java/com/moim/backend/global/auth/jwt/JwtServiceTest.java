@@ -17,7 +17,6 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 @SpringBootTest
 @EnableConfigurationProperties({JwtProperties.class})
-@Import(TestQueryDSLConfig.class)
 public class JwtServiceTest {
 
     @Autowired
