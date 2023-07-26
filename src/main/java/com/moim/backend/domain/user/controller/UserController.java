@@ -1,5 +1,6 @@
 package com.moim.backend.domain.user.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.request.UserRequest;
 import com.moim.backend.domain.user.response.UserResponse;
@@ -44,4 +45,8 @@ public class UserController {
         );
     }
 
+    @GetMapping("/login/naver")
+    public CustomResponseEntity<UserResponse.Login> loginByNaver(@RequestParam(name = "code") String code) {
+        return CustomResponseEntity.success(userService.loginByNaver(code));
+    }
 }
