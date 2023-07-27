@@ -38,4 +38,4 @@
 
 
 ## ⚙️ Software Architecture
-
+<img width="891" alt="모이닷 백엔드 아키텍처" src="https://moidot-bucket.s3.ap-northeast-2.amazonaws.com/image/Software.png">
