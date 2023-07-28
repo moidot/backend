@@ -36,7 +36,7 @@ public class NaverLoginService {
     }
 
     // Naver AccessToken 응답
-    public String toRequestAccessToken(String code) {
+    private String toRequestAccessToken(String code) {
         // 발급받은 code -> GET 요청
         ResponseEntity<NaverTokenResponse> response =
                 restTemplate.exchange(naverProperties.getRequestURL(code), HttpMethod.GET, null, NaverTokenResponse.class);
@@ -48,14 +48,14 @@ public class NaverLoginService {
             throw new CustomException(NOT_AUTHENTICATE_NAVER_TOKEN_INFO);
         }
 
-        return "Bearer " + response.getBody().getAccessToken();
+        return response.getBody().getAccessToken();
     }
 
     // 유저 정보 응답
-    public NaverUserResponse.NaverUserDetail toRequestProfile(String accessToken) {
+    private NaverUserResponse.NaverUserDetail toRequestProfile(String accessToken) {
         // accessToken 헤더 등록
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", accessToken);
+        headers.setBearerAuth(accessToken);
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(headers);
 
         // GET 요청으로 유저정보 응답 시도
