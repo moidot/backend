@@ -1,7 +1,5 @@
 package com.moim.backend.domain.user.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.request.UserRequest;
 import com.moim.backend.domain.user.response.UserResponse;
@@ -41,9 +39,9 @@ public class UserController {
         );
     }
 
-    @PostMapping("/login/kakao")
-    public CustomResponseEntity<UserResponse.Login> loginByKakao(@RequestParam String authorizationCode) {
-        return CustomResponseEntity.success(userService.loginByOAuth(authorizationCode, KAKAO));
+    @GetMapping("/login/kakao")
+    public CustomResponseEntity<UserResponse.Login> loginByKakao(@RequestParam(name = "code") String code) {
+        return CustomResponseEntity.success(userService.loginByOAuth(code, KAKAO));
     }
 
     @GetMapping("/login/naver")

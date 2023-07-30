@@ -21,8 +21,28 @@ include::{snippets}/login-by-email/response-fields.adoc[]
 
 ==== HTTP Request Body
 include::{snippets}/login-by-kakao/http-request.adoc[]
-include::{snippets}/login-by-kakao/form-parameters.adoc[]
+include::{snippets}/login-by-kakao/query-parameters.adoc[]
 
 ==== HTTP Response
 include::{snippets}/login-by-kakao/http-response.adoc[]
 include::{snippets}/login-by-kakao/response-fields.adoc[]
+
+=== 네이버 로그인 API
+
+==== HTTP Request Body
+include::{snippets}/login-by-naver/http-request.adoc[]
+include::{snippets}/login-by-naver/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/login-by-naver/http-response.adoc[]
+include::{snippets}/login-by-naver/response-fields.adoc[]
+
+=== 구글 로그인 API
+
+==== HTTP Request Body
+include::{snippets}/login-by-google/http-request.adoc[]
+include::{snippets}/login-by-google/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/login-by-google/http-response.adoc[]
+include::{snippets}/login-by-google/response-fields.adoc[]

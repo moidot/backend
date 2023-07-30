@@ -1,8 +1,8 @@
 package com.moim.backend.docs.user;
 
 import com.moim.backend.RestDocsSupport;
+import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.controller.UserController;
-import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.request.UserRequest;
 import com.moim.backend.domain.user.response.UserResponse;
 import com.moim.backend.domain.user.service.UserService;
@@ -14,6 +14,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -25,6 +26,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.formParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,7 +34,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
 
     private final UserService userService = mock(UserService.class);
     private final String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5dS1qdW5nMzE0NzZAbmF2ZXIuY29tIiwiZXhwIjoxNjg5MjYwODM2fQ.cgZ8eFDU_Gz7Z3EghXxoa3v-iXUeQmBZ1AfKCBQZnnqFJ6mqMqGdiTS5uVCF1lIKBarXeD6nEmRZj9Ng94pnHw";
-    private final String authorizationCode = "BecAFGVdZhX-8pSEQAxL6l9B3bzZnPpac0H_FEjDLr4MJUQ90L-NuWJFXs0_gIp6h74ugwo9c5oAAAGJiTbIcg";
+    private final String code = "BecAFGVdZhX-8pSEQAxL6l9B3bzZnPpac0H_FEjDLr4MJUQ90L-NuWJFXs0_gIp6h74ugwo9c5oAAAGJiTbIcg";
 
     @Override
     protected Object initController() {
@@ -43,7 +45,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
     @Test
     void loginByEmail() throws Exception {
         // given
-        UserRequest.Login request = new UserRequest.Login("yujung-31476@naver.com", "김유정");
+        UserRequest.Login request = new UserRequest.Login("test@gmail.com", "테스터");
 
         given(userService.login(any()))
                 .willReturn(UserResponse.Login.builder()
@@ -114,9 +116,9 @@ public class UserControllerDocsTest extends RestDocsSupport {
 
     @DisplayName("카카오 로그인")
     @Test
-    void kakaoByLogin() throws Exception {
+    void loginByKakao() throws Exception {
         // given
-        given(userService.loginByKakao(any()))
+        given(userService.loginByOAuth(any(), eq(Platform.KAKAO)))
                 .willReturn(UserResponse.Login.builder()
                         .email("test@gmail.com")
                         .name("테스터")
@@ -125,16 +127,94 @@ public class UserControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.post("/user/login/kakao")
-                                .param("authorizationCode", authorizationCode)
+                        RestDocumentationRequestBuilders.get("/user/login/kakao")
+                                .param("code", code)
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("login-by-kakao",
                         preprocessResponse(prettyPrint()),
-                        formParameters(
-                                parameterWithName("authorizationCode")
+                        queryParameters(
+                                parameterWithName("code")
                                         .description("카카오 인가 코드")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data.email").type(JsonFieldType.STRING)
+                                        .description("유저 이메일"),
+                                fieldWithPath("data.name").type(JsonFieldType.STRING)
+                                        .description("유저 이름"),
+                                fieldWithPath("data.token").type(JsonFieldType.STRING)
+                                        .description("엑세스 토큰(시간, 이메일, 이름에 따라 달라짐)")
+                        ))
+                );
+    }
+
+    @DisplayName("네이버 로그인")
+    @Test
+    void loginByNaver() throws Exception {
+        // given
+        given(userService.loginByOAuth(any(), eq(Platform.NAVER)))
+                .willReturn(UserResponse.Login.builder()
+                        .email("test@gmail.com")
+                        .name("테스터")
+                        .token(token)
+                        .build());
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.get("/user/login/naver")
+                                .param("code", code)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("login-by-naver",
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("code")
+                                        .description("네이버 인가 코드")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data.email").type(JsonFieldType.STRING)
+                                        .description("유저 이메일"),
+                                fieldWithPath("data.name").type(JsonFieldType.STRING)
+                                        .description("유저 이름"),
+                                fieldWithPath("data.token").type(JsonFieldType.STRING)
+                                        .description("엑세스 토큰(시간, 이메일, 이름에 따라 달라짐)")
+                        ))
+                );
+    }
+
+    @DisplayName("구글 로그인")
+    @Test
+    void loginByGoogle() throws Exception {
+        // given
+        given(userService.loginByOAuth(any(), eq(Platform.GOOGLE)))
+                .willReturn(UserResponse.Login.builder()
+                        .email("test@gmail.com")
+                        .name("테스터")
+                        .token(token)
+                        .build());
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.get("/user/login/google")
+                                .param("code", code)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("login-by-google",
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("code")
+                                        .description("구글 인가 코드")
                         ),
                         responseFields(
                                 fieldWithPath("code").type(JsonFieldType.NUMBER)
