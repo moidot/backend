@@ -3,7 +3,6 @@ package com.moim.backend.domain.user.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
 import java.util.Map;

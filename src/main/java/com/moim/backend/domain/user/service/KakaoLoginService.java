@@ -2,17 +2,12 @@ package com.moim.backend.domain.user.service;
 
 import com.moim.backend.domain.user.config.KakaoProperties;
 import com.moim.backend.domain.user.entity.Users;
-import com.moim.backend.domain.user.response.GoogleTokenResponse;
-import com.moim.backend.domain.user.response.GoogleUserResponse;
 import com.moim.backend.domain.user.response.KakaoTokenResponse;
 import com.moim.backend.domain.user.response.KakaoUserResponse;
-import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import static com.moim.backend.global.common.Result.*;
@@ -35,21 +30,17 @@ public class KakaoLoginService {
                 .build();
     }
 
-    // Google AccessToken 응답
-    private String toRequestAccessToken(String authorizationCode) {
-        // 발급받은 code -> GET 요청
+    // Kakao AccessToken 응답
+    private String toRequestAccessToken(String code) {
+        // 발급받은 code -> POST 요청
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", kakaoProperties.getGrantType());
-        params.add("client_id", kakaoProperties.getClientId());
-        params.add("redirect_uri", kakaoProperties.getRedirectUri());
-        params.add("code", authorizationCode);
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        ResponseEntity<KakaoTokenResponse> response =
-                restTemplate.postForEntity(kakaoProperties.getTokenUri(), request, KakaoTokenResponse.class);
+        ResponseEntity<KakaoTokenResponse> response = restTemplate.postForEntity(
+                kakaoProperties.getTokenUri(),
+                new HttpEntity<>(kakaoProperties.getRequestParameter(code), headers),
+                KakaoTokenResponse.class
+        );
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new CustomException(NOT_AUTHENTICATE_NAVER_TOKEN_INFO);

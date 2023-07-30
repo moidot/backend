@@ -4,7 +4,6 @@ import com.moim.backend.domain.user.config.GoogleProperties;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.response.GoogleTokenResponse;
 import com.moim.backend.domain.user.response.GoogleUserResponse;
-import com.moim.backend.domain.user.response.NaverUserResponse;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -38,7 +37,7 @@ public class GoogleLoginService {
 
     // Google AccessToken 응답
     private String toRequestAccessToken(String code) {
-        // 발급받은 code -> GET 요청
+        // 발급받은 code -> POST 요청
         ResponseEntity<GoogleTokenResponse> response = restTemplate.postForEntity(
                 googleProperties.getRequestTokenUri(),
                 googleProperties.getRequestParameter(code),

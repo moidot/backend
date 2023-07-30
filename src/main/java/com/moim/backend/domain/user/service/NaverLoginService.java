@@ -1,14 +1,10 @@
 package com.moim.backend.domain.user.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moim.backend.domain.user.config.NaverProperties;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.response.NaverTokenResponse;
 import com.moim.backend.domain.user.response.NaverUserResponse;
-import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
-import jdk.jshell.Snippet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
