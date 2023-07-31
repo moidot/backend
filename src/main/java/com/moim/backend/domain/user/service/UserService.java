@@ -1,20 +1,16 @@
 package com.moim.backend.domain.user.service;
 
-import com.moim.backend.domain.user.config.KakaoProperties;
-import com.moim.backend.domain.user.config.NaverProperties;
+import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.domain.user.request.UserRequest;
-import com.moim.backend.domain.user.response.*;
+import com.moim.backend.domain.user.response.UserResponse;
 import com.moim.backend.global.auth.jwt.JwtService;
+import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+
+import static com.moim.backend.global.common.Result.UNEXPECTED_EXCEPTION;
 
 @Service
 @RequiredArgsConstructor
@@ -22,14 +18,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final KakaoLoginService kakaoLoginService;
     private final NaverLoginService naverLoginService;
-    private final KakaoProperties kakaoProperties;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final GoogleLoginService googleLoginService;
 
     public String getUserNameByToken(Users user) {
         return user.getName();
     }
 
+    // 테스트용 이메일 로그인
     public UserResponse.Login login(UserRequest.Login request) {
         Users user = saveOrUpdate(request);
 
@@ -40,21 +37,19 @@ public class UserService {
                 .build();
     }
 
-    public UserResponse.Login loginByKakao(String authorizationCode) {
-        KakaoTokenResponse kakaoTokenResponse = getKakaoToken(authorizationCode);
-        KakaoUserResponse kakaoUserResponse = getKakaoUserInfo(kakaoTokenResponse);
-        return login(new UserRequest.Login(kakaoUserResponse));
-    }
-
-    public UserResponse.Login loginByNaver(String code) {
-        // 네이버 로그인 진행
-        Users user = naverLoginService.toEntityUser(code);
-
-        // 현재 서비스 내 회원인지 검증
-        Boolean isUser = userRepository.existsByEmail(user.getEmail());
-        if (!isUser) {
-            userRepository.save(user);
+    // 소셜 로그인
+    public UserResponse.Login loginByOAuth(String code, Platform platform) {
+        // 요청된 로그인 플랫폼 확인 후 소셜 로그인 진행
+        Users userEntity;
+        switch (platform.name()) {
+            case "KAKAO" -> userEntity = kakaoLoginService.toEntityUser(code);
+            case "NAVER" -> userEntity = naverLoginService.toEntityUser(code);
+            case "GOOGLE" -> userEntity = googleLoginService.toEntityUser(code);
+            default -> throw new CustomException(UNEXPECTED_EXCEPTION);
         }
+
+        // 현재 서비스 내 회원인지 검증 및 save
+        Users user = saveOrUpdate(userEntity);
 
         // 서비스 JWT 토큰 발급
         String accessToken = jwtService.createToken(user.getEmail());
@@ -66,14 +61,7 @@ public class UserService {
                 .build();
     }
 
-
     // method
-    private Users toUserEntity(UserRequest.Login request) {
-        return Users.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .build();
-    }
 
     private Users saveOrUpdate(UserRequest.Login request) {
         Users user = userRepository.findByEmail(request.getEmail())
@@ -83,29 +71,25 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    private KakaoTokenResponse getKakaoToken(String authorizationCode) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    private Users saveOrUpdate(Users userEntity) {
+        Users user = userRepository.findByEmail(userEntity.getEmail())
+                .map(entity -> entity.update(userEntity.getName()))
+                .orElse(toUserEntity(userEntity));
 
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", kakaoProperties.getGrantType());
-        params.add("client_id", kakaoProperties.getClientId());
-        params.add("redirect_uri", kakaoProperties.getRedirectUri());
-        params.add("code", authorizationCode);
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        return restTemplate.postForObject(
-                kakaoProperties.getTokenUri(), request, KakaoTokenResponse.class
-        );
+        return userRepository.save(user);
     }
 
-    private KakaoUserResponse getKakaoUserInfo(KakaoTokenResponse kakaoTokenResponse) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.setBearerAuth(kakaoTokenResponse.getAccessToken());
+    private Users toUserEntity(Users request) {
+        return Users.builder()
+                .email(request.getEmail())
+                .name(request.getName())
+                .build();
+    }
 
-        return restTemplate.postForObject(
-                kakaoProperties.getUserInfoUri(), new HttpEntity<>(headers), KakaoUserResponse.class
-        );
+    private Users toUserEntity(UserRequest.Login request) {
+        return Users.builder()
+                .email(request.getEmail())
+                .name(request.getName())
+                .build();
     }
 }

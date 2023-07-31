@@ -1,6 +1,5 @@
 package com.moim.backend.domain.user.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.request.UserRequest;
 import com.moim.backend.domain.user.response.UserResponse;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import static com.moim.backend.domain.user.config.Platform.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,15 +39,18 @@ public class UserController {
         );
     }
 
-    @PostMapping("/login/kakao")
-    public CustomResponseEntity<UserResponse.Login> loginByKakao(@RequestParam String authorizationCode) {
-        return CustomResponseEntity.success(
-                userService.loginByKakao(authorizationCode)
-        );
+    @GetMapping("/login/kakao")
+    public CustomResponseEntity<UserResponse.Login> loginByKakao(@RequestParam(name = "code") String code) {
+        return CustomResponseEntity.success(userService.loginByOAuth(code, KAKAO));
     }
 
     @GetMapping("/login/naver")
     public CustomResponseEntity<UserResponse.Login> loginByNaver(@RequestParam(name = "code") String code) {
-        return CustomResponseEntity.success(userService.loginByNaver(code));
+        return CustomResponseEntity.success(userService.loginByOAuth(code, NAVER));
+    }
+
+    @GetMapping("/login/google")
+    public CustomResponseEntity<UserResponse.Login> loginByGoogle(@RequestParam(name = "code") String code) {
+        return CustomResponseEntity.success(userService.loginByOAuth(code, GOOGLE));
     }
 }
