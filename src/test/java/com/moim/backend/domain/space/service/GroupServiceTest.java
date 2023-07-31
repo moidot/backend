@@ -1,6 +1,5 @@
 package com.moim.backend.domain.space.service;
 
-import com.moim.backend.TestQueryDSLConfig;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
@@ -9,6 +8,7 @@ import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupRequest;
+import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.KakaoMapDetailDto;
 import com.moim.backend.domain.user.entity.Users;
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -520,6 +519,28 @@ class GroupServiceTest {
                         "02-922-1672", tags, "배달불가",
                         "포장가능", photos, menuInfo
                 );
+    }
+
+    @DisplayName("동일한 유저가 동일한 그룹에 중복으로 참여할 수 없다.")
+    @Test
+    void throwsExceptionWhenDuplicateParticipation() {
+        //given
+        Users user = savedUser("test@gmail.com", "테스터");
+        Groups group = savedGroup(user.getUserId(), "테스트 그룹");
+        GroupServiceRequest.Participate request = GroupServiceRequest.Participate.builder()
+                .groupId(group.getGroupId())
+                .userName("테스터")
+                .locationName("불광역")
+                .latitude(37.610553)
+                .longitude(126.92982)
+                .transportation("BUS")
+                .build();
+        groupService.participateGroup(request, user);
+
+        // when // then
+        assertThatThrownBy(() -> groupService.participateGroup(request, user))
+                .extracting("result.code", "result.message")
+                .contains(Result.DUPLICATE_PARTICIPATION.getCode(), Result.DUPLICATE_PARTICIPATION.getMessage());
     }
 
     // method

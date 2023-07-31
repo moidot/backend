@@ -31,22 +31,22 @@ public class GroupRequest {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Participate {
-        @NotNull
+        @NotNull(message = "스페이스 아이디를 입력하지 않았습니다.")
         private Long groupId;
 
-        @NotBlank(message = "별명을 입력하지 않았습니다.")
+        @NotBlank(message = "닉네임을 입력하지 않았습니다.")
         private String userName;
 
-        @NotBlank(message = "출발 위치가 입력되지 않았습니다.")
+        @NotBlank(message = "출발 위치가 입력하지 않았습니다.")
         private String locationName;
 
-        @NotNull
+        @NotNull(message = "위도를 입력하지 않았습니다.")
         private Double latitude;
 
-        @NotNull
+        @NotNull(message = "경도를 입력하지 않았습니다.")
         private Double longitude;
 
-        @NotNull
+        @NotNull(message = "이동 수단을 입력하지 않았습니다.")
         private String transportation;
 
         private String password;
@@ -72,7 +72,7 @@ public class GroupRequest {
         @NotNull
         private Long participateId;
 
-        @NotBlank(message = "별명을 입력하지 않았습니다.")
+        @NotBlank(message = "닉네임을 입력하지 않았습니다.")
         private String userName;
 
         @NotBlank(message = "출발 위치가 입력되지 않았습니다.")

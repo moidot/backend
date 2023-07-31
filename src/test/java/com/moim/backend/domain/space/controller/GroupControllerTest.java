@@ -106,7 +106,7 @@ class GroupControllerTest extends ControllerTestSupport {
                 .andExpect(status().isOk());
     }
 
-    @DisplayName("내 참여 정보 수정 API - 별명 미입력 실패")
+    @DisplayName("내 참여 정보 수정 API - 닉네임 미입력 실패")
     @Test
     void participationUpdateFailsWhenUserNameNotProvided() throws Exception {
         // given

@@ -1,11 +1,5 @@
 package com.moim.backend.domain.space.request;
 
-import com.moim.backend.domain.space.entity.Groups;
-import com.moim.backend.domain.space.entity.Participation;
-import com.moim.backend.domain.space.entity.TransportationType;
-import com.moim.backend.domain.user.entity.Users;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;

@@ -50,11 +50,10 @@ public class GroupService {
     // 모임 참여
     @Transactional
     public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request, Users user) {
-        if (!request.getTransportation().equals("BUS") && !request.getTransportation().equals("SUBWAY")) {
-            throw new CustomException(INVALID_TRANSPORTATION);
-        }
-
         Groups group = getGroup(request.getGroupId());
+
+        checkDuplicateParticipation(group, user);
+        validateTransportation(request.getTransportation());
 
         // 어드민이 참여하는 경우 (즉, 모임이 생성된 직후)
         if (group.getAdminId().equals(user.getUserId())) {
@@ -154,11 +153,23 @@ public class GroupService {
                 ).toList();
     }
 
+
     // validate
+    private void checkDuplicateParticipation(Groups group, Users user) {
+        if (participationRepository.countByGroupAndUserId(group, user.getUserId()) > 0) {
+            throw new CustomException(DUPLICATE_PARTICIPATION);
+        }
+    }
 
     private static void validateAdminStatus(Long userId, Long adminId) {
         if (!adminId.equals(userId)) {
             throw new CustomException(NOT_ADMIN_USER);
+        }
+    }
+
+    private static void validateTransportation(String transportation) {
+        if (!transportation.equals("BUS") && !transportation.equals("SUBWAY")) {
+            throw new CustomException(INVALID_TRANSPORTATION);
         }
     }
 
