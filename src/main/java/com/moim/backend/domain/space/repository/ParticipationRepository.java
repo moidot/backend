@@ -20,6 +20,7 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
             + "HAVING p.group = :group")
     MiddlePoint getMiddlePoint(@Param("group") Groups group);
 
+    Participation findByGroupAndUserId(Groups group, Long userId);
     int countByGroupAndUserId(Groups group, Long userId);
 
 }

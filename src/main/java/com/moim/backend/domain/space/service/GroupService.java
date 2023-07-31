@@ -50,11 +50,13 @@ public class GroupService {
     // 모임 참여
     @Transactional
     public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request, Users user) {
-        if (!request.getTransportation().equals("BUS") && !request.getTransportation().equals("SUBWAY")) {
-            throw new CustomException(INVALID_TRANSPORTATION);
-        }
-
         Groups group = getGroup(request.getGroupId());
+        // 중복 참여 확인
+        Participation participation = participationRepository.findByGroupAndUserId(group, user.getUserId());
+        if (participation != null) {
+            return GroupResponse.Participate.response(participation);
+        }
+        validateTransportation(request.getTransportation());
 
         // 어드민이 참여하는 경우 (즉, 모임이 생성된 직후)
         if (group.getAdminId().equals(user.getUserId())) {
@@ -74,7 +76,7 @@ public class GroupService {
         }
 
         String encryptedPassword = encrypt(request.getPassword());
-        Participation participation = participationRepository.save(
+        participation = participationRepository.save(
                 toParticipationEntity(request, group, user.getUserId(), encryptedPassword)
         );
 
@@ -159,6 +161,12 @@ public class GroupService {
     private static void validateAdminStatus(Long userId, Long adminId) {
         if (!adminId.equals(userId)) {
             throw new CustomException(NOT_ADMIN_USER);
+        }
+    }
+
+    private static void validateTransportation(String transportation) {
+        if (!transportation.equals("BUS") && !transportation.equals("SUBWAY")) {
+            throw new CustomException(INVALID_TRANSPORTATION);
         }
     }
 
