@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ParticipationRepository extends JpaRepository<Participation, Long> {
 
@@ -17,5 +19,7 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
             + "GROUP BY p.group "
             + "HAVING p.group = :group")
     MiddlePoint getMiddlePoint(@Param("group") Groups group);
+
+    int countByGroupAndUserId(Groups group, Long userId);
 
 }

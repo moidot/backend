@@ -144,7 +144,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("groupId").type(JsonFieldType.NUMBER)
                                         .description("그룹 ID / Long"),
                                 fieldWithPath("userName").type(JsonFieldType.STRING)
-                                        .description("유저 별명"),
+                                        .description("유저 닉네임"),
                                 fieldWithPath("locationName").type(JsonFieldType.STRING)
                                         .description("출발 위치 이름"),
                                 fieldWithPath("latitude").type(JsonFieldType.NUMBER)
@@ -169,7 +169,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("data.userId").type(JsonFieldType.NUMBER)
                                         .description("유저 ID / Long"),
                                 fieldWithPath("data.userName").type(JsonFieldType.STRING)
-                                        .description("유저 별명"),
+                                        .description("유저 닉네임"),
                                 fieldWithPath("data.locationName").type(JsonFieldType.STRING)
                                         .description("출발 위치"),
                                 fieldWithPath("data.latitude").type(JsonFieldType.NUMBER)
@@ -217,7 +217,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("participateId").type(JsonFieldType.NUMBER)
                                         .description("참여 정보 ID / Long"),
                                 fieldWithPath("userName").type(JsonFieldType.STRING)
-                                        .description("유저 별명"),
+                                        .description("유저 닉네임"),
                                 fieldWithPath("locationName").type(JsonFieldType.STRING)
                                         .description("출발 위치 이름"),
                                 fieldWithPath("latitude").type(JsonFieldType.NUMBER)
