@@ -51,11 +51,8 @@ public class GroupService {
     @Transactional
     public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request, Users user) {
         Groups group = getGroup(request.getGroupId());
-        // 중복 참여 확인
-        Participation participation = participationRepository.findByGroupAndUserId(group, user.getUserId());
-        if (participation != null) {
-            return GroupResponse.Participate.response(participation);
-        }
+
+        checkDuplicateParticipation(group, user);
         validateTransportation(request.getTransportation());
 
         // 어드민이 참여하는 경우 (즉, 모임이 생성된 직후)
@@ -76,7 +73,7 @@ public class GroupService {
         }
 
         String encryptedPassword = encrypt(request.getPassword());
-        participation = participationRepository.save(
+        Participation participation = participationRepository.save(
                 toParticipationEntity(request, group, user.getUserId(), encryptedPassword)
         );
 
@@ -156,7 +153,13 @@ public class GroupService {
                 ).toList();
     }
 
+
     // validate
+    private void checkDuplicateParticipation(Groups group, Users user) {
+        if (participationRepository.countByGroupAndUserId(group, user.getUserId()) > 0) {
+            throw new CustomException(DUPLICATE_PARTICIPATION);
+        }
+    }
 
     private static void validateAdminStatus(Long userId, Long adminId) {
         if (!adminId.equals(userId)) {

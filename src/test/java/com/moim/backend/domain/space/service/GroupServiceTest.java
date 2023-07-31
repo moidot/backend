@@ -523,7 +523,8 @@ class GroupServiceTest {
 
     @DisplayName("동일한 유저가 동일한 그룹에 중복으로 참여할 수 없다.")
     @Test
-    void preventDuplicateParticipation() {
+    void throwsExceptionWhenDuplicateParticipation() {
+        //given
         Users user = savedUser("test@gmail.com", "테스터");
         Groups group = savedGroup(user.getUserId(), "테스트 그룹");
         GroupServiceRequest.Participate request = GroupServiceRequest.Participate.builder()
@@ -534,12 +535,12 @@ class GroupServiceTest {
                 .longitude(126.92982)
                 .transportation("BUS")
                 .build();
-        // 첫 참여
         groupService.participateGroup(request, user);
-        // 중복 참여
-        groupService.participateGroup(request, user);
-        assertThat(participationRepository.countByGroupAndUserId(group, user.getUserId()))
-                .isEqualTo(1);
+
+        // when // then
+        assertThatThrownBy(() -> groupService.participateGroup(request, user))
+                .extracting("result.code", "result.message")
+                .contains(Result.DUPLICATE_PARTICIPATION.getCode(), Result.DUPLICATE_PARTICIPATION.getMessage());
     }
 
     // method

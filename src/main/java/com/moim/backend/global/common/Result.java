@@ -24,7 +24,8 @@ public enum Result {
 
     NOT_MATCHED_PARTICIPATE(-1004,"자신의 참여 정보가 아닙니다."),
 
-    NOT_ADMIN_USER(-1005,"해당 유저는 그룹의 어드민이 아닙니다.");
+    NOT_ADMIN_USER(-1005,"해당 유저는 그룹의 어드민이 아닙니다."),
+    DUPLICATE_PARTICIPATION(-1006, "동일한 유저가 이미 스페이스에 참여하고 있습니다.");
 
     private final int code;
     private final String message;
