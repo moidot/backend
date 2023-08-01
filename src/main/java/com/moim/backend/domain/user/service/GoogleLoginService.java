@@ -1,6 +1,7 @@
 package com.moim.backend.domain.user.service;
 
 import com.moim.backend.domain.user.config.GoogleProperties;
+import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.response.GoogleTokenResponse;
 import com.moim.backend.domain.user.response.GoogleUserResponse;
@@ -19,13 +20,19 @@ import static com.moim.backend.global.common.Result.NOT_AUTHENTICATE_NAVER_TOKEN
 
 @Service
 @RequiredArgsConstructor
-public class GoogleLoginService {
+public class GoogleLoginService implements OAuth2LoginService{
 
     private final GoogleProperties googleProperties;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // 유저 Entity 로 변환
-    public Users toEntityUser(String code) {
+
+    @Override
+    public Platform supports() {
+        return Platform.GOOGLE;
+    }
+
+    @Override
+    public Users toEntityUser(String code, Platform platform) {
         String accessToken = toRequestAccessToken(code);
         GoogleUserResponse profile = toRequestProfile(accessToken);
 

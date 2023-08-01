@@ -1,6 +1,7 @@
 package com.moim.backend.domain.user.service;
 
 import com.moim.backend.domain.user.config.NaverProperties;
+import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.response.NaverTokenResponse;
 import com.moim.backend.domain.user.response.NaverUserResponse;
@@ -15,13 +16,18 @@ import static com.moim.backend.global.common.Result.*;
 
 @Service
 @RequiredArgsConstructor
-public class NaverLoginService {
+public class NaverLoginService implements OAuth2LoginService{
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final NaverProperties naverProperties;
 
-    // 유저 Entity 로 변환
-    public Users toEntityUser(String code) {
+    @Override
+    public Platform supports() {
+        return Platform.NAVER;
+    }
+
+    @Override
+    public Users toEntityUser(String code, Platform platform) {
         String accessToken = toRequestAccessToken(code);
         NaverUserResponse.NaverUserDetail profile = toRequestProfile(accessToken);
 
