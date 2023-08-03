@@ -25,3 +25,6 @@ include::api/user/user.adoc[]
 
 == GroupAPI
 include::api/space/group.adoc[]
+
+== VoteAPI
+include::api/groupvote/vote.adoc[]

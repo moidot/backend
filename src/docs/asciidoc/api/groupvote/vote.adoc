@@ -1,0 +1,12 @@
+=== 투표 생성 API
+
+==== HTTP Request Headers
+include::{snippets}/create-vote/request-headers.adoc[]
+
+==== HTTP Request Body
+include::{snippets}/create-vote/http-request.adoc[]
+include::{snippets}/create-vote/request-fields.adoc[]
+
+==== HTTP Response Body
+include::{snippets}/create-vote/http-response.adoc[]
+include::{snippets}/create-vote/response-fields.adoc[]
