@@ -1,6 +1,7 @@
 package com.moim.backend.domain.user.service;
 
 import com.moim.backend.domain.user.config.KakaoProperties;
+import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.response.KakaoTokenResponse;
 import com.moim.backend.domain.user.response.KakaoUserResponse;
@@ -14,13 +15,18 @@ import static com.moim.backend.global.common.Result.*;
 
 @Service
 @RequiredArgsConstructor
-public class KakaoLoginService {
+public class KakaoLoginService implements OAuth2LoginService{
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final KakaoProperties kakaoProperties;
 
-    // 유저 Entity 로 변환
-    public Users toEntityUser(String code) {
+    @Override
+    public Platform supports() {
+        return Platform.KAKAO;
+    }
+
+    @Override
+    public Users toEntityUser(String code, Platform platform) {
         String accessToken = toRequestAccessToken(code);
         KakaoUserResponse profile = toRequestProfile(accessToken);
 
@@ -67,5 +73,4 @@ public class KakaoLoginService {
 
         return response.getBody();
     }
-
 }

@@ -10,12 +10,15 @@ import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.moim.backend.global.common.Result.UNEXPECTED_EXCEPTION;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
+    private final List<OAuth2LoginService> oAuth2LoginServices;
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final KakaoLoginService kakaoLoginService;
@@ -40,12 +43,17 @@ public class UserService {
     // 소셜 로그인
     public UserResponse.Login loginByOAuth(String code, Platform platform) {
         // 요청된 로그인 플랫폼 확인 후 소셜 로그인 진행
-        Users userEntity;
-        switch (platform.name()) {
-            case "KAKAO" -> userEntity = kakaoLoginService.toEntityUser(code);
-            case "NAVER" -> userEntity = naverLoginService.toEntityUser(code);
-            case "GOOGLE" -> userEntity = googleLoginService.toEntityUser(code);
-            default -> throw new CustomException(UNEXPECTED_EXCEPTION);
+        Users userEntity = null;
+
+        for (OAuth2LoginService oAuth2LoginService : oAuth2LoginServices) {
+            if (oAuth2LoginService.supports().equals(platform)) {
+                userEntity = oAuth2LoginService.toEntityUser(code, platform);
+                break;
+            }
+        }
+
+        if (userEntity == null) {
+            throw new CustomException(UNEXPECTED_EXCEPTION);
         }
 
         // 현재 서비스 내 회원인지 검증 및 save
