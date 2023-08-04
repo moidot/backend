@@ -1,7 +1,6 @@
 /bin/**
 
 /src/main/generated/*
-
 # User-specific stuff
 .idea/**/workspace.xml
 .idea/**/tasks.xml
@@ -206,3 +205,5 @@ src/main/resources/application-dev.yml
 src/test/resources/application.yml
 
 src/main/resources/db/h2/data.sql
+
+src/main/resources/db/mysql/data.sql
