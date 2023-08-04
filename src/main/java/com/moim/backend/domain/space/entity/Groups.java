@@ -2,17 +2,17 @@ package com.moim.backend.domain.space.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
+@Table(name = "my_groups")
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Builder
 public class Groups {
 
     @Id
@@ -34,15 +34,4 @@ public class Groups {
 
     @OneToMany(mappedBy = "group")
     private List<BestPlace> bestPlaces;
-
-    @Builder
-    private Groups(Long groupId, Long adminId, String name, LocalDate date, String place, List<Participation> participations, List<BestPlace> bestPlaces) {
-        this.groupId = groupId;
-        this.adminId = adminId;
-        this.name = name;
-        this.date = date;
-        this.place = (place == null) ? "none" : place;
-        this.participations = participations;
-        this.bestPlaces = bestPlaces;
-    }
 }
