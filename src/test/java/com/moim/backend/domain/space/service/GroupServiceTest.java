@@ -69,7 +69,7 @@ class GroupServiceTest {
         // then
         assertThat(response)
                 .extracting("adminId", "name", "date", "fixedPlace")
-                .contains(user.getUserId(), "테스트 그룹", "2023-07-15", "none");
+                .contains(user.getUserId(), "테스트 그룹", "2023-07-15", null);
     }
 
     @DisplayName("하나의 유저가 새로운 모임을 생성할때 날짜는 입력하지 않는다.")
@@ -514,7 +514,7 @@ class GroupServiceTest {
                         "pagekage", "photos", "menuInfo"
                 )
                 .contains(
-                        "커피나무 성신여대점", "http://t1.kakaocdn.net/fiy_reboot/place/D02C1C1162A548B58894B236B754CFD6", "서울 성북구 보문로30길 79 1, 2층",
+                        "커피나무 성신여대점", "http://t1.kakaocdn.net/fiy_reboot/place/D02C1C1162A548B58894B236B754CFD6", "서울 성북구 보문로30길 79 1,2층",
                         "영업중", timeList, "http://www.coffeenamu.co.kr",
                         "02-922-1672", tags, "배달불가",
                         "포장가능", photos, menuInfo
