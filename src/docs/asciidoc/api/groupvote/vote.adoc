@@ -10,3 +10,28 @@ include::{snippets}/create-vote/request-fields.adoc[]
 ==== HTTP Response Body
 include::{snippets}/create-vote/http-response.adoc[]
 include::{snippets}/create-vote/response-fields.adoc[]
+
+=== 투표 참여 API
+
+==== HTTP Request Headers
+include::{snippets}/select-vote/request-headers.adoc[]
+
+==== Request PathParameters
+
+include::{snippets}/select-vote/path-parameters.adoc[]
+
+==== Request Parameters
+[source,http,options="nowrap"]
+----
+POST /api/v1/group/1/vote/select?bestPlaceIds=1,3 HTTP/1.1
+Authorization: JWT AccessToken
+Content-Type: application/x-www-form-urlencoded
+Host: localhost:8080
+Content-Length: 29
+----
+include::{snippets}/select-vote/form-parameters.adoc[]
+
+==== HTTP ResponseBody
+include::{snippets}/select-vote/http-response.adoc[]
+include::{snippets}/select-vote/response-fields.adoc[]
+

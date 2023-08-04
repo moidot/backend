@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -49,5 +52,21 @@ class VoteControllerTest extends ControllerTestSupport {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
 
+    }
+
+    @DisplayName("투표 참여 API")
+    @Test
+    void selectVote() throws Exception {
+        // given
+        List<Long> bestPlaceIds = List.of(1L, 2L);
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/v1/group/{groupId}/vote/select", 1L)
+                                .header("Authorization", "JWT AccessToken")
+                                .param("bestPlaceIds", StringUtils.collectionToCommaDelimitedString(bestPlaceIds))
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 }
