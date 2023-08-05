@@ -240,7 +240,7 @@ class VoteServiceTest {
         // then
 
         assertThat(response)
-                .extracting("groupId", "voteId", "groupName", "groupDate","endAt")
+                .extracting("groupId", "voteId", "groupName", "groupDate", "endAt")
                 .contains(group.getGroupId(), vote.getVoteId(), group.getName(), "2023-07-10", "2023-08-03 12:00:00");
 
         assertThat(response.getVoteStatuses())
@@ -250,6 +250,79 @@ class VoteServiceTest {
                         tuple(bestPlace2.getBestPlaceId(), 1, "역삼역", true),
                         tuple(bestPlace3.getBestPlaceId(), 1, "신논현역", false)
                 );
+    }
+
+
+    @DisplayName("유저가 해당 장소에 투표한 사람들의 목록을 조회한다.")
+    @Test
+    void readSelectPlaceUsers() {
+        // given
+        Users user = savedUser("test@test.com", "테스트");
+        Users admin = savedUser("admin@admin.com", "어드민");
+
+        Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
+
+        Participation par1 = savedParticipation(admin, group, "어드민", "테스트", 123.123, 123.123, "BUS");
+        Participation par2 = savedParticipation(user, group, "일반인", "테스트", 123.123, 123.123, "BUS");
+
+        BestPlace bestPlace1 = saveBestPlace(group, "강남역", 123.123456, 123.123456);
+        BestPlace bestPlace2 = saveBestPlace(group, "역삼역", 123.123456, 123.123456);
+        BestPlace bestPlace3 = saveBestPlace(group, "신논현역", 123.123456, 123.123456);
+
+        Vote vote = saveVote(group.getGroupId(), true, true, LocalDateTime.of(2023, 8, 3, 12, 0, 0));
+
+        SelectPlace selectPlace1 = saveSelectPlace(user, bestPlace1, vote);
+        SelectPlace selectPlace2 = saveSelectPlace(user, bestPlace3, vote);
+        SelectPlace selectPlace3 = saveSelectPlace(admin, bestPlace1, vote);
+        SelectPlace selectPlace4 = saveSelectPlace(admin, bestPlace2, vote);
+
+        em.flush();
+        em.clear();
+
+        // when
+        List<VoteResponse.SelectPlaceUser> response =
+                voteService.readSelectPlaceUsers(group.getGroupId(), bestPlace1.getBestPlaceId(), user);
+
+        // then
+        assertThat(response)
+                .extracting("participationId", "userId", "nickName", "isAdmin")
+                .contains(
+                        tuple(par1.getParticipationId(), par1.getUserId(), par1.getUserName(), true),
+                        tuple(par2.getParticipationId(), par2.getUserId(), par2.getUserName(), false)
+
+                );
+    }
+
+    @DisplayName("유저가 해당 장소에 투표한 사람들의 목록을 조회한다.")
+    @Test
+    void readSelectPlaceUsersWithNotVotedPlaceThrowException() {
+        // given
+        Users user = savedUser("test@test.com", "테스트");
+        Users admin = savedUser("admin@admin.com", "어드민");
+
+        Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
+
+        Participation participation1 = savedParticipation(admin, group, "어드민", "테스트", 123.123, 123.123, "BUS");
+        Participation participation2 = savedParticipation(user, group, "일반인", "테스트", 123.123, 123.123, "BUS");
+
+        BestPlace bestPlace1 = saveBestPlace(group, "강남역", 123.123456, 123.123456);
+        BestPlace bestPlace2 = saveBestPlace(group, "역삼역", 123.123456, 123.123456);
+        BestPlace bestPlace3 = saveBestPlace(group, "신논현역", 123.123456, 123.123456);
+
+        Vote vote = saveVote(group.getGroupId(), true, true, LocalDateTime.of(2023, 8, 3, 12, 0, 0));
+
+        SelectPlace selectPlace1 = saveSelectPlace(user, bestPlace1, vote);
+        SelectPlace selectPlace3 = saveSelectPlace(admin, bestPlace1, vote);
+        SelectPlace selectPlace4 = saveSelectPlace(admin, bestPlace2, vote);
+
+        em.flush();
+        em.clear();
+
+        // when // then
+        assertThatThrownBy(
+                () -> voteService.readSelectPlaceUsers(group.getGroupId(), bestPlace3.getBestPlaceId(), user))
+                .extracting("result.code", "result.message")
+                .contains(-2006, "해당 장소를 투표한 인원은 0명 입니다.");
     }
 
     // method
