@@ -28,6 +28,14 @@ public class VoteController {
         return CustomResponseEntity.success(voteService.createVote(request.toServiceRequest(), groupId, user));
     }
 
+    // 투표 읽기
+    @GetMapping("/{groupId}/vote")
+    public CustomResponseEntity<VoteResponse.SelectResult> readVote(
+            @PathVariable Long groupId, @Login Users user
+    ) {
+        return CustomResponseEntity.success(voteService.readVote(groupId, user));
+    }
+
     // 투표 하기
     @PostMapping("/{groupId}/vote/select")
     public CustomResponseEntity<VoteResponse.SelectResult> selectVote(

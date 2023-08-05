@@ -88,6 +88,19 @@ public class VoteService {
         return VoteResponse.SelectResult.response(group, vote, voteStatuses);
     }
 
+    public VoteResponse.SelectResult readVote(Long groupId, Users user) {
+        Groups group = getGroups(groupId);
+
+        // TODO: 어떤 방식이 프론트엔드에서 처리하기 편한지 확인해봐야 할 것 같음
+        // 투표가 개설되지 않은 상태면 Exception 발생
+        Vote vote = getVote(groupId);
+
+        // 투표 이후 현재 추천된 장소들의 현황을 조회
+        List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
+        List<VoteResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
+        return VoteResponse.SelectResult.response(group, vote, voteStatuses);
+    }
+
     // method
 
     private Vote getVote(Long groupId) {
@@ -126,4 +139,5 @@ public class VoteService {
             return VoteResponse.VoteStatus.toStatusDto(bestPlace, isVoted);
         }).toList();
     }
+
 }
