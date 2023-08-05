@@ -1,5 +1,6 @@
 package com.moim.backend.domain.groupvote.controller;
 
+import com.moim.backend.domain.groupvote.entity.Vote;
 import com.moim.backend.domain.groupvote.request.VoteRequest;
 import com.moim.backend.domain.groupvote.response.VoteResponse;
 import com.moim.backend.domain.groupvote.service.VoteService;
@@ -45,5 +46,16 @@ public class VoteController {
                 voteService.selectVote(groupId, bestPlaceIds, user, LocalDateTime.now())
         );
     }
+
+    // 해당 장소 투표한 인원 리스트 조회하기
+    @GetMapping("/{groupId}/vote/select")
+    public CustomResponseEntity<List<VoteResponse.SelectPlaceUser>> readSelectPlaceUsers(
+            @PathVariable Long groupId, @RequestParam Long bestPlaceId, @Login Users user
+    ) {
+        return CustomResponseEntity.success(
+                voteService.readSelectPlaceUsers(groupId, bestPlaceId, user)
+        );
+    }
+
 
 }

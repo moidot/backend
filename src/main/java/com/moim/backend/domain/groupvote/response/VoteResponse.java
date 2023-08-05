@@ -3,6 +3,7 @@ package com.moim.backend.domain.groupvote.response;
 import com.moim.backend.domain.groupvote.entity.Vote;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
+import com.moim.backend.domain.space.entity.Participation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -105,6 +106,26 @@ public class VoteResponse {
                     .latitude(bestPlace.getLatitude())
                     .longitude(bestPlace.getLongitude())
                     .isVoted(isVoted)
+                    .build();
+        }
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Builder
+    public static class SelectPlaceUser {
+        private Long participationId;
+        private Long userId;
+        private String nickName;
+        private Boolean isAdmin;
+
+        public static VoteResponse.SelectPlaceUser response(Participation participation, Boolean isAdmin) {
+            return SelectPlaceUser.builder()
+                    .participationId(participation.getParticipationId())
+                    .userId(participation.getUserId())
+                    .nickName(participation.getUserName())
+                    .isAdmin(isAdmin)
                     .build();
         }
     }

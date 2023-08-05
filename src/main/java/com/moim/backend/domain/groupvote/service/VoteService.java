@@ -8,21 +8,23 @@ import com.moim.backend.domain.groupvote.request.VoteServiceRequest;
 import com.moim.backend.domain.groupvote.response.VoteResponse;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
+import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.user.entity.Users;
-import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static com.moim.backend.global.common.Result.*;
+import static java.lang.Boolean.*;
 
 @Service
 @RequiredArgsConstructor
@@ -101,6 +103,39 @@ public class VoteService {
         return VoteResponse.SelectResult.response(group, vote, voteStatuses);
     }
 
+    public List<VoteResponse.SelectPlaceUser> readSelectPlaceUsers(Long groupId, Long bestPlaceId, Users user) {
+        // 그룹의 추천장소와 투표 리스트를 fetch 조회
+        Groups group = groupRepository.findByIdToFetchJoinBestPlace(groupId)
+                .orElseThrow(
+                        () -> new CustomException(NOT_FOUND_GROUP)
+                );
+        BestPlace bestPlace = filteredBestPlace(bestPlaceId, group);
+
+        // 선택된 BestPlace 에 투표한 유저Id로 그룹 참여자 조회
+        if (bestPlace.getSelectPlaces().isEmpty()) {
+            throw new CustomException(NOT_VOTED_PLACE);
+        }
+        List<Long> userIds = new ArrayList<>();
+        for (SelectPlace selectPlace : bestPlace.getSelectPlaces()) {
+            userIds.add(selectPlace.getUserId());
+        }
+        List<Participation> participations = participationRepository.findAllByGroupAndUserIdIn(group, userIds);
+
+        // 어드민 판별 후 DTO 변환
+        return participations.stream().map(
+                participation -> {
+                    Boolean isAdmin = (participation.getUserId().equals(group.getAdminId())) ? TRUE : FALSE;
+                    return VoteResponse.SelectPlaceUser.response(participation, isAdmin);
+                }).toList();
+    }
+
+    private static BestPlace filteredBestPlace(Long bestPlaceId, Groups group) {
+        return group.getBestPlaces().stream()
+                .filter(groups -> groups.getBestPlaceId().equals(bestPlaceId))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(NOT_FOUND_BESTPLACE));
+    }
+
     // method
 
     private Vote getVote(Long groupId) {
@@ -139,5 +174,4 @@ public class VoteService {
             return VoteResponse.VoteStatus.toStatusDto(bestPlace, isVoted);
         }).toList();
     }
-
 }

@@ -32,7 +32,8 @@ public enum Result {
     NOT_FOUND_BESTPLACE(-2002, "존재하지 않는 추천 장소 입니다."),
     IS_CLOSED_VOTE(-2003, "해당 투표는 이미 종료되었습니다."),
     NOT_MULTIPLE_CHOICE(-2004, "해당 투표는 중복 선택이 허용되지 않습니다." ),
-    VOTE_ALREADY_ENDED(-2005,"해당 투표는 종료 시간이 지났습니다." );
+    VOTE_ALREADY_ENDED(-2005,"해당 투표는 종료 시간이 지났습니다." ),
+    NOT_VOTED_PLACE(-2006, "해당 장소를 투표한 인원은 0명 입니다." );
 
     private final int code;
     private final String message;
