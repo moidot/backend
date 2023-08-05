@@ -82,4 +82,18 @@ class VoteControllerTest extends ControllerTestSupport {
                 .andDo(print())
                 .andExpect(status().isOk());
     }
+
+    @DisplayName("해당 장소 투표한 인원 리스트 조회 API")
+    @Test
+    void readSelectPlaceUsers() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/v1/group/{groupId}/vote/select", 1L)
+                                .header("Authorization", "JWT AccessToken")
+                                .param("bestPlaceId", "1")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }

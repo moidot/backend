@@ -47,3 +47,20 @@ include::{snippets}/read-vote/path-parameters.adoc[]
 ==== HTTP Response Body
 include::{snippets}/read-vote/http-response.adoc[]
 include::{snippets}/read-vote/response-fields.adoc[]
+
+=== 해당 장소 투표한 인원 리스트 조회 API
+
+==== HTTP Request Headers
+include::{snippets}/read-selectPlace/request-headers.adoc[]
+
+==== HTTP Request PathParameters
+include::{snippets}/read-selectPlace/http-request.adoc[]
+include::{snippets}/read-selectPlace/path-parameters.adoc[]
+
+==== HTTP Request Parameters
+include::{snippets}/read-selectPlace/query-parameters.adoc[]
+
+==== HTTP Response Body
+include::{snippets}/read-selectPlace/http-response.adoc[]
+include::{snippets}/read-selectPlace/response-fields.adoc[]
+

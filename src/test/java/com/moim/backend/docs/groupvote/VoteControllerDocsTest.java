@@ -6,6 +6,7 @@ import com.moim.backend.domain.groupvote.request.VoteRequest;
 import com.moim.backend.domain.groupvote.request.VoteServiceRequest;
 import com.moim.backend.domain.groupvote.response.VoteResponse;
 import com.moim.backend.domain.groupvote.service.VoteService;
+import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.user.entity.Users;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -127,7 +128,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
         List<String> bestPlaceIds2 = List.of("4", "6");
         String[] bestPlaceIds = bestPlaceIds2.toArray(new String[0]);
 
-        given(voteService.selectVote(anyLong(),any(),any(),any())).willReturn(mockResult);
+        given(voteService.selectVote(anyLong(), any(), any(), any())).willReturn(mockResult);
 
         // when // then
         mockMvc.perform(
@@ -203,7 +204,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .voteStatuses(createMockVoteStatuses())
                 .build();
 
-        given(voteService.readVote(anyLong(),any()))
+        given(voteService.readVote(anyLong(), any()))
                 .willReturn(mockResult);
 
         // when // then
@@ -260,7 +261,74 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 ));
     }
 
+    @DisplayName("해당 장소 투표한 인원 리스트 조회 API")
+    @Test
+    void readSelectPlaceUsers() throws Exception {
+        // given
+        given(voteService.readSelectPlaceUsers(anyLong(), any(), any()))
+                .willReturn(List.of(
+                                VoteResponse.SelectPlaceUser.builder()
+                                        .participationId(1L)
+                                        .userId(1L)
+                                        .nickName("모이닷 모임장")
+                                        .isAdmin(true)
+                                        .build(),
+                                VoteResponse.SelectPlaceUser.builder()
+                                        .participationId(2L)
+                                        .userId(2L)
+                                        .nickName("모이닷 인원1")
+                                        .isAdmin(false)
+                                        .build(),
+                                VoteResponse.SelectPlaceUser.builder()
+                                        .participationId(3L)
+                                        .userId(3L)
+                                        .nickName("모이닷 인원2")
+                                        .isAdmin(false)
+                                        .build()
+                        )
+                );
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.get("/api/v1/group/{groupId}/vote/select", 1L)
+                                .header("Authorization", "JWT AccessToken")
+                                .param("bestPlaceId", "1")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("read-selectPlace",
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization")
+                                        .description("insert the AccessToken")
+                        ),
+                        pathParameters(
+                                parameterWithName("groupId")
+                                        .description("그룹 ID")
+                        ),
+                        queryParameters(
+                                parameterWithName("bestPlaceId")
+                                        .description("추천된 장소 Id")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data[].participationId").type(JsonFieldType.NUMBER)
+                                        .description("참여 ID"),
+                                fieldWithPath("data[].userId").type(JsonFieldType.NUMBER)
+                                        .description("유저 ID"),
+                                fieldWithPath("data[].nickName").type(JsonFieldType.STRING)
+                                        .description("그룹 내 닉네임"),
+                                fieldWithPath("data[].isAdmin").type(JsonFieldType.BOOLEAN)
+                                        .description("관리자 여부")
+                        )
+                ));
+    }
+
     // method
+
     private List<VoteResponse.VoteStatus> createMockVoteStatuses() {
         List<VoteResponse.VoteStatus> voteStatuses = new ArrayList<>();
         voteStatuses.add(VoteResponse.VoteStatus.builder()
@@ -289,4 +357,6 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .build());
         return voteStatuses;
     }
+
+
 }
