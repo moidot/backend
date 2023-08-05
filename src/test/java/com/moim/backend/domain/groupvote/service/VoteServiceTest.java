@@ -198,7 +198,6 @@ class VoteServiceTest {
         BestPlace bestPlace3 = saveBestPlace(group, "신논현역", 123.123456, 123.123456);
         Vote vote = saveVote(group.getGroupId(), true, true, LocalDateTime.of(2023, 8, 3, 12, 0, 0));
 
-        System.out.println(LocalDateTime.now());
         em.flush();
         em.clear();
 
@@ -212,6 +211,48 @@ class VoteServiceTest {
                 .contains(-2005, "해당 투표는 종료 시간이 지났습니다.");
     }
 
+    @DisplayName("유저가 자신의 그룹의 투표현황을 확인한다.")
+    @Test
+    void readVote() {
+        // given
+        Users user = savedUser("test@test.com", "테스트");
+        Users admin = savedUser("admin@admin.com", "어드민");
+
+        Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
+
+        BestPlace bestPlace1 = saveBestPlace(group, "강남역", 123.123456, 123.123456);
+        BestPlace bestPlace2 = saveBestPlace(group, "역삼역", 123.123456, 123.123456);
+        BestPlace bestPlace3 = saveBestPlace(group, "신논현역", 123.123456, 123.123456);
+
+        Vote vote = saveVote(group.getGroupId(), true, true, LocalDateTime.of(2023, 8, 3, 12, 0, 0));
+
+        SelectPlace selectPlace1 = saveSelectPlace(user, bestPlace1, vote);
+        SelectPlace selectPlace2 = saveSelectPlace(user, bestPlace3, vote);
+        SelectPlace selectPlace3 = saveSelectPlace(admin, bestPlace1, vote);
+        SelectPlace selectPlace4 = saveSelectPlace(admin, bestPlace2, vote);
+
+        em.flush();
+        em.clear();
+
+        // when
+        VoteResponse.SelectResult response = voteService.readVote(group.getGroupId(), admin);
+
+        // then
+
+        assertThat(response)
+                .extracting("groupId", "voteId", "groupName", "groupDate","endAt")
+                .contains(group.getGroupId(), vote.getVoteId(), group.getName(), "2023-07-10", "2023-08-03 12:00:00");
+
+        assertThat(response.getVoteStatuses())
+                .extracting("bestPlaceId", "votes", "placeName", "isVoted")
+                .contains(
+                        tuple(bestPlace1.getBestPlaceId(), 2, "강남역", true),
+                        tuple(bestPlace2.getBestPlaceId(), 1, "역삼역", true),
+                        tuple(bestPlace3.getBestPlaceId(), 1, "신논현역", false)
+                );
+    }
+
+    // method
     private Vote saveVote(
             Long groupId, Boolean isAnonymous, boolean isEnabledMultipleChoice, LocalDateTime endAt
     ) {
@@ -225,8 +266,6 @@ class VoteServiceTest {
                         .build()
         );
     }
-
-    // method
 
     private SelectPlace saveSelectPlace(Users user, BestPlace bestPlace, Vote vote) {
         return selectPlaceRepository.save(
