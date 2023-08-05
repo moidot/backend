@@ -69,4 +69,17 @@ class VoteControllerTest extends ControllerTestSupport {
                 .andDo(print())
                 .andExpect(status().isOk());
     }
+
+    @DisplayName("투표 현황 조회 API")
+    @Test
+    void readVote() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/v1/group/{groupId}/vote", 1L)
+                                .header("Authorization", "JWT AccessToken")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }

@@ -35,3 +35,15 @@ include::{snippets}/select-vote/form-parameters.adoc[]
 include::{snippets}/select-vote/http-response.adoc[]
 include::{snippets}/select-vote/response-fields.adoc[]
 
+=== 투표 현황 조회 API
+
+==== HTTP Request Headers
+include::{snippets}/read-vote/request-headers.adoc[]
+
+==== HTTP Request PathParameters
+include::{snippets}/read-vote/http-request.adoc[]
+include::{snippets}/read-vote/path-parameters.adoc[]
+
+==== HTTP Response Body
+include::{snippets}/read-vote/http-response.adoc[]
+include::{snippets}/read-vote/response-fields.adoc[]
