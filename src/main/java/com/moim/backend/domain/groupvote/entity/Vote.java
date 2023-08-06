@@ -9,6 +9,8 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import static java.lang.Boolean.TRUE;
+
 @Entity
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -33,4 +35,8 @@ public class Vote {
     private Boolean isEnabledMultipleChoice;
 
     private LocalDateTime endAt;
+
+    public void conclusionVote() {
+        this.isClosed = TRUE;
+    }
 }

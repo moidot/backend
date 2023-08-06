@@ -13,6 +13,7 @@ import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.user.entity.Users;
+import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -129,14 +130,31 @@ public class VoteService {
                 }).toList();
     }
 
+    @Transactional
+    public VoteResponse.SelectResult conclusionVote(Long groupId, Users user) {
+        Groups group = getGroups(groupId);
+        if (!group.getAdminId().equals(user.getUserId())) {
+            throw new CustomException(NOT_ADMIN_USER);
+        }
+        Vote vote = getVote(groupId);
+
+        // 투표 종료
+        vote.conclusionVote();
+
+        // 종료 이후 현재 추천된 장소들의 현황을 조회
+        List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
+        List<VoteResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
+        return VoteResponse.SelectResult.response(group, vote, voteStatuses);
+    }
+
+    // method
+
     private static BestPlace filteredBestPlace(Long bestPlaceId, Groups group) {
         return group.getBestPlaces().stream()
                 .filter(groups -> groups.getBestPlaceId().equals(bestPlaceId))
                 .findFirst()
                 .orElseThrow(() -> new CustomException(NOT_FOUND_BESTPLACE));
     }
-
-    // method
 
     private Vote getVote(Long groupId) {
         return voteRepository.findByGroupId(groupId)
