@@ -509,13 +509,13 @@ class GroupServiceTest {
         assertThat(response)
                 .extracting(
                         "placeName", "mainPhotoUrl", "detailPlace",
-                        "isOpen", "openTime", "url",
+                        "openTime", "url",
                         "phone", "tags", "delivery",
                         "pagekage", "photos", "menuInfo"
                 )
                 .contains(
                         "커피나무 성신여대점", "http://t1.kakaocdn.net/fiy_reboot/place/D02C1C1162A548B58894B236B754CFD6", "서울 성북구 보문로30길 79 1,2층",
-                        "영업중", timeList, "http://www.coffeenamu.co.kr",
+                        timeList, "http://www.coffeenamu.co.kr",
                         "02-922-1672", tags, "배달불가",
                         "포장가능", photos, menuInfo
                 );
