@@ -22,6 +22,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
@@ -323,6 +324,80 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                                         .description("그룹 내 닉네임"),
                                 fieldWithPath("data[].isAdmin").type(JsonFieldType.BOOLEAN)
                                         .description("관리자 여부")
+                        )
+                ));
+    }
+
+    @DisplayName("투표 종료하기 API")
+    @Test
+    void conclusionVote() throws Exception {
+        // given
+        VoteResponse.SelectResult mockResult = VoteResponse.SelectResult.builder()
+                .groupId(1L)
+                .groupName("모이닷 모임")
+                .groupDate("2023-08-04")
+                .voteId(3L)
+                .isClosed(true)
+                .isAnonymous(true)
+                .isEnabledMultipleChoice(true)
+                .endAt("2023-08-10 18:00:00")
+                .voteStatuses(createMockVoteStatuses())
+                .build();
+
+
+        given(voteService.conclusionVote(anyLong(), any()))
+                .willReturn(mockResult);
+
+        // when// then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.patch("/api/v1/group/{groupId}/vote", 1L)
+                                .header("Authorization", "JWT AccessToken")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("conclusion-vote",
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization")
+                                        .description("insert the AccessToken")
+                        ),
+                        pathParameters(
+                                parameterWithName("groupId")
+                                        .description("그룹 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data.groupId").type(JsonFieldType.NUMBER)
+                                        .description("그룹 ID"),
+                                fieldWithPath("data.groupName").type(JsonFieldType.STRING)
+                                        .description("그룹 이름"),
+                                fieldWithPath("data.groupDate").type(JsonFieldType.STRING).
+                                        description("그룹 날짜"),
+                                fieldWithPath("data.voteId").type(JsonFieldType.NUMBER)
+                                        .description("투표 ID"),
+                                fieldWithPath("data.isClosed").type(JsonFieldType.BOOLEAN)
+                                        .description("투표 종료 여부"),
+                                fieldWithPath("data.isAnonymous").type(JsonFieldType.BOOLEAN)
+                                        .description("익명 투표 여부"),
+                                fieldWithPath("data.isEnabledMultipleChoice").type(JsonFieldType.BOOLEAN).
+                                        description("다중 선택 가능 여부"),
+                                fieldWithPath("data.endAt").type(JsonFieldType.STRING)
+                                        .description("투표 종료 일시"),
+                                fieldWithPath("data.voteStatuses[].bestPlaceId").type(JsonFieldType.NUMBER)
+                                        .description("장소 ID"),
+                                fieldWithPath("data.voteStatuses[].votes").type(JsonFieldType.NUMBER)
+                                        .description("장소 투표 수"),
+                                fieldWithPath("data.voteStatuses[].placeName").type(JsonFieldType.STRING)
+                                        .description("장소 이름"),
+                                fieldWithPath("data.voteStatuses[].latitude").type(JsonFieldType.NUMBER)
+                                        .description("장소 위도"),
+                                fieldWithPath("data.voteStatuses[].longitude").type(JsonFieldType.NUMBER)
+                                        .description("장소 경도"),
+                                fieldWithPath("data.voteStatuses[].isVoted").type(JsonFieldType.BOOLEAN)
+                                        .description("사용자의 투표 여부")
                         )
                 ));
     }

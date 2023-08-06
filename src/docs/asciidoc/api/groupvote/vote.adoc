@@ -64,3 +64,15 @@ include::{snippets}/read-selectPlace/query-parameters.adoc[]
 include::{snippets}/read-selectPlace/http-response.adoc[]
 include::{snippets}/read-selectPlace/response-fields.adoc[]
 
+=== 투표 종료하기 API
+
+==== HTTP Request Headers
+include::{snippets}/conclusion-vote/request-headers.adoc[]
+
+==== HTTP Request PathParameters
+include::{snippets}/conclusion-vote/http-request.adoc[]
+include::{snippets}/conclusion-vote/path-parameters.adoc[]
+
+==== HTTP Response Body
+include::{snippets}/conclusion-vote/http-response.adoc[]
+include::{snippets}/conclusion-vote/response-fields.adoc[]
