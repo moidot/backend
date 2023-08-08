@@ -21,9 +21,6 @@ public class UserService {
     private final List<OAuth2LoginService> oAuth2LoginServices;
     private final UserRepository userRepository;
     private final JwtService jwtService;
-    private final KakaoLoginService kakaoLoginService;
-    private final NaverLoginService naverLoginService;
-    private final GoogleLoginService googleLoginService;
 
     public String getUserNameByToken(Users user) {
         return user.getName();

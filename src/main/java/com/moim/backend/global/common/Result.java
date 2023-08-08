@@ -14,7 +14,7 @@ public enum Result {
     NOT_AUTHENTICATE_NAVER_TOKEN_INFO(-902, "토큰 정보 접근을 위한 권한이 잘못되었습니다."),
 
     // Space
-    UNEXPECTED_EXCEPTION(-1000,"예상치 못한 예외가 발생했습니다."),
+    UNEXPECTED_EXCEPTION(-500,"예상치 못한 예외가 발생했습니다."),
 
     NOT_FOUND_GROUP(-1001,"존재하지 않는 그룹입니다."),
 
@@ -33,7 +33,8 @@ public enum Result {
     IS_CLOSED_VOTE(-2003, "해당 투표는 이미 종료되었습니다."),
     NOT_MULTIPLE_CHOICE(-2004, "해당 투표는 중복 선택이 허용되지 않습니다." ),
     VOTE_ALREADY_ENDED(-2005,"해당 투표는 종료 시간이 지났습니다." ),
-    NOT_VOTED_PLACE(-2006, "해당 장소를 투표한 인원은 0명 입니다." );
+    NOT_VOTED_PLACE(-2006, "해당 장소를 투표한 인원은 0명 입니다." ),
+    ALREADY_CREATED_VOTE(-2007, "해당 모임은 이미 투표가 시작되었습니다." );
 
     private final int code;
     private final String message;

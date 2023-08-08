@@ -1,5 +1,7 @@
 package com.moim.backend.domain.space.service;
 
+import com.moim.backend.domain.groupvote.entity.Vote;
+import com.moim.backend.domain.groupvote.repository.VoteRepository;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
@@ -15,6 +17,7 @@ import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.entity.Users;
+import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,14 +29,17 @@ import org.springframework.web.client.RestTemplate;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Optional;
 
 import static com.moim.backend.global.common.Result.*;
+import static java.lang.Boolean.TRUE;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class GroupService {
 
+    private final VoteRepository voteRepository;
     private final GroupRepository groupRepository;
     private final ParticipationRepository participationRepository;
     private final BestPlaceRepository bestPlaceRepository;
@@ -98,9 +104,14 @@ public class GroupService {
         validateParticipationMyInfo(user, myParticipate);
         // TODO : fetchJoin 적용여부 판단
         Groups group = myParticipate.getGroup();
+        Optional<Vote> optionalVote = voteRepository.findByGroupId(group.getGroupId());
+
+        // 투표 시작시 모임 나가기 불가
+        if (optionalVote.isPresent() && optionalVote.get().getIsClosed().equals(true)) {
+            throw new CustomException(Result.ALREADY_CREATED_VOTE);
+        }
 
         // TODO : 추후 투표도 같이 삭제해야함
-
         // 모임장이 나가는 경우 스페이스 삭제
         if (group.getAdminId().equals(user.getUserId())) {
             groupRepository.delete(group);
@@ -109,6 +120,12 @@ public class GroupService {
 
         participationRepository.delete(myParticipate);
         return GroupResponse.Exit.response(false, "모임에서 나갔습니다.");
+    }
+
+    private Vote getVote(Groups group) {
+        return voteRepository.findByGroupId(group.getGroupId()).orElseThrow(
+                () -> new CustomException(NOT_CREATED_VOTE)
+        );
     }
 
 
