@@ -5,15 +5,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
+import static java.lang.Boolean.TRUE;
+
 @Entity
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Builder
 public class Vote {
 
     @Id
@@ -32,6 +34,9 @@ public class Vote {
     @NotNull
     private Boolean isEnabledMultipleChoice;
 
-    @NotNull
     private LocalDateTime endAt;
+
+    public void conclusionVote() {
+        this.isClosed = TRUE;
+    }
 }

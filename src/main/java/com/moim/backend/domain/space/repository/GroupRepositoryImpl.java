@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.moim.backend.domain.space.entity.QBestPlace.bestPlace;
 import static com.moim.backend.domain.space.entity.QGroups.groups;
@@ -17,6 +18,16 @@ public class GroupRepositoryImpl implements GroupCustomRepository {
 
     public GroupRepositoryImpl(JPAQueryFactory queryFactory) {
         this.queryFactory = queryFactory;
+    }
+
+    @Override
+    public Optional<Groups> findByIdToFetchJoinBestPlace(Long groupId) {
+        return Optional.ofNullable(queryFactory
+                .selectFrom(groups)
+                .leftJoin(groups.bestPlaces, bestPlace)
+                .where(groups.groupId.eq(groupId))
+                .fetchJoin()
+                .fetchOne());
     }
 
     @Override

@@ -1,6 +1,10 @@
 package com.moim.backend.domain.space.repository;
 
 import com.moim.backend.TestQueryDSLConfig;
+import com.moim.backend.domain.groupvote.entity.SelectPlace;
+import com.moim.backend.domain.groupvote.entity.Vote;
+import com.moim.backend.domain.groupvote.repository.SelectPlaceRepository;
+import com.moim.backend.domain.groupvote.repository.VoteRepository;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
@@ -17,7 +21,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -30,6 +36,12 @@ class GroupRepositoryTest {
 
     @Autowired
     private EntityManager em;
+
+    @Autowired
+    private SelectPlaceRepository selectPlaceRepository;
+
+    @Autowired
+    private VoteRepository voteRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -90,7 +102,7 @@ class GroupRepositoryTest {
 
         assertThat(groups.get(0))
                 .extracting("groupId", "name", "date", "place")
-                .contains(1L, "그룹1", LocalDate.of(2023, 7, 10), "none");
+                .contains(group1.getGroupId(), "그룹1", LocalDate.of(2023, 7, 10), "none");
 
         assertThat(groups.get(0).getBestPlaces())
                 .extracting("placeName", "longitude", "latitude")
@@ -101,10 +113,100 @@ class GroupRepositoryTest {
                 );
     }
 
+    @DisplayName("그룹을 가져올때 추천장소까지 fetchJoin 으로 가져온다.")
+    @Test
+    void findByIdToFetchJoin() {
+        // given
+        Users admin1 = savedUser("admin1@test.com", "어드민1");
+        Groups group1 = savedGroup(admin1.getUserId(), "그룹1");
+
+        BestPlace bestPlace1 = saveBestPlace(group1, "의정부역", 127.123456, 36.123456);
+        BestPlace bestPlace2 = saveBestPlace(group1, "서울역", 127.123457, 36.123457);
+        BestPlace bestPlace3 = saveBestPlace(group1, "개봉역", 127.123458, 36.123458);
+
+        Users user1 = savedUser("test1@test.com", "테스트1");
+        Users user2 = savedUser("test2@test.com", "테스트2");
+
+        savedParticipation(admin1, group1, "어드민", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(user1, group1, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(user2, group1, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+
+        Vote vote = voteRepository.save(
+                Vote.builder()
+                        .groupId(group1.getGroupId())
+                        .isClosed(false)
+                        .isAnonymous(true)
+                        .isEnabledMultipleChoice(true)
+                        .build()
+        );
+
+        selectPlaceRepository.save(
+                SelectPlace.builder()
+                        .userId(admin1.getUserId())
+                        .vote(vote)
+                        .bestPlace(bestPlace1)
+                        .build()
+        );
+
+        selectPlaceRepository.save(
+                SelectPlace.builder()
+                        .userId(admin1.getUserId())
+                        .vote(vote)
+                        .bestPlace(bestPlace3)
+                        .build()
+        );
+
+        em.flush();
+        em.clear();
+
+        // when
+        Optional<Groups> optionalGroup = groupRepository.findByIdToFetchJoinBestPlace(group1.getGroupId());
+
+        // then
+        Groups group = optionalGroup.get();
+        assertThat(group.getBestPlaces())
+                .extracting("placeName", "longitude", "latitude")
+                .contains(
+                        tuple("의정부역", 127.123456, 36.123456),
+                        tuple("서울역", 127.123457, 36.123457),
+                        tuple("개봉역", 127.123458, 36.123458)
+                );
+
+        for (BestPlace bestPlace : group.getBestPlaces()) {
+            for (SelectPlace selectPlace : bestPlace.getSelectPlaces()) {
+                System.out.println(selectPlace.getUserId());
+            }
+        }
+    }
+
     // method
 
-    private void saveBestPlace(Groups group, String placeName, double longitude, double latitude) {
-        bestPlaceRepository.save(
+    private SelectPlace saveSelectPlace(Users user, BestPlace bestPlace, Vote vote) {
+        return selectPlaceRepository.save(
+                SelectPlace.builder()
+                        .vote(vote)
+                        .userId(user.getUserId())
+                        .bestPlace(bestPlace)
+                        .build()
+        );
+    }
+
+    private Vote saveVote(
+            Long groupId, Boolean isAnonymous, boolean isEnabledMultipleChoice, LocalDateTime endAt
+    ) {
+        return voteRepository.save(
+                Vote.builder()
+                        .groupId(groupId)
+                        .isClosed(false)
+                        .isAnonymous(isAnonymous)
+                        .isEnabledMultipleChoice(isEnabledMultipleChoice)
+                        .endAt(endAt)
+                        .build()
+        );
+    }
+
+    private BestPlace saveBestPlace(Groups group, String placeName, double longitude, double latitude) {
+        return bestPlaceRepository.save(
                 BestPlace.builder()
                         .group(group)
                         .placeName(placeName)

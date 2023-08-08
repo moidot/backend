@@ -1,15 +1,17 @@
 package com.moim.backend.domain.space.entity;
 
+import com.moim.backend.domain.groupvote.entity.SelectPlace;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Builder
 public class BestPlace {
 
     @Id
@@ -25,15 +27,11 @@ public class BestPlace {
 
     @NotNull
     private Double latitude;
+
     @NotNull
     private Double longitude;
 
-    @Builder
-    private BestPlace(Long bestPlaceId, Groups group, String placeName, Double latitude, Double longitude) {
-        this.bestPlaceId = bestPlaceId;
-        this.group = group;
-        this.placeName = placeName;
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
+    @OneToMany(mappedBy = "bestPlace")
+    private List<SelectPlace> selectPlaces;
+
 }
