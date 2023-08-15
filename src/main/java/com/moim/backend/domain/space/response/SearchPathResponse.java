@@ -4,19 +4,47 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Collections;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SearchPathResponse {
+public class SearchPathResponse{
 
     private Result result;
+    private Info bestPathInfo;
+
+    public String getPathInfoMapObj() {
+        return "0:0@" + searchBestPathInfo().mapObj;
+    }
+
+    public int getTotalTransitCount() {
+        return searchBestPathInfo().busTransitCount + searchBestPathInfo().subwayTransitCount;
+    }
+
+    public int getTotalTime() {
+        return searchBestPathInfo().totalTime;
+    }
+
+    public Double getTotalDistance() {
+        return searchBestPathInfo().totalDistance;
+    }
+
+    private Info searchBestPathInfo() {
+        if (bestPathInfo == null) {
+            Collections.sort(this.result.path);
+            this.bestPathInfo = result.path.get(0).info;
+        }
+
+        return bestPathInfo;
+    }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Result {
+
         private int searchType;
         private int outTrafficCheck;
         private int busCount;
@@ -27,9 +55,14 @@ public class SearchPathResponse {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Path {
+    public static class Path implements Comparable<Path>{
         private int pathType;
         private Info info;
+
+        @Override
+        public int compareTo(Path o) {
+            return o.info.getScore() - this.info.getScore();
+        }
     }
 
     @Getter
@@ -51,21 +84,10 @@ public class SearchPathResponse {
         private Double totalDistance;
         private int checkIntervalTime;
         private String checkIntervalTimeOverYn;
+
+        private int getScore() {
+            return busTransitCount + subwayTransitCount + totalTime;
+        }
     }
 
-    public String getPathInfoMapObj() {
-        return "0:0@" + result.path.get(0).info.mapObj;
-    }
-
-    public int getTotalTransitCount() {
-        return result.path.get(0).info.busTransitCount + result.path.get(0).info.subwayTransitCount;
-    }
-
-    public int getTotalTime() {
-        return result.path.get(0).info.totalTime;
-    }
-
-    public Double getTotalDistance() {
-        return result.path.get(0).info.totalDistance;
-    }
 }

@@ -2,6 +2,7 @@ package com.moim.backend.domain.space.service;
 
 import com.moim.backend.domain.groupvote.entity.Vote;
 import com.moim.backend.domain.groupvote.repository.VoteRepository;
+import com.moim.backend.domain.space.config.OdsayProperties;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
@@ -13,10 +14,13 @@ import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.KakaoMapDetailDto;
 import com.moim.backend.domain.space.response.MiddlePoint;
+import com.moim.backend.domain.space.response.PlaceRouteResponse;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.entity.Users;
+import com.moim.backend.domain.space.response.GraphicDataResponse;
+import com.moim.backend.domain.space.response.SearchPathResponse;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +32,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static com.moim.backend.global.common.Result.*;
-import static java.lang.Boolean.TRUE;
 
 @Service
 @Transactional(readOnly = true)
@@ -44,6 +48,8 @@ public class GroupService {
     private final ParticipationRepository participationRepository;
     private final BestPlaceRepository bestPlaceRepository;
     private final SubwayRepository subwayRepository;
+    private final OdsayProperties odsayProperties;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     // 모임 생성
     @Transactional
@@ -148,17 +154,26 @@ public class GroupService {
         return null;
     }
 
-    // 모임 추천 지역 조회하기
-    public List<BestSubwayInterface> getBestRegion(Long groupId) {
+//     불필요한 코드 제거 버전
+    public List<PlaceRouteResponse> getBestRegion(Long groupId) {
         Groups group = getGroup(groupId);
         MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
         List<BestSubwayInterface> bestSubwayList = subwayRepository.getBestSubwayList(
                 middlePoint.getLatitude(), middlePoint.getLongitude()
         );
-        // TODO : 이름이 같은 역일 경우 중간 지점에 더 가까운 역으로 조회(DB 또는 Application 계층 중 어디에서 처리해야할지 고민)
-        // TODO : 조회한 역이 적절하지 않은 경우 인기 지역 조회
 
-        return bestSubwayList;
+        List<PlaceRouteResponse> placeRouteResponseList = new ArrayList<>();
+        List<Participation> participations = participationRepository.findAllByGroup(group);
+        bestSubwayList.forEach(bestSubway -> {
+            PlaceRouteResponse placeRouteResponse = new PlaceRouteResponse(bestSubway);
+
+            for (Participation participation : participations) {
+                addBusRouteToResponse(bestSubway, participation, placeRouteResponse);
+            }
+            placeRouteResponseList.add(placeRouteResponse);
+        });
+
+        return placeRouteResponseList;
     }
 
     // 내 모임 확인하기
@@ -278,4 +293,27 @@ public class GroupService {
 
         return GroupResponse.detailRecommendedPlace.response(kakaoMapDetailDto);
     }
+
+    private void addBusRouteToResponse(
+            BestSubwayInterface bestSubway, Participation participation, PlaceRouteResponse placeRouteResponse
+    ) {
+        SearchPathResponse searchPathResponse = restTemplate.getForObject(
+                odsayProperties.getSearchPathUriWithParams(bestSubway, participation),
+                SearchPathResponse.class
+        );
+
+        if (searchPathResponse.getResult() != null) {
+            GraphicDataResponse graphicDataResponse = restTemplate.getForObject(
+                    odsayProperties.getGraphicDataUriWIthParams(searchPathResponse.getPathInfoMapObj()),
+                    GraphicDataResponse.class
+            );
+            if (graphicDataResponse.getResult() != null) {
+                PlaceRouteResponse.MoveUserInfo moveUserInfo = new PlaceRouteResponse.MoveUserInfo(
+                        participation, graphicDataResponse, searchPathResponse
+                );
+                placeRouteResponse.addMoveUserInfo(moveUserInfo);
+            }
+        }
+    }
+
 }

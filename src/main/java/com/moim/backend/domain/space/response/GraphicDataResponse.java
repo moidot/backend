@@ -13,6 +13,10 @@ import java.util.List;
 public class GraphicDataResponse {
     private Result result;
 
+    public List<Lane> getLane() {
+        return result.lane;
+    }
+
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
@@ -47,7 +51,4 @@ public class GraphicDataResponse {
         private Double latitude;
     }
 
-    public List<Lane> getLane() {
-        return result.lane;
-    }
 }
