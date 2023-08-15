@@ -203,4 +203,20 @@ class GroupControllerTest extends ControllerTestSupport {
                 .andDo(print())
                 .andExpect(status().isOk());
     }
+
+    @DisplayName("모임 장소 추천 조회 리스트 API")
+    @Test
+    void keywordCentralizedMeetingSpot() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/v1/group/best-region/place")
+                                .param("x","127.232943")
+                                .param("y","37.6823811")
+                                .param("local","성신여대입구역")
+                                .param("keyword","식당")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }
