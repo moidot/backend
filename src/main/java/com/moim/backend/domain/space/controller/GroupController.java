@@ -85,14 +85,6 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.getMyParticipate(user));
     }
 
-    // 추천된 장소 상세보기
-    @GetMapping("/{id}")
-    public CustomResponseEntity<GroupResponse.detailRecommendedPlace> RecommendedPlaceDetails(
-            @PathVariable(name = "id") Long id
-    ) {
-        return CustomResponseEntity.success(groupService.detailRecommendedPlace(id));
-    }
-
     // 모임 장소 추천 조회 리스트 API
     @GetMapping("/best-region/place")
     public CustomResponseEntity<List<GroupResponse.Place>> keywordCentralizedMeetingSpot(

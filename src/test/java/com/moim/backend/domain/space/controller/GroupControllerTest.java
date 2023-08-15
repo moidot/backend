@@ -192,18 +192,6 @@ class GroupControllerTest extends ControllerTestSupport {
                 .andExpect(status().isOk());
     }
 
-    @DisplayName("추천된 장소 상세보기 API")
-    @Test
-    void RecommendedPlaceDetails() throws Exception {
-        // given
-        // when // then
-        mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group/{id}", 26974293L)
-                )
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
     @DisplayName("모임 장소 추천 조회 리스트 API")
     @Test
     void keywordCentralizedMeetingSpot() throws Exception {

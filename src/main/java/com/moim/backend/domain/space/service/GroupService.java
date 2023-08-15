@@ -11,7 +11,6 @@ import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
-import com.moim.backend.domain.space.response.KakaoMapDetailDto;
 import com.moim.backend.domain.space.response.MiddlePoint;
 import com.moim.backend.domain.space.response.NaverMapListDto;
 import com.moim.backend.domain.subway.entity.Subway;
@@ -25,12 +24,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -335,28 +331,5 @@ public class GroupService {
         return bestPlaces.stream()
                 .map(GroupResponse.BestPlaces::response)
                 .toList();
-    }
-
-    public GroupResponse.detailRecommendedPlace detailRecommendedPlace(Long id) {
-        RestTemplate restTemplate = new RestTemplate();
-        KakaoMapDetailDto kakaoMapDetailDto;
-
-        try {
-            kakaoMapDetailDto = restTemplate.getForObject(
-                    "https://place.map.kakao.com/main/v/" + id, KakaoMapDetailDto.class
-            );
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            throw new CustomException(UNEXPECTED_EXCEPTION);
-        }
-
-        if (kakaoMapDetailDto == null) {
-            throw new CustomException(UNEXPECTED_EXCEPTION);
-        }
-
-        return GroupResponse.detailRecommendedPlace.response(kakaoMapDetailDto);
-    }
-
-    private static String createKakaoUrl(Double x, Double y, String keyword) {
-        return String.format("https://dapi.kakao.com/v2/local/search/keyword.json?y=%s&x=%s&radius=3000&query=%s", y, x, keyword);
     }
 }
