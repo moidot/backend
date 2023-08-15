@@ -20,8 +20,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -474,7 +473,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("그룹 추천장소 ID / Long"),
                                 fieldWithPath("data[].bestPlaces[].bestPlaceName").type(JsonFieldType.STRING)
                                         .description("그룹 추천장소 이름")
-                                )
+                        )
                 ));
     }
 
@@ -579,6 +578,171 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("data.menuInfo.timeexp").type(JsonFieldType.STRING)
                                         .description("메뉴 갱신 날짜")
                         )
+                ));
+    }
+
+    @DisplayName("")
+    @Test
+    void keywordCentralizedMeetingSpot() throws Exception {
+        // given
+        GroupResponse.Place place1 = GroupResponse.Place.builder()
+                .title("멘야하나비 성신여대점")
+                .thumUrl("https://ldb-phinf.pstatic.net/20230804_174/16911100078193yaWQ_JPEG/IMG_4118.JPEG")
+                .distance("성신여대입구역(으)로부터 220m")
+                .openTime("21:00에 라스트오더")
+                .tel("02-6397-3020")
+                .detail(
+                        GroupResponse.Place.Detail.builder()
+                                .local("성신여대입구역")
+                                .title("멘야하나비 성신여대점")
+                                .address("서울특별시 성북구 동소문로22길 39-5 2층")
+                                .status("영업 중")
+                                .openTime("21:00에 라스트오더")
+                                .homePageUrl("")
+                                .tel("02-6397-3020")
+                                .category(List.of("일식", "일본식라면"))
+                                .x("127.0186061")
+                                .y("37.5914413")
+                                .thumUrls(List.of(
+                                        "https://ldb-phinf.pstatic.net/20230804_174/16911100078193yaWQ_JPEG/IMG_4118.JPEG",
+                                        "https://ldb-phinf.pstatic.net/20230804_278/1691110001584jSktH_JPEG/IMG_4117.JPEG",
+                                        "https://ldb-phinf.pstatic.net/20230324_57/1679617040749YQEdq_JPEG/KakaoTalk_20230323_100524740.jpg"
+                                ))
+                                .menuInfo(List.of(
+                                        "마제소바 11,000",
+                                        "도니꾸 마제소바 14,000",
+                                        "네기시오 마제소바 14,000",
+                                        "스파이시 마제소바 12,000",
+                                        "소유라멘 10,000",
+                                        "카레마제소바 12,000"
+                                ))
+                                .build()
+                )
+                .build();
+
+        GroupResponse.Place place2 = GroupResponse.Place.builder()
+                .title("치치 성신여대점")
+                .thumUrl("https://ldb-phinf.pstatic.net/20230704_152/1688449596232YkYod_JPEG/3.jpg")
+                .distance("성신여대입구역(으)로부터 213m")
+                .openTime("17:30에 영업시작")
+                .tel("02-921-8520")
+                .detail(
+                        GroupResponse.Place.Detail.builder()
+                                .local("성신여대입구역")
+                                .title("치치 성신여대점")
+                                .address("서울특별시 성북구 동소문로20길 37-12 1층")
+                                .status("곧 영업 시작")
+                                .openTime("17:30에 영업시작")
+                                .homePageUrl("http://www.chi-chi.co.kr/")
+                                .tel("02-921-8520")
+                                .category(List.of("술집", "요리주점"))
+                                .x("127.0175747")
+                                .y("37.5909647")
+                                .thumUrls(List.of(
+                                        "https://ldb-phinf.pstatic.net/20230704_152/1688449596232YkYod_JPEG/3.jpg",
+                                        "https://ldb-phinf.pstatic.net/20230630_204/1688116794177JlDTz_JPEG/20230630_162032.jpg",
+                                        "https://ldb-phinf.pstatic.net/20230704_54/16884496305868jaey_JPEG/1688297595651.jpg"
+                                ))
+                                .menuInfo(List.of(
+                                        "버터갈릭감자 변동가격(업주문의)",
+                                        "설탕토마토 변동가격(업주문의)"
+                                ))
+                                .build()
+                )
+                .build();
+
+        GroupResponse.Place place3 = GroupResponse.Place.builder()
+                .title("동경산책 성신여대점")
+                .thumUrl("https://ldb-phinf.pstatic.net/20220106_294/1641437440289J8dYW_JPEG/1635122589184-10.jpg")
+                .distance("성신여대입구역(으)로부터 236m")
+                .openTime("21:00에 영업종료")
+                .tel("02-923-2666")
+                .detail(
+                        GroupResponse.Place.Detail.builder()
+                                .local("성신여대입구역")
+                                .title("동경산책 성신여대점")
+                                .address("서울특별시 성북구 보문로34길 45")
+                                .status("영업 중")
+                                .openTime("21:00에 영업종료")
+                                .homePageUrl("http://www.instagram.com/dongkyungsancheck")
+                                .tel("02-923-2666")
+                                .category(List.of("일식", "일식당"))
+                                .x("127.0179133")
+                                .y("37.5908482")
+                                .thumUrls(List.of(
+                                        "https://ldb-phinf.pstatic.net/20220106_294/1641437440289J8dYW_JPEG/1635122589184-10.jpg",
+                                        "https://ldb-phinf.pstatic.net/20220106_112/1641437356001DoVgV_JPEG/1540180782395.jpg",
+                                        "https://ldb-phinf.pstatic.net/20220106_297/1641437421551RjALN_JPEG/IMG_20180602_101017_715.jpg"
+                                ))
+                                .menuInfo(List.of(
+                                        "아나고사케동정식 변동가격(업주문의)",
+                                        "스키야끼정식 변동가격(업주문의)"
+                                ))
+                                .build()
+                )
+                .build();
+
+        given(groupService.keywordCentralizedMeetingSpot(anyDouble(), anyDouble(), anyString(), anyString()))
+                .willReturn(List.of(place1, place2, place3));
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.get("/api/v1/group/best-region/place")
+                                .param("x", "127.232943")
+                                .param("y", "37.6823811")
+                                .param("local", "성신여대입구역")
+                                .param("keyword", "식당")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("read-bestPlace-keyword",
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("x").description("역(또는 지역) x좌표"),
+                                parameterWithName("y").description("역(또는 지역) y좌표"),
+                                parameterWithName("local").description("역(또는 지역)이름"),
+                                parameterWithName("keyword").description("카페 / 스터디카페 / 식당 / 도서관 / 스터디룸")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data[].title").type(JsonFieldType.STRING)
+                                        .description("가게 이름"),
+                                fieldWithPath("data[].thumUrl").type(JsonFieldType.STRING)
+                                        .description("썸네일 이미지 URL"),
+                                fieldWithPath("data[].distance").type(JsonFieldType.STRING)
+                                        .description("거리"),
+                                fieldWithPath("data[].openTime").type(JsonFieldType.STRING)
+                                        .description("영업 시간"),
+                                fieldWithPath("data[].tel").type(JsonFieldType.STRING)
+                                        .description("전화번호"),
+                                fieldWithPath("data[].detail.local").type(JsonFieldType.STRING)
+                                        .description("지역"),
+                                fieldWithPath("data[].detail.title").type(JsonFieldType.STRING)
+                                        .description("가게 이름"),
+                                fieldWithPath("data[].detail.address").type(JsonFieldType.STRING)
+                                        .description("주소"),
+                                fieldWithPath("data[].detail.status").type(JsonFieldType.STRING)
+                                        .description("영업 상태"),
+                                fieldWithPath("data[].detail.openTime").type(JsonFieldType.STRING)
+                                        .description("영업 시간"),
+                                fieldWithPath("data[].detail.homePageUrl").type(JsonFieldType.STRING)
+                                        .description("홈페이지 URL"),
+                                fieldWithPath("data[].detail.tel").type(JsonFieldType.STRING)
+                                        .description("전화번호"),
+                                fieldWithPath("data[].detail.category[]").type(JsonFieldType.ARRAY)
+                                        .description("카테고리 목록 / List<String>"),
+                                fieldWithPath("data[].detail.x").type(JsonFieldType.STRING)
+                                        .description("위도"),
+                                fieldWithPath("data[].detail.y").type(JsonFieldType.STRING)
+                                        .description("경도"),
+                                fieldWithPath("data[].detail.thumUrls[]").type(JsonFieldType.ARRAY)
+                                        .description("상세 이미지 URL 목록 / List<String>"),
+                                fieldWithPath("data[].detail.menuInfo[]").type(JsonFieldType.ARRAY)
+                                        .description("메뉴 정보 목록 / List<String>")
+                                )
                 ));
     }
 }

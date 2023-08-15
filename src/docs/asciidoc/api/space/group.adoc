@@ -91,6 +91,22 @@ include::{snippets}/detail-recommended/http-request.adoc[]
 include::{snippets}/detail-recommended/path-parameters.adoc[]
 
 ==== HTTP Response Body
-
 include::{snippets}/detail-recommended/http-response.adoc[]
 include::{snippets}/detail-recommended/response-fields.adoc[]
+
+=== 모임 장소 추천 조회 리스트 API
+
+==== HTTP Request QueryParameters
+include::{snippets}/read-bestPlace-keyword/query-parameters.adoc[]
+[source,http,options="nowrap"]
+----
+GET /api/v1/group/best-region/place?x=127.232943&y=37.6823811&local=성신여대입구역AD&keyword=식당 HTTP/1.1
+Host: localhost:8080
+----
+
+==== HTTP Response body
+include::{snippets}/read-bestPlace-keyword/http-response.adoc[]
+
+> 예시는 3개지만 12개의 관련 항목을 응답
+
+include::{snippets}/read-bestPlace-keyword/response-fields.adoc[]
