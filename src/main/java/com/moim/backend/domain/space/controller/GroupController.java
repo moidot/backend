@@ -2,7 +2,6 @@ package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
-import com.moim.backend.domain.space.response.KakaoMapDetailDto;
 import com.moim.backend.domain.space.service.GroupService;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.entity.Users;
@@ -12,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @RestController
@@ -91,5 +91,16 @@ public class GroupController {
             @PathVariable(name = "id") Long id
     ) {
         return CustomResponseEntity.success(groupService.detailRecommendedPlace(id));
+    }
+
+    // 모임 장소 추천 조회 리스트 API
+    @GetMapping("/best-region/place")
+    public CustomResponseEntity<List<GroupResponse.Place>> keywordCentralizedMeetingSpot(
+            @RequestParam Double x,
+            @RequestParam Double y,
+            @RequestParam String local,
+            @RequestParam String keyword
+    ) {
+        return CustomResponseEntity.success(groupService.keywordCentralizedMeetingSpot(x, y, local, keyword));
     }
 }

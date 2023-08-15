@@ -13,32 +13,40 @@ import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.KakaoMapDetailDto;
 import com.moim.backend.domain.space.response.MiddlePoint;
+import com.moim.backend.domain.space.response.NaverMapListDto;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
+import com.moim.backend.domain.user.config.KakaoProperties;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static com.moim.backend.global.common.Result.*;
-import static java.lang.Boolean.TRUE;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class GroupService {
 
+    private final KakaoProperties kakaoProperties;
+    private final RestTemplate restTemplate = new RestTemplate();
     private final VoteRepository voteRepository;
     private final GroupRepository groupRepository;
     private final ParticipationRepository participationRepository;
@@ -170,8 +178,39 @@ public class GroupService {
                 ).toList();
     }
 
+    // 모임 장소 추천 조회 리스트 API
+    public List<GroupResponse.Place> keywordCentralizedMeetingSpot(Double x, Double y, String local, String keyword) {
+        // 네이버 API 요청
+        URI uri = createNaverRequestUri(local, keyword);
+        ResponseEntity<NaverMapListDto> naverResponse = restTemplate.getForEntity(uri.toString(), NaverMapListDto.class);
+
+        // 응답 처리
+        Optional<NaverMapListDto> optionalBody = Optional.ofNullable(naverResponse.getBody());
+        if (!naverResponse.getStatusCode().is2xxSuccessful() || optionalBody.isEmpty()) {
+            throw new CustomException(NOT_REQUEST_NAVER);
+        }
+
+        // 장소 정보 가져오기
+        List<NaverMapListDto.placeList> placeList = optionalBody.get().getResult().getPlace().getList();
+
+        return placeList.stream().map(toPlaceEntity(x, y, local)).toList();
+    }
 
     // validate
+
+    private static URI createNaverRequestUri(String local, String keyword) {
+        return UriComponentsBuilder.fromHttpUrl("https://map.naver.com/v5/api/search")
+                .queryParam("caller", "pcweb")
+                .queryParam("query", local + keyword)
+                .queryParam("type", "all")
+                .queryParam("page", 1)
+                .queryParam("displayCount", 12)
+                .queryParam("isPlaceRecommendationReplace", true)
+                .queryParam("lang", "ko")
+                .build()
+                .toUri();
+    }
+
     private void checkDuplicateParticipation(Groups group, Users user) {
         if (participationRepository.countByGroupAndUserId(group, user.getUserId()) > 0) {
             throw new CustomException(DUPLICATE_PARTICIPATION);
@@ -197,6 +236,44 @@ public class GroupService {
     }
 
     // method
+
+    private static Function<NaverMapListDto.placeList, GroupResponse.Place> toPlaceEntity(Double x, Double y, String local) {
+        return naver -> {
+            GroupResponse.Place response = GroupResponse.Place.response(naver, local);
+            double placeX = Double.parseDouble(naver.getX());
+            double placeY = Double.parseDouble(naver.getY());
+            String distance = String.format("%s(으)로부터 %sm", local, (int) calculateDistance(y, x, placeY, placeX, "meter"));
+            response.setDistance(distance);
+            return response;
+        };
+    }
+
+    private static double calculateDistance(double lat1, double lon1, double lat2, double lon2, String unit) {
+
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+
+        if (unit.equals("kilometer")) {
+            dist = dist * 1.609344;
+        } else if (unit.equals("meter")) {
+            dist = dist * 1609.344;
+        }
+
+        return (dist);
+    }
+
+
+    private static double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    private static double rad2deg(double rad) {
+        return (rad * 180 / Math.PI);
+    }
 
     private Groups getGroup(Long groupId) {
         return groupRepository.findById(groupId)
@@ -277,5 +354,9 @@ public class GroupService {
         }
 
         return GroupResponse.detailRecommendedPlace.response(kakaoMapDetailDto);
+    }
+
+    private static String createKakaoUrl(Double x, Double y, String keyword) {
+        return String.format("https://dapi.kakao.com/v2/local/search/keyword.json?y=%s&x=%s&radius=3000&query=%s", y, x, keyword);
     }
 }
