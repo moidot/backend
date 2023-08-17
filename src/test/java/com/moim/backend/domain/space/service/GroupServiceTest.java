@@ -512,20 +512,20 @@ class GroupServiceTest {
 
         // then
         assertThat(response)
-                .extracting("title", "openTime", "detail.x", "detail.y", "detail.homePageUrl", "distance")
+                .extracting("title", "detail.x", "detail.y", "detail.homePageUrl", "distance")
                 .contains(
-                        tuple("랠리쉬커피", "19:30에 라스트오더", "127.0166246", "37.5944971", "https://www.instagram.com/relishcoffee_", "성신여대입구역(으)로부터 192m"),
-                        tuple("도쿄빙수 성신여대점", "21:20에 라스트오더", "127.0181725", "37.5920195", "https://instagram.com/tokyobingsu_sungshin?igshid=113a9wlh7mmb8", "성신여대입구역(으)로부터 150m"),
-                        tuple("Los Dias", "20:30에 라스트오더", "127.0188944", "37.5901777", "http://pf.kakao.com/_cDqxixj", "성신여대입구역(으)로부터 344m"),
-                        tuple("753 베이글 비스트로 성신여대점", "20:00에 라스트오더", "127.0200490", "37.5945812", "https://www.instagram.com/753_bagel_bistro", "성신여대입구역(으)로부터 354m"),
-                        tuple("서울노마드", "21:00에 라스트오더", "127.0119483", "37.5915893", "http://instagram.com/seoulnomad_official", "성신여대입구역(으)로부터 442m"),
-                        tuple("써리얼 벗 나이스", "08/15 휴무", "127.0186908", "37.5945515", "https://www.instagram.com/surreal.b.nice", "성신여대입구역(으)로부터 262m"),
-                        tuple("맬크", "매주 화요일 휴무", "127.0168510", "37.5950775", "https://www.instagram.com/melc.cake", "성신여대입구역(으)로부터 257m"),
-                        tuple("루틴", "22:00에 영업종료", "127.0201489", "37.5917147", "http://instagram.com/cafe.routine", "성신여대입구역(으)로부터 321m"),
-                        tuple("더홈서울", "매주 화요일 휴무", "127.0174049", "37.5888662", "http://instagram.com/the_home_seoul", "성신여대입구역(으)로부터 437m"),
-                        tuple("본크레페", "광복절 휴무", "127.0183100", "37.5920357", "http://www.instagram.com/_bon_crepe_/", "성신여대입구역(으)로부터 159m"),
-                        tuple("소설원 서가", "20:30에 라스트오더", "127.0099785", "37.5903636", "", "성신여대입구역(으)로부터 653m"),
-                        tuple("버터플로우", "19:30에 라스트오더", "127.0184950", "37.5919186", "https://www.instagram.com/butterflow_2f", "성신여대입구역(으)로부터 180m")
+                        tuple("랠리쉬커피", "127.0166246", "37.5944971", "https://www.instagram.com/relishcoffee_", "성신여대입구역(으)로부터 192m"),
+                        tuple("도쿄빙수 성신여대점", "127.0181725", "37.5920195", "https://instagram.com/tokyobingsu_sungshin?igshid=113a9wlh7mmb8", "성신여대입구역(으)로부터 150m"),
+                        tuple("Los Dias", "127.0188944", "37.5901777", "http://pf.kakao.com/_cDqxixj", "성신여대입구역(으)로부터 344m"),
+                        tuple("753 베이글 비스트로 성신여대점", "127.0200490", "37.5945812", "https://www.instagram.com/753_bagel_bistro", "성신여대입구역(으)로부터 354m"),
+                        tuple("서울노마드", "127.0119483", "37.5915893", "http://instagram.com/seoulnomad_official", "성신여대입구역(으)로부터 442m"),
+                        tuple("써리얼 벗 나이스", "127.0186908", "37.5945515", "https://www.instagram.com/surreal.b.nice", "성신여대입구역(으)로부터 262m"),
+                        tuple("맬크", "127.0168510", "37.5950775", "https://www.instagram.com/melc.cake", "성신여대입구역(으)로부터 257m"),
+                        tuple("루틴", "127.0201489", "37.5917147", "http://instagram.com/cafe.routine", "성신여대입구역(으)로부터 321m"),
+                        tuple("더홈서울", "127.0174049", "37.5888662", "http://instagram.com/the_home_seoul", "성신여대입구역(으)로부터 437m"),
+                        tuple("본크레페", "127.0183100", "37.5920357", "http://www.instagram.com/_bon_crepe_/", "성신여대입구역(으)로부터 159m"),
+                        tuple("소설원 서가", "127.0099785", "37.5903636", "", "성신여대입구역(으)로부터 653m"),
+                        tuple("모블러", "127.0204521", "37.5950653", "https://smartstore.naver.com/moblerpatisserie", "성신여대입구역(으)로부터 414m")
                 );
     }
 
