@@ -84,16 +84,6 @@ include::{snippets}/my-participate/request-headers.adoc[]
 include::{snippets}/my-participate/http-response.adoc[]
 include::{snippets}/my-participate/response-fields.adoc[]
 
-=== 추천된 장소 상세보기 API
-
-==== HTTP Request PathParameters
-include::{snippets}/detail-recommended/http-request.adoc[]
-include::{snippets}/detail-recommended/path-parameters.adoc[]
-
-==== HTTP Response Body
-include::{snippets}/detail-recommended/http-response.adoc[]
-include::{snippets}/detail-recommended/response-fields.adoc[]
-
 === 모임 장소 추천 조회 리스트 API
 
 ==== HTTP Request QueryParameters
