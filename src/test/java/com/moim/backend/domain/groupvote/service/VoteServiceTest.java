@@ -262,8 +262,8 @@ class VoteServiceTest {
 
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
 
-        Participation par1 = savedParticipation(admin, group, "어드민", "테스트", 123.123, 123.123, "BUS");
-        Participation par2 = savedParticipation(user, group, "일반인", "테스트", 123.123, 123.123, "BUS");
+        Participation par1 = savedParticipation(admin, group, "어드민", "테스트", 123.123, 123.123, "PUBLIC");
+        Participation par2 = savedParticipation(user, group, "일반인", "테스트", 123.123, 123.123, "PUBLIC");
 
         BestPlace bestPlace1 = saveBestPlace(group, "강남역", 123.123456, 123.123456);
         BestPlace bestPlace2 = saveBestPlace(group, "역삼역", 123.123456, 123.123456);
@@ -302,8 +302,8 @@ class VoteServiceTest {
 
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
 
-        Participation participation1 = savedParticipation(admin, group, "어드민", "테스트", 123.123, 123.123, "BUS");
-        Participation participation2 = savedParticipation(user, group, "일반인", "테스트", 123.123, 123.123, "BUS");
+        Participation participation1 = savedParticipation(admin, group, "어드민", "테스트", 123.123, 123.123, "PUBLIC");
+        Participation participation2 = savedParticipation(user, group, "일반인", "테스트", 123.123, 123.123, "PUBLIC");
 
         BestPlace bestPlace1 = saveBestPlace(group, "강남역", 123.123456, 123.123456);
         BestPlace bestPlace2 = saveBestPlace(group, "역삼역", 123.123456, 123.123456);

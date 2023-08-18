@@ -2,6 +2,7 @@ package com.moim.backend.docs.space;
 
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
+import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.service.GroupService;
@@ -16,6 +17,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
 
+import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
+import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
@@ -104,7 +107,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     void participationGroup() throws Exception {
         // given
         GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, "안지영", "쇼파르", 37.5660, 126.9784, "BUS", "123456");
+                = new GroupRequest.Participate(1L, "안지영", "쇼파르", 37.5660, 126.9784, PUBLIC, "123456");
 
         given(groupService.participateGroup(any(), any()))
                 .willReturn(
@@ -116,7 +119,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .locationName("쇼파르")
                                 .latitude(37.57449)
                                 .longitude(126.89521)
-                                .transportation("BUS")
+                                .transportation("PUBLIC")
                                 .build()
                 );
 
@@ -147,8 +150,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("위도 / Double"),
                                 fieldWithPath("longitude").type(NUMBER)
                                         .description("경도 / Double"),
-                                fieldWithPath("transportation").type(STRING)
-                                        .description("'BUS' / 'SUBWAY'"),
+                                fieldWithPath("transportationType").type(STRING)
+                                        .description("대중교통 : 'PUBLIC' / 자동차 : 'PERSONAL'"),
                                 fieldWithPath("password").type(STRING)
                                         .optional()
                                         .description("모임 내 비밀번호")
@@ -183,13 +186,13 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     void participationUpdate() throws Exception {
         // given
         GroupRequest.ParticipateUpdate request
-                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, "SUBWAY");
+                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, PERSONAL);
 
         given(groupService.participateUpdate(any(), any()))
                 .willReturn(
                         GroupResponse.ParticipateUpdate.builder()
                                 .locationName("쇼파르")
-                                .transportation("SUBWAY")
+                                .transportation("PERSONAL")
                                 .build()
                 );
 
@@ -220,8 +223,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("위도 / Double"),
                                 fieldWithPath("longitude").type(NUMBER)
                                         .description("경도 / Double"),
-                                fieldWithPath("transportation").type(STRING)
-                                        .description("'BUS' / 'SUBWAY'")
+                                fieldWithPath("transportationType").type(STRING)
+                                        .description("대중교통 : 'PUBLIC' / 자동차 : 'PERSONAL'")
                         ),
                         responseFields(
                                 fieldWithPath("code").type(NUMBER)
@@ -642,15 +645,15 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @DisplayName("모임 참여자 정보 리스트 조회 API")
     @Test
     void readParticipateGroupByRegion() throws Exception {
-        GroupResponse.Participations participations1 = new GroupResponse.Participations(1L, 1L, "김모임장", "서울 성북구 보문로34다길 2", "BUS");
-        GroupResponse.Participations participations2 = new GroupResponse.Participations(2L, 13L, "박이람이", "서울 성북구 보문로34다길 2", "BUS");
+        GroupResponse.Participations participations1 = new GroupResponse.Participations(1L, 1L, "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC");
+        GroupResponse.Participations participations2 = new GroupResponse.Participations(2L, 13L, "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC");
         GroupResponse.Region region1 = new GroupResponse.Region("서울 성북구", List.of(participations1, participations2));
 
-        GroupResponse.Participations participations3 = new GroupResponse.Participations(3L, 25L, "천수제비", "서울 강북구 도봉로 76가길 55", "BUS");
-        GroupResponse.Participations participations4 = new GroupResponse.Participations(4L, 6L, "모람모람", "서울 강북구 도봉로 76가길 54", "SUBWAY");
+        GroupResponse.Participations participations3 = new GroupResponse.Participations(3L, 25L, "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL");
+        GroupResponse.Participations participations4 = new GroupResponse.Participations(4L, 6L, "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC");
         GroupResponse.Region region2 = new GroupResponse.Region("서울 강북구", List.of(participations3, participations4));
 
-        GroupResponse.Participations participations5 = new GroupResponse.Participations(3L, 25L, "낭만 ENFP", "경기도 부천시 부천로 1", "SUBWAY");
+        GroupResponse.Participations participations5 = new GroupResponse.Participations(3L, 25L, "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL");
         GroupResponse.Region region3 = new GroupResponse.Region("경기도 부천시", List.of(participations5));
 
         // given

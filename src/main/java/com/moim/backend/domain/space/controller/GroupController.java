@@ -34,7 +34,6 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.readParticipateGroupByRegion(groupId));
     }
 
-
     // 모임 참여하기
     @PostMapping("/participate")
     public CustomResponseEntity<GroupResponse.Participate> participateGroup(

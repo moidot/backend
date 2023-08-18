@@ -1,5 +1,6 @@
 package com.moim.backend.domain.space.request;
 
+import com.moim.backend.domain.space.entity.TransportationType;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -29,7 +30,7 @@ public class GroupServiceRequest {
         private String locationName;
         private Double latitude;
         private Double longitude;
-        private String transportation;
+        private TransportationType transportationType;
         private String password;
     }
 
@@ -44,6 +45,6 @@ public class GroupServiceRequest {
         private String locationName;
         private Double latitude;
         private Double longitude;
-        private String transportation;
+        private TransportationType transportationType;
     }
 }
