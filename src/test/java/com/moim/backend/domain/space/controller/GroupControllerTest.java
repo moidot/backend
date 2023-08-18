@@ -192,13 +192,30 @@ class GroupControllerTest extends ControllerTestSupport {
                 .andExpect(status().isOk());
     }
 
-    @DisplayName("추천된 장소 상세보기 API")
+    @DisplayName("모임 장소 추천 조회 리스트 API")
     @Test
-    void RecommendedPlaceDetails() throws Exception {
+    void keywordCentralizedMeetingSpot() throws Exception {
         // given
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group/{id}", 26974293L)
+                        MockMvcRequestBuilders.get("/api/v1/group/best-region/place")
+                                .param("x", "127.232943")
+                                .param("y", "37.6823811")
+                                .param("local", "성신여대입구역")
+                                .param("keyword", "식당")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("모임 참여자 정보 리스트 조회 API")
+    @Test
+    void readParticipateGroupByRegion() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/v1/group")
+                                .param("groupId", "1")
                 )
                 .andDo(print())
                 .andExpect(status().isOk());

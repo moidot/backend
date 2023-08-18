@@ -10,7 +10,6 @@ import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
-import com.moim.backend.domain.space.response.KakaoMapDetailDto;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.global.common.Result;
@@ -23,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
@@ -478,49 +478,6 @@ class GroupServiceTest {
                 .contains("의정부역", "서울역", "개봉역");
     }
 
-    @DisplayName("카카오맵을 이용해 해당 장소의 상세 정보를 가져온다.")
-    @Test
-    void RecommendedPlaceDetails() {
-        // given
-        List<KakaoMapDetailDto.TimeList> timeList = List.of(new KakaoMapDetailDto.TimeList("영업시간", "09:30 ~ 21:00", "매일"));
-        List<String> tags = List.of("스터디카페", "제로페이");
-        List<GroupResponse.Photos> photos = List.of(
-                new GroupResponse.Photos("M", "http://t1.kakaocdn.net/fiy_reboot/place/D02C1C1162A548B58894B236B754CFD6"),
-                new GroupResponse.Photos("R2", "http://t1.kakaocdn.net/fiy_reboot/place/7F10166652F94503872F7A8B07A55F42"),
-                new GroupResponse.Photos("R3", "http://t1.kakaocdn.net/fiy_reboot/place/5B14072B5D18448C81CF530950F0F571"),
-                new GroupResponse.Photos("R4", "http://t1.kakaocdn.net/fiy_reboot/place/8BC6FCB8CCEC45B1804B3557E72F8721"),
-                new GroupResponse.Photos("R5", "http://t1.kakaocdn.net/fiy_reboot/place/B2F2340363F44F18A76773AB8CADAC72")
-        );
-
-        List<KakaoMapDetailDto.MenuList> menuLists = List.of(
-                new KakaoMapDetailDto.MenuList("3,300", false, "아메리카노"),
-                new KakaoMapDetailDto.MenuList("3,800", false, "카페라떼"),
-                new KakaoMapDetailDto.MenuList("3,800", false, "자몽에이드"),
-                new KakaoMapDetailDto.MenuList("4,000", false, "유자차"),
-                new KakaoMapDetailDto.MenuList("4,000", false, "자몽차")
-        );
-
-        KakaoMapDetailDto.MenuInfo menuInfo = new KakaoMapDetailDto.MenuInfo(5, menuLists, "N", 0, "2022.11.11.");
-
-        // when
-        GroupResponse.detailRecommendedPlace response = groupService.detailRecommendedPlace(26974293L);
-
-        // then
-        assertThat(response)
-                .extracting(
-                        "placeName", "mainPhotoUrl", "detailPlace",
-                        "openTime", "url",
-                        "phone", "tags", "delivery",
-                        "pagekage", "photos", "menuInfo"
-                )
-                .contains(
-                        "커피나무 성신여대점", "http://t1.kakaocdn.net/fiy_reboot/place/D02C1C1162A548B58894B236B754CFD6", "서울 성북구 보문로30길 79 1,2층",
-                        timeList, "http://www.coffeenamu.co.kr",
-                        "02-922-1672", tags, "배달불가",
-                        "포장가능", photos, menuInfo
-                );
-    }
-
     @DisplayName("동일한 유저가 동일한 그룹에 중복으로 참여할 수 없다.")
     @Test
     void throwsExceptionWhenDuplicateParticipation() {
@@ -541,6 +498,87 @@ class GroupServiceTest {
         assertThatThrownBy(() -> groupService.participateGroup(request, user))
                 .extracting("result.code", "result.message")
                 .contains(Result.DUPLICATE_PARTICIPATION.getCode(), Result.DUPLICATE_PARTICIPATION.getMessage());
+    }
+
+    @DisplayName("네이버 API 를 이용해 장소의 정보를 가져온다.")
+    @Test
+    void keywordCentralizedMeetingSpot() throws UnsupportedEncodingException {
+        // given
+
+        // when
+        List<GroupResponse.Place> response = groupService.keywordCentralizedMeetingSpot(
+                127.01674669413555, 37.59276455965626, "성신여대입구역", "카페"
+        );
+
+        // then
+        assertThat(response)
+                .extracting("title", "detail.x", "detail.y", "detail.homePageUrl", "distance")
+                .contains(
+                        tuple("랠리쉬커피", "127.0166246", "37.5944971", "https://www.instagram.com/relishcoffee_", "성신여대입구역(으)로부터 192m"),
+                        tuple("도쿄빙수 성신여대점", "127.0181725", "37.5920195", "https://instagram.com/tokyobingsu_sungshin?igshid=113a9wlh7mmb8", "성신여대입구역(으)로부터 150m"),
+                        tuple("Los Dias", "127.0188944", "37.5901777", "http://pf.kakao.com/_cDqxixj", "성신여대입구역(으)로부터 344m"),
+                        tuple("753 베이글 비스트로 성신여대점", "127.0200490", "37.5945812", "https://www.instagram.com/753_bagel_bistro", "성신여대입구역(으)로부터 354m"),
+                        tuple("서울노마드", "127.0119483", "37.5915893", "http://instagram.com/seoulnomad_official", "성신여대입구역(으)로부터 442m"),
+                        tuple("써리얼 벗 나이스", "127.0186908", "37.5945515", "https://www.instagram.com/surreal.b.nice", "성신여대입구역(으)로부터 262m"),
+                        tuple("맬크", "127.0168510", "37.5950775", "https://www.instagram.com/melc.cake", "성신여대입구역(으)로부터 257m"),
+                        tuple("루틴", "127.0201489", "37.5917147", "http://instagram.com/cafe.routine", "성신여대입구역(으)로부터 321m"),
+                        tuple("더홈서울", "127.0174049", "37.5888662", "http://instagram.com/the_home_seoul", "성신여대입구역(으)로부터 437m"),
+                        tuple("본크레페", "127.0183100", "37.5920357", "http://www.instagram.com/_bon_crepe_/", "성신여대입구역(으)로부터 159m"),
+                        tuple("소설원 서가", "127.0099785", "37.5903636", "", "성신여대입구역(으)로부터 653m"),
+                        tuple("모블러", "127.0204521", "37.5950653", "https://smartstore.naver.com/moblerpatisserie", "성신여대입구역(으)로부터 414m")
+                );
+    }
+
+    @DisplayName("유저가 해당 모임의 참여자 정보들을 조회한다.")
+    @Test
+    void readParticipateGroupByRegion() {
+        // given
+        Users user1 = savedUser("test1@test.com", "모이닷 운영자1");
+        Users user2 = savedUser("test2@test.com", "모이닷 운영자2");
+        Users user3 = savedUser("test3@test.com", "모이닷 운영자3");
+        Users user4 = savedUser("test4@test.com", "모이닷 운영자4");
+
+        Groups group = savedGroup(user1.getUserId(), "모이닷");
+
+        Participation participation1 = savedParticipation(user1, group, "모이닷1", "서울 성북구 보문로34다길 2", 36.123456, 127.1234567, "SUBWAY");
+        Participation participation2 = savedParticipation(user2, group, "모이닷2", "서울 강북구 도봉로 76가길 55", 36.123456, 127.1234567, "BUS");
+        Participation participation3 = savedParticipation(user3, group, "모이닷3", "서울 강북구 도봉로 76가길 54", 36.123456, 127.1234567, "SUBWAY");
+        Participation participation4 = savedParticipation(user4, group, "모이닷4", "경기도 부천시 부천로 1", 36.123456, 127.1234567, "BUS");
+
+        em.flush();
+        em.clear();
+
+        // when
+        GroupResponse.Detail response = groupService.readParticipateGroupByRegion(group.getGroupId());
+
+        // then
+        assertThat(response)
+                .extracting("groupId", "name", "adminId", "date")
+                .contains(group.getGroupId(), "모이닷", group.getAdminId(), "2023-07-10");
+
+        assertThat(response.getParticipantsByRegion())
+                .extracting("regionName")
+                .contains("서울 성북구", "서울 강북구", "경기도 부천시");
+
+        assertThat(response.getParticipantsByRegion())
+                .allSatisfy(region -> {
+                    if (region.getRegionName().equals("서울 성북구")) {
+                        assertThat(region.getParticipations())
+                                .extracting("userName", "locationName")
+                                .contains(tuple("모이닷1", "서울 성북구 보문로34다길 2"));
+                    } else if (region.getRegionName().equals("서울 강북구")) {
+                        assertThat(region.getParticipations())
+                                .extracting("userName", "locationName")
+                                .contains(
+                                        tuple("모이닷2", "서울 강북구 도봉로 76가길 55"),
+                                        tuple("모이닷3", "서울 강북구 도봉로 76가길 54")
+                                );
+                    } else {
+                        assertThat(region.getParticipations())
+                                .extracting("userName", "locationName")
+                                .contains(tuple("모이닷4", "경기도 부천시 부천로 1"));
+                    }
+                });
     }
 
     // method

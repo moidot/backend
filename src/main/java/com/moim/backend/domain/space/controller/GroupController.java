@@ -2,7 +2,6 @@ package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
-import com.moim.backend.domain.space.response.KakaoMapDetailDto;
 import com.moim.backend.domain.space.service.GroupService;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.entity.Users;
@@ -28,6 +27,13 @@ public class GroupController {
     ) {
         return CustomResponseEntity.success(groupService.createGroup(request.toServiceRequest(), user));
     }
+
+    // 모임 참여자 정보 리스트 조회 API
+    @GetMapping("")
+    public CustomResponseEntity<GroupResponse.Detail> readParticipateGroupByRegion(@RequestParam Long groupId) {
+        return CustomResponseEntity.success(groupService.readParticipateGroupByRegion(groupId));
+    }
+
 
     // 모임 참여하기
     @PostMapping("/participate")
@@ -85,11 +91,14 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.getMyParticipate(user));
     }
 
-    // 추천된 장소 상세보기
-    @GetMapping("/{id}")
-    public CustomResponseEntity<GroupResponse.detailRecommendedPlace> RecommendedPlaceDetails(
-            @PathVariable(name = "id") Long id
+    // 모임 장소 추천 조회 리스트 API
+    @GetMapping("/best-region/place")
+    public CustomResponseEntity<List<GroupResponse.Place>> keywordCentralizedMeetingSpot(
+            @RequestParam Double x,
+            @RequestParam Double y,
+            @RequestParam String local,
+            @RequestParam String keyword
     ) {
-        return CustomResponseEntity.success(groupService.detailRecommendedPlace(id));
+        return CustomResponseEntity.success(groupService.keywordCentralizedMeetingSpot(x, y, local, keyword));
     }
 }

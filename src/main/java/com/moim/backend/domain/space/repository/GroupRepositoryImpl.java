@@ -2,6 +2,7 @@ package com.moim.backend.domain.space.repository;
 
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.QBestPlace;
+import com.moim.backend.domain.space.entity.QParticipation;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
 
@@ -39,5 +40,15 @@ public class GroupRepositoryImpl implements GroupCustomRepository {
                 .where(participation.userId.eq(userId))
                 .fetchJoin()
                 .fetch();
+    }
+
+    @Override
+    public Optional<Groups> findByGroupParticipation(Long groupId) {
+        return Optional.ofNullable(queryFactory
+                .selectFrom(groups)
+                .leftJoin(groups.participations, participation).fetchJoin()
+                .where(groups.groupId.eq(groupId))
+                .fetchOne()
+        );
     }
 }

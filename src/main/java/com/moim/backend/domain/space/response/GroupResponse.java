@@ -6,9 +6,7 @@ import com.moim.backend.domain.space.entity.Participation;
 import lombok.*;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GroupResponse {
@@ -45,8 +43,72 @@ public class GroupResponse {
         }
     }
 
-    @Getter
+    @AllArgsConstructor
     @NoArgsConstructor
+    @Getter
+    @Builder
+    public static class Detail {
+        private Long groupId;
+        private Long adminId;
+        private String name;
+        private String date;
+        private List<Region> participantsByRegion;
+
+        public static Detail response(Groups group, List<Region> participantsByRegion) {
+            return Detail.builder()
+                    .groupId(group.getGroupId())
+                    .name(group.getName())
+                    .adminId(group.getAdminId())
+                    .date(group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .participantsByRegion(participantsByRegion)
+                    .build();
+        }
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Builder
+    public static class Region {
+        private String regionName;
+
+        @Setter
+        private List<Participations> participations;
+
+        public static Region toLocalEntity(String region, GroupResponse.Participations participation) {
+            return Region.builder()
+                    .regionName(region)
+                    .participations(List.of(participation))
+                    .build();
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class Participations {
+        private Long participationId;
+        private Long userId;
+        private String userName;
+        private String locationName;
+        private String transportation;
+
+        public static GroupResponse.Participations toParticipateEntity(Participation participation) {
+            return Participations.builder()
+                    .participationId(participation.getParticipationId())
+                    .userId(participation.getUserId())
+                    .userName(participation.getUserName())
+                    .locationName(participation.getLocationName())
+                    .transportation(participation.getTransportation().name())
+                    .build();
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
     public static class Participate {
         private Long participationId;
         private Long groupId;
@@ -56,18 +118,6 @@ public class GroupResponse {
         private Double latitude;
         private Double longitude;
         private String transportation;
-
-        @Builder
-        private Participate(Long participationId, Long groupId, Long userId, String userName, String locationName, Double latitude, Double longitude, String transportation) {
-            this.participationId = participationId;
-            this.groupId = groupId;
-            this.userId = userId;
-            this.userName = userName;
-            this.locationName = locationName;
-            this.latitude = latitude;
-            this.longitude = longitude;
-            this.transportation = transportation;
-        }
 
         public static GroupResponse.Participate response(Participation participation) {
             return Participate.builder()
@@ -155,121 +205,66 @@ public class GroupResponse {
         }
     }
 
-    @Getter
+    @AllArgsConstructor
     @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class detailRecommendedPlace {
-        private String placeName;
-        private String mainPhotoUrl;
-        private String detailPlace;
-        private String isOpen;
-        private List<KakaoMapDetailDto.TimeList> openTime;
-        private String url;
-        private String phone;
-        private List<String> tags;
-        private String delivery;
-        private String pagekage;
-        private List<Photos> photos;
-        private KakaoMapDetailDto.MenuInfo menuInfo;
-
-        public static GroupResponse.detailRecommendedPlace response(KakaoMapDetailDto kakaoMapDetailDto) {
-            KakaoMapDetailDto.BasicInfo basicInfo = kakaoMapDetailDto.getBasicInfo();
-            KakaoMapDetailDto.Address address = basicInfo.getAddress();
-            String placeName = (basicInfo.getPlacenamefull() != null) ? basicInfo.getPlacenamefull() : "none";
-            String mainPhotoUrl = (basicInfo.getMainphotourl() != null) ? basicInfo.getMainphotourl() : "none";
-            String isOpen = "none";
-            List<KakaoMapDetailDto.TimeList> timeList = new ArrayList<>();
-            String homePage = (basicInfo.getHomepage() != null) ? basicInfo.getHomepage() : "none";
-            String phoneNum = (basicInfo.getPhonenum() != null) ? basicInfo.getPhonenum() : "none";
-            List<String> tags = new ArrayList<>();
-            String delivery = "none";
-            String pagekage = "none";
-            List<Photos> photos = new ArrayList<>();
-            KakaoMapDetailDto.MenuInfo menuInfo = (kakaoMapDetailDto.getMenuInfo() != null) ?
-                    kakaoMapDetailDto.getMenuInfo() : new KakaoMapDetailDto.MenuInfo();
-
-            if (basicInfo.getOpenHour() != null) {
-                if (basicInfo.getOpenHour().getRealtime().getOpen() != null) {
-                    isOpen = basicInfo.getOpenHour().getRealtime().getOpen().equals("Y") ? "영업중" : "영업종료";
-                }
-                if (basicInfo.getOpenHour().getRealtime().getCurrentPeriod() != null) {
-                    timeList = basicInfo.getOpenHour().getRealtime().getCurrentPeriod().getTimeList();
-                }
-            }
-
-            if (basicInfo.getTags() != null) {
-                tags = basicInfo.getTags();
-            }
-
-            if (basicInfo.getOperationInfo() != null && basicInfo.getOperationInfo().getDelivery() != null) {
-                delivery = basicInfo.getOperationInfo().getDelivery().equals("Y") ? "배달가능" : "배달불가";
-            }
-
-            if (basicInfo.getOperationInfo() != null && basicInfo.getOperationInfo().getPagekage() != null) {
-                pagekage = basicInfo.getOperationInfo().getPagekage().equals("Y") ? "포장가능" : "포장불가";
-            }
-
-            if (kakaoMapDetailDto.getPhoto() != null) {
-                photos = kakaoMapDetailDto.getPhoto().getPhotoList().get(0).getList()
-                        .stream()
-                        .map(Photos::response)
-                        .collect(Collectors.toList());
-            }
-
-            return detailRecommendedPlace.builder()
-                    .placeName(placeName)
-                    .mainPhotoUrl(mainPhotoUrl)
-                    .detailPlace(getDetailPlace(address))
-                    .isOpen(isOpen)
-                    .openTime(timeList)
-                    .url(homePage)
-                    .phone(phoneNum)
-                    .tags(tags)
-                    .delivery(delivery)
-                    .pagekage(pagekage)
-                    .photos(photos)
-                    .menuInfo(menuInfo)
-                    .build();
-        }
-
-        private static String getDetailPlace(KakaoMapDetailDto.Address address) {
-            String addFullName = (address.getRegion().getNewaddrfullname() != null) ? address.getRegion().getNewaddrfullname() : "";
-            String addMiddleName = (address.getNewaddr().getNewaddrfull() != null) ? address.getNewaddr().getNewaddrfull() : "";
-            String addDetail = (address.getAddrdetail() != null) ? address.getAddrdetail() : "";
-            return addFullName +
-                    " " +
-                    addMiddleName +
-                    " " +
-                    addDetail;
-        }
-    }
-
     @Getter
-    @AllArgsConstructor
     @Builder
-    public static class Photos {
-        private String photoId;
-        private String photoUrl;
+    public static class Place {
+        private String title;
+        private String thumUrl;
+        private String distance;
+        private String openTime;
+        private String tel;
+        private Detail detail;
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Photos photos = (Photos) o;
-            return Objects.equals(getPhotoUrl(), photos.getPhotoUrl());
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(getPhotoUrl());
-        }
-
-        public static GroupResponse.Photos response(KakaoMapDetailDto.PhotoListList photo) {
-            return Photos.builder()
-                    .photoId(photo.getPhotoid())
-                    .photoUrl(photo.getOrgurl())
+        public static Place response(NaverMapListDto.placeList naver, String local) {
+            List<String> menuInfo = naver.getMenuInfoOptional()
+                    .map(menuInfoString ->
+                            Arrays.stream(menuInfoString.split("\\s*\\|\\s*")).collect(Collectors.toList()))
+                    .orElseGet(() -> List.of());
+            return Place.builder()
+                    .title(naver.getName())
+                    .thumUrl(naver.getThumUrl())
+                    .openTime(naver.getBusinessStatus().getStatus().getDetailInfo())
+                    .tel(naver.getTel())
+                    .detail(Detail.builder()
+                            .local(local)
+                            .title(naver.getName())
+                            .address(naver.getRoadAddress())
+                            .status(naver.getBizhourInfo())
+                            .openTime(naver.getBusinessStatus().getStatus().getDetailInfo())
+                            .homePageUrl(naver.getHomePage())
+                            .tel(naver.getTel())
+                            .category(naver.getCategory())
+                            .x(naver.getX())
+                            .y(naver.getY())
+                            .thumUrls(naver.getThumUrls())
+                            .menuInfo(menuInfo)
+                            .build())
                     .build();
+        }
+
+        public void setDistance(String distance) {
+            this.distance = distance;
+        }
+
+        @AllArgsConstructor
+        @NoArgsConstructor
+        @Getter
+        @Builder
+        public static class Detail {
+            private String local;
+            private String title;
+            private String address;
+            private String status;
+            private String openTime;
+            private String homePageUrl;
+            private String tel;
+            private List<String> category;
+            private String x;
+            private String y;
+            private List<String> thumUrls;
+            private List<String> menuInfo;
         }
     }
 }

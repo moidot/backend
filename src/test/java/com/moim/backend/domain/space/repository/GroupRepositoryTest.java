@@ -11,6 +11,7 @@ import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
+import com.moim.backend.global.common.exception.CustomException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -177,6 +178,38 @@ class GroupRepositoryTest {
                 System.out.println(selectPlace.getUserId());
             }
         }
+    }
+
+    @DisplayName("")
+    @Test
+    void findByGroupParticipation() {
+        // given
+        Users user1 = savedUser("test1@test.com", "모이닷 운영자1");
+        Users user2 = savedUser("test2@test.com", "모이닷 운영자2");
+        Users user3 = savedUser("test3@test.com", "모이닷 운영자3");
+        Users user4 = savedUser("test4@test.com", "모이닷 운영자4");
+
+        Groups group = savedGroup(user1.getUserId(), "모이닷");
+
+        Participation participation1 = savedParticipation(user1, group, "모이닷1", "서울 성북구 보문로34다길 2", 36.123456, 127.1234567, "SUBWAY");
+        Participation participation2 = savedParticipation(user2, group, "모이닷2", "서울 강북구 도봉로 76가길 55", 36.123456, 127.1234567, "BUS");
+        Participation participation3 = savedParticipation(user3, group, "모이닷3", "서울 강북구 도봉로 76가길 54", 36.123456, 127.1234567, "SUBWAY");
+        Participation participation4 = savedParticipation(user4, group, "모이닷4", "경기도 부천시 부천로 1", 36.123456, 127.1234567, "BUS");
+
+        em.flush();
+        em.clear();
+
+        // when
+        Groups validateGroup = groupRepository.findByGroupParticipation(group.getGroupId()).get();
+
+        // then
+        assertThat(validateGroup.getParticipations())
+                .extracting("userName", "locationName")
+                .contains(
+                        tuple("모이닷1", "서울 성북구 보문로34다길 2"),
+                        tuple("모이닷2", "서울 강북구 도봉로 76가길 55"),
+                        tuple("모이닷3", "서울 강북구 도봉로 76가길 54"),
+                        tuple("모이닷4", "경기도 부천시 부천로 1"));
     }
 
     // method
