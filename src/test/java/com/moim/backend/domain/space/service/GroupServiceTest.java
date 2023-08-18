@@ -529,6 +529,58 @@ class GroupServiceTest {
                 );
     }
 
+    @DisplayName("유저가 해당 모임의 참여자 정보들을 조회한다.")
+    @Test
+    void readParticipateGroupByRegion() {
+        // given
+        Users user1 = savedUser("test1@test.com", "모이닷 운영자1");
+        Users user2 = savedUser("test2@test.com", "모이닷 운영자2");
+        Users user3 = savedUser("test3@test.com", "모이닷 운영자3");
+        Users user4 = savedUser("test4@test.com", "모이닷 운영자4");
+
+        Groups group = savedGroup(user1.getUserId(), "모이닷");
+
+        Participation participation1 = savedParticipation(user1, group, "모이닷1", "서울 성북구 보문로34다길 2", 36.123456, 127.1234567, "SUBWAY");
+        Participation participation2 = savedParticipation(user2, group, "모이닷2", "서울 강북구 도봉로 76가길 55", 36.123456, 127.1234567, "BUS");
+        Participation participation3 = savedParticipation(user3, group, "모이닷3", "서울 강북구 도봉로 76가길 54", 36.123456, 127.1234567, "SUBWAY");
+        Participation participation4 = savedParticipation(user4, group, "모이닷4", "경기도 부천시 부천로 1", 36.123456, 127.1234567, "BUS");
+
+        em.flush();
+        em.clear();
+
+        // when
+        GroupResponse.Detail response = groupService.readParticipateGroupByRegion(group.getGroupId());
+
+        // then
+        assertThat(response)
+                .extracting("groupId", "name", "adminId", "date")
+                .contains(group.getGroupId(), "모이닷", group.getAdminId(), "2023-07-10");
+
+        assertThat(response.getParticipantsByRegion())
+                .extracting("regionName")
+                .contains("서울 성북구", "서울 강북구", "경기도 부천시");
+
+        assertThat(response.getParticipantsByRegion())
+                .allSatisfy(region -> {
+                    if (region.getRegionName().equals("서울 성북구")) {
+                        assertThat(region.getParticipations())
+                                .extracting("userName", "locationName")
+                                .contains(tuple("모이닷1", "서울 성북구 보문로34다길 2"));
+                    } else if (region.getRegionName().equals("서울 강북구")) {
+                        assertThat(region.getParticipations())
+                                .extracting("userName", "locationName")
+                                .contains(
+                                        tuple("모이닷2", "서울 강북구 도봉로 76가길 55"),
+                                        tuple("모이닷3", "서울 강북구 도봉로 76가길 54")
+                                );
+                    } else {
+                        assertThat(region.getParticipations())
+                                .extracting("userName", "locationName")
+                                .contains(tuple("모이닷4", "경기도 부천시 부천로 1"));
+                    }
+                });
+    }
+
     // method
 
     private void saveBestPlace(Groups group, String placeName, double longitude, double latitude) {
