@@ -100,3 +100,13 @@ include::{snippets}/read-bestPlace-keyword/http-response.adoc[]
 > 예시는 3개지만 12개의 관련 항목을 응답
 
 include::{snippets}/read-bestPlace-keyword/response-fields.adoc[]
+
+=== 모임 참여자 정보 리스트 조회 API
+
+==== HTTP Request QueryParameters
+include::{snippets}/read-participate-region/query-parameters.adoc[]
+include::{snippets}/read-participate-region/http-request.adoc[]
+
+==== HTTP Response body
+include::{snippets}/read-participate-region/http-response.adoc[]
+include::{snippets}/read-participate-region/response-fields.adoc[]

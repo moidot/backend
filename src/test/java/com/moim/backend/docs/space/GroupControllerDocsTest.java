@@ -24,6 +24,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.payload.JsonFieldType.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -73,26 +74,26 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("insert the AccessToken")
                         ),
                         requestFields(
-                                fieldWithPath("name").type(JsonFieldType.STRING)
+                                fieldWithPath("name").type(STRING)
                                         .description("모임 이름"),
-                                fieldWithPath("date").type(JsonFieldType.STRING)
+                                fieldWithPath("date").type(STRING)
                                         .description("모임 날짜 / 'yyyy-dd-mm'")
                                         .optional()
                         ),
                         responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                fieldWithPath("code").type(NUMBER)
                                         .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                fieldWithPath("message").type(STRING)
                                         .description("상태 메세지"),
-                                fieldWithPath("data.groupId").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data.groupId").type(NUMBER)
                                         .description("모임 ID / Long"),
-                                fieldWithPath("data.adminId").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data.adminId").type(NUMBER)
                                         .description("모임장 ID / Long"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING)
+                                fieldWithPath("data.name").type(STRING)
                                         .description("모임 이름"),
-                                fieldWithPath("data.date").type(JsonFieldType.STRING)
+                                fieldWithPath("data.date").type(STRING)
                                         .description("모임 날짜"),
-                                fieldWithPath("data.fixedPlace").type(JsonFieldType.STRING)
+                                fieldWithPath("data.fixedPlace").type(STRING)
                                         .description("확정 장소")
                         )
                 ));
@@ -136,42 +137,42 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("insert the AccessToken")
                         ),
                         requestFields(
-                                fieldWithPath("groupId").type(JsonFieldType.NUMBER)
+                                fieldWithPath("groupId").type(NUMBER)
                                         .description("그룹 ID / Long"),
-                                fieldWithPath("userName").type(JsonFieldType.STRING)
+                                fieldWithPath("userName").type(STRING)
                                         .description("유저 닉네임"),
-                                fieldWithPath("locationName").type(JsonFieldType.STRING)
+                                fieldWithPath("locationName").type(STRING)
                                         .description("출발 위치 이름"),
-                                fieldWithPath("latitude").type(JsonFieldType.NUMBER)
+                                fieldWithPath("latitude").type(NUMBER)
                                         .description("위도 / Double"),
-                                fieldWithPath("longitude").type(JsonFieldType.NUMBER)
+                                fieldWithPath("longitude").type(NUMBER)
                                         .description("경도 / Double"),
-                                fieldWithPath("transportation").type(JsonFieldType.STRING)
+                                fieldWithPath("transportation").type(STRING)
                                         .description("'BUS' / 'SUBWAY'"),
-                                fieldWithPath("password").type(JsonFieldType.STRING)
+                                fieldWithPath("password").type(STRING)
                                         .optional()
                                         .description("모임 내 비밀번호")
                         ),
                         responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                fieldWithPath("code").type(NUMBER)
                                         .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                fieldWithPath("message").type(STRING)
                                         .description("상태 메세지"),
-                                fieldWithPath("data.participationId").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data.participationId").type(NUMBER)
                                         .description("모임 참여자 ID / Long"),
-                                fieldWithPath("data.groupId").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data.groupId").type(NUMBER)
                                         .description("그룹 ID / Long"),
-                                fieldWithPath("data.userId").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data.userId").type(NUMBER)
                                         .description("유저 ID / Long"),
-                                fieldWithPath("data.userName").type(JsonFieldType.STRING)
+                                fieldWithPath("data.userName").type(STRING)
                                         .description("유저 닉네임"),
-                                fieldWithPath("data.locationName").type(JsonFieldType.STRING)
+                                fieldWithPath("data.locationName").type(STRING)
                                         .description("출발 위치"),
-                                fieldWithPath("data.latitude").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data.latitude").type(NUMBER)
                                         .description("위도 / Double"),
-                                fieldWithPath("data.longitude").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data.longitude").type(NUMBER)
                                         .description("경도 / Long"),
-                                fieldWithPath("data.transportation").type(JsonFieldType.STRING)
+                                fieldWithPath("data.transportation").type(STRING)
                                         .description("내 이동수단")
                         )
                 ));
@@ -209,27 +210,27 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("insert the AccessToken")
                         ),
                         requestFields(
-                                fieldWithPath("participateId").type(JsonFieldType.NUMBER)
+                                fieldWithPath("participateId").type(NUMBER)
                                         .description("참여 정보 ID / Long"),
-                                fieldWithPath("userName").type(JsonFieldType.STRING)
+                                fieldWithPath("userName").type(STRING)
                                         .description("유저 닉네임"),
-                                fieldWithPath("locationName").type(JsonFieldType.STRING)
+                                fieldWithPath("locationName").type(STRING)
                                         .description("출발 위치 이름"),
-                                fieldWithPath("latitude").type(JsonFieldType.NUMBER)
+                                fieldWithPath("latitude").type(NUMBER)
                                         .description("위도 / Double"),
-                                fieldWithPath("longitude").type(JsonFieldType.NUMBER)
+                                fieldWithPath("longitude").type(NUMBER)
                                         .description("경도 / Double"),
-                                fieldWithPath("transportation").type(JsonFieldType.STRING)
+                                fieldWithPath("transportation").type(STRING)
                                         .description("'BUS' / 'SUBWAY'")
                         ),
                         responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                fieldWithPath("code").type(NUMBER)
                                         .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                fieldWithPath("message").type(STRING)
                                         .description("상태 메세지"),
-                                fieldWithPath("data.locationName").type(JsonFieldType.STRING)
+                                fieldWithPath("data.locationName").type(STRING)
                                         .description("출발 위치"),
-                                fieldWithPath("data.transportation").type(JsonFieldType.STRING)
+                                fieldWithPath("data.transportation").type(STRING)
                                         .description("내 이동수단")
                         )
                 ));
@@ -265,13 +266,13 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("참여자 정보 ID")
                         ),
                         responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                fieldWithPath("code").type(NUMBER)
                                         .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                fieldWithPath("message").type(STRING)
                                         .description("상태 메세지"),
                                 fieldWithPath("data.isDeletedSpace").type(JsonFieldType.BOOLEAN)
                                         .description("모임 삭제 여부 : 어드민이 나간경우 모임이 삭제 / 참가자가 나간경우 모임 나가기"),
-                                fieldWithPath("data.message").type(JsonFieldType.STRING)
+                                fieldWithPath("data.message").type(STRING)
                                         .description("모임이 삭제되었습니다. / 모임에서 나갔습니다.")
                         )
                 ));
@@ -300,9 +301,9 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("참여자 정보 ID")
                         ),
                         responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                fieldWithPath("code").type(NUMBER)
                                         .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                fieldWithPath("message").type(STRING)
                                         .description("상태 메세지"),
                                 fieldWithPath("data").type(JsonFieldType.NULL)
                                         .description("Always NULL")
@@ -368,17 +369,17 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("모이닷 스페이스 ID")
                         ),
                         responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                fieldWithPath("code").type(NUMBER)
                                         .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                fieldWithPath("message").type(STRING)
                                         .description("상태 메세지"),
-                                fieldWithPath("data[].name").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].name").type(STRING)
                                         .description("지하철역 이름"),
-                                fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data[].latitude").type(NUMBER)
                                         .description("지하철역 위도"),
-                                fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data[].longitude").type(NUMBER)
                                         .description("지하철역 경도"),
-                                fieldWithPath("data[].distanceFromMiddlePoint").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data[].distanceFromMiddlePoint").type(NUMBER)
                                         .description("중간좌표로부터 지하철역까지의 거리(단위: m)")
                         )
                 ));
@@ -451,23 +452,23 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("insert the AccessToken")
                         ),
                         responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                fieldWithPath("code").type(NUMBER)
                                         .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                fieldWithPath("message").type(STRING)
                                         .description("상태 메세지"),
-                                fieldWithPath("data[].groupId").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data[].groupId").type(NUMBER)
                                         .description("그룹 ID"),
-                                fieldWithPath("data[].groupName").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].groupName").type(STRING)
                                         .description("그룹 이름"),
-                                fieldWithPath("data[].groupDate").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].groupDate").type(STRING)
                                         .description("그룹 모임날짜"),
-                                fieldWithPath("data[].groupParticipates").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data[].groupParticipates").type(NUMBER)
                                         .description("그룹 참여자 수 / Integer"),
                                 fieldWithPath("data[].bestPlaces[]").type(JsonFieldType.ARRAY)
                                         .description("그룹 추천장소 현황"),
-                                fieldWithPath("data[].bestPlaces[].bestPlaceId").type(JsonFieldType.NUMBER)
+                                fieldWithPath("data[].bestPlaces[].bestPlaceId").type(NUMBER)
                                         .description("그룹 추천장소 ID / Long"),
-                                fieldWithPath("data[].bestPlaces[].bestPlaceName").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].bestPlaces[].bestPlaceName").type(STRING)
                                         .description("그룹 추천장소 이름")
                         )
                 ));
@@ -596,45 +597,116 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 parameterWithName("keyword").description("카페 / 스터디카페 / 식당 / 도서관 / 스터디룸")
                         ),
                         responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                fieldWithPath("code").type(NUMBER)
                                         .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                fieldWithPath("message").type(STRING)
                                         .description("상태 메세지"),
-                                fieldWithPath("data[].title").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].title").type(STRING)
                                         .description("가게 이름"),
-                                fieldWithPath("data[].thumUrl").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].thumUrl").type(STRING)
                                         .description("썸네일 이미지 URL"),
-                                fieldWithPath("data[].distance").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].distance").type(STRING)
                                         .description("거리"),
-                                fieldWithPath("data[].openTime").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].openTime").type(STRING)
                                         .description("영업 시간"),
-                                fieldWithPath("data[].tel").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].tel").type(STRING)
                                         .description("전화번호"),
-                                fieldWithPath("data[].detail.local").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].detail.local").type(STRING)
                                         .description("지역"),
-                                fieldWithPath("data[].detail.title").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].detail.title").type(STRING)
                                         .description("가게 이름"),
-                                fieldWithPath("data[].detail.address").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].detail.address").type(STRING)
                                         .description("주소"),
-                                fieldWithPath("data[].detail.status").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].detail.status").type(STRING)
                                         .description("영업 상태"),
-                                fieldWithPath("data[].detail.openTime").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].detail.openTime").type(STRING)
                                         .description("영업 시간"),
-                                fieldWithPath("data[].detail.homePageUrl").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].detail.homePageUrl").type(STRING)
                                         .description("홈페이지 URL"),
-                                fieldWithPath("data[].detail.tel").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].detail.tel").type(STRING)
                                         .description("전화번호"),
                                 fieldWithPath("data[].detail.category[]").type(JsonFieldType.ARRAY)
                                         .description("카테고리 목록 / List<String>"),
-                                fieldWithPath("data[].detail.x").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].detail.x").type(STRING)
                                         .description("위도"),
-                                fieldWithPath("data[].detail.y").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].detail.y").type(STRING)
                                         .description("경도"),
                                 fieldWithPath("data[].detail.thumUrls[]").type(JsonFieldType.ARRAY)
                                         .description("상세 이미지 URL 목록 / List<String>"),
                                 fieldWithPath("data[].detail.menuInfo[]").type(JsonFieldType.ARRAY)
                                         .description("메뉴 정보 목록 / List<String>")
-                                )
+                        )
                 ));
+    }
+
+    @DisplayName("모임 참여자 정보 리스트 조회 API")
+    @Test
+    void readParticipateGroupByRegion() throws Exception {
+        GroupResponse.Participations participations1 = new GroupResponse.Participations(1L, 1L, "김모임장", "서울 성북구 보문로34다길 2", "BUS");
+        GroupResponse.Participations participations2 = new GroupResponse.Participations(2L, 13L, "박이람이", "서울 성북구 보문로34다길 2", "BUS");
+        GroupResponse.Region region1 = new GroupResponse.Region("서울 성북구", List.of(participations1, participations2));
+
+        GroupResponse.Participations participations3 = new GroupResponse.Participations(3L, 25L, "천수제비", "서울 강북구 도봉로 76가길 55", "BUS");
+        GroupResponse.Participations participations4 = new GroupResponse.Participations(4L, 6L, "모람모람", "서울 강북구 도봉로 76가길 54", "SUBWAY");
+        GroupResponse.Region region2 = new GroupResponse.Region("서울 강북구", List.of(participations3, participations4));
+
+        GroupResponse.Participations participations5 = new GroupResponse.Participations(3L, 25L, "낭만 ENFP", "경기도 부천시 부천로 1", "SUBWAY");
+        GroupResponse.Region region3 = new GroupResponse.Region("경기도 부천시", List.of(participations5));
+
+        // given
+        given(groupService.readParticipateGroupByRegion(anyLong()))
+                .willReturn(
+                        GroupResponse.Detail.builder()
+                                .groupId(1L)
+                                .adminId(1L)
+                                .name("모이닷 팀 프로젝트")
+                                .date("2023-12-01")
+                                .participantsByRegion(List.of(region1,region2,region3))
+                                .build()
+                );
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/v1/group")
+                                .param("groupId", "1")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("read-participate-region",
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("groupId").description("그룹 Id")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data.groupId").type(NUMBER)
+                                        .description("그룹 ID"),
+                                fieldWithPath("data.adminId").type(NUMBER)
+                                        .description("그룹 어드민 ID"),
+                                fieldWithPath("data.name").type(STRING)
+                                        .description("그룹 이름"),
+                                fieldWithPath("data.date").type(STRING)
+                                        .description("그룹 생성 날짜"),
+                                fieldWithPath("data.participantsByRegion[]").type(ARRAY)
+                                        .description("그룹화된 지역 리스트"),
+                                fieldWithPath("data.participantsByRegion[].regionName").type(STRING)
+                                        .description("그룹화된 지역 이름"),
+                                fieldWithPath("data.participantsByRegion[].participations[]").type(ARRAY)
+                                        .description("그룹화된 지역 참여자 리스트"),
+                                fieldWithPath("data.participantsByRegion[].participations[].participationId").type(NUMBER)
+                                        .description("참여 ID"),
+                                fieldWithPath("data.participantsByRegion[].participations[].userId").type(NUMBER)
+                                        .description("유저 ID"),
+                                fieldWithPath("data.participantsByRegion[].participations[].userName").type(STRING)
+                                        .description("유저 이름"),
+                                fieldWithPath("data.participantsByRegion[].participations[].locationName").type(STRING)
+                                        .description("유저 출발지 이름"),
+                                fieldWithPath("data.participantsByRegion[].participations[].transportation").type(STRING)
+                                        .description("유저 교통수단")
+                        ))
+                );
     }
 }
