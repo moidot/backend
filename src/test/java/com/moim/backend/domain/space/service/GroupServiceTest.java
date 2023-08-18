@@ -29,6 +29,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
+import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
@@ -98,8 +100,7 @@ class GroupServiceTest {
         Users participateUser = savedUser("test2@test.com", "테스트 이름2");
         Groups saveGroup = savedGroup(admin.getUserId(), "테스트 그룹");
         GroupRequest.Participate request = new GroupRequest.Participate(
-                saveGroup.getGroupId(), "어드민", "커피나무", 37.591043, 127.019721,
-                "BUS", "2345"
+                saveGroup.getGroupId(), "어드민", "커피나무", 37.591043, 127.019721, PUBLIC, "2345"
         );
 
         em.flush();
@@ -121,8 +122,7 @@ class GroupServiceTest {
                 )
                 .contains(
                         saveGroup.getGroupId(), admin.getUserId(), "커피나무",
-                        "어드민", 37.591043, 127.019721,
-                        "BUS"
+                        "어드민", 37.591043, 127.019721,"PUBLIC"
                 );
 
         assertThat(participation.getPassword()).isEqualTo(encrypt("2345"));
@@ -145,7 +145,7 @@ class GroupServiceTest {
 
         GroupRequest.Participate request = new GroupRequest.Participate(
                 saveGroup.getGroupId(), "경기도불주먹", "커피나무", 37.5660, 126.9784,
-                "BUS", "2345"
+                PUBLIC, "2345"
         );
 
         // when
@@ -162,8 +162,7 @@ class GroupServiceTest {
                 )
                 .contains(
                         saveGroup.getGroupId(), participateUser.getUserId(), "커피나무",
-                        "경기도불주먹", 37.5660, 126.9784,
-                        "BUS"
+                        "경기도불주먹", 37.5660, 126.9784, "PUBLIC"
                 );
 
         Participation participation = participationRepository.findById(response.getParticipationId()).get();
@@ -183,7 +182,7 @@ class GroupServiceTest {
         GroupRequest.Participate request =
                 new GroupRequest.Participate(
                         saveGroup.getGroupId(), "경기도불주먹", "커피나무",
-                        37.5660, 126.9784, "BUS", null
+                        37.5660, 126.9784, PUBLIC, null
                 );
 
         // when
@@ -200,14 +199,14 @@ class GroupServiceTest {
                 .contains(
                         saveGroup.getGroupId(), "커피나무",
                         participateUser.getUserId(), "경기도불주먹", 37.5660,
-                        126.9784, "BUS"
+                        126.9784, "PUBLIC"
                 );
 
         Participation participation = participationRepository.findById(response.getParticipationId()).get();
         assertThat(participation.getPassword()).isNull();
     }
 
-    @DisplayName("하나의 유저가 하나의 그룹에 참가할때 이동수단이 BUS, SUBWAY 가 아닌 잘못된 코드를 보내면 Exception 이 발생한다.")
+    @DisplayName("하나의 유저가 하나의 그룹에 참가할때 이동수단이 PUBLIC, PERSONAL 이 아닌 잘못된 코드를 보내면 Exception 이 발생한다.")
     @Test
     void throwsExceptionWhenParticipateWithInvalidTransportation() {
         // given
@@ -218,7 +217,7 @@ class GroupServiceTest {
         GroupRequest.Participate request =
                 new GroupRequest.Participate(
                         saveGroup.getGroupId(), "경기도불주먹", "커피나무",
-                        37.5660, 126.9784, "TAXI", "2345"
+                        37.5660, 126.9784, TransportationType.NULL, "2345"
                 );
 
         // when // then
@@ -239,11 +238,11 @@ class GroupServiceTest {
 
         Participation user1Participation = savedParticipation(
                 user1, group, user1.getName(),
-                "커피나무", 37.5660, 126.9784, "BUS"
+                "커피나무", 37.5660, 126.9784, PUBLIC
         );
 
         GroupRequest.ParticipateUpdate request = new GroupRequest.ParticipateUpdate(
-                user1Participation.getParticipationId(), "양파쿵야", "뮬", 37.5700, 126.9790, "SUBWAY"
+                user1Participation.getParticipationId(), "양파쿵야", "뮬", 37.5700, 126.9790, PERSONAL
         );
 
         // when
@@ -253,7 +252,7 @@ class GroupServiceTest {
         // then
         assertThat(response)
                 .extracting("locationName", "transportation")
-                .contains("뮬", "SUBWAY");
+                .contains("뮬", "PERSONAL");
     }
 
     @DisplayName("자신이 속해있는 그룹에서 내가 아닌 참여정보를 수정하려할때 Exception 이 발생한다.")
@@ -268,16 +267,16 @@ class GroupServiceTest {
 
         Participation user1Participation = savedParticipation(
                 user1, group, user1.getName(),
-                "커피나무", 37.5660, 126.9784, "BUS"
+                "커피나무", 37.5660, 126.9784, PUBLIC
         );
 
         Participation adminParticipation = savedParticipation(
                 admin, group, admin.getName(),
-                "커피나무", 37.5660, 126.9784, "BUS"
+                "커피나무", 37.5660, 126.9784, PUBLIC
         );
 
         GroupRequest.ParticipateUpdate request = new GroupRequest.ParticipateUpdate(
-                user1Participation.getParticipationId(), "양파쿵야", "뮬", 37.5700, 126.9790, "SUBWAY"
+                user1Participation.getParticipationId(), "양파쿵야", "뮬", 37.5700, 126.9790, PERSONAL
         );
 
         // when // then
@@ -294,9 +293,9 @@ class GroupServiceTest {
         Users user = savedUser("test@test.com", "테스트 이름");
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
         Participation participationAdmin =
-                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, "BUS");
+                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, PUBLIC);
         Participation participationUser =
-                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, "BUS");
+                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
 
         // when
         GroupResponse.Exit response =
@@ -322,9 +321,9 @@ class GroupServiceTest {
         Users user = savedUser("test@test.com", "테스트 이름");
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
         Participation participationAdmin =
-                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, "BUS");
+                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, PUBLIC);
         Participation participationUser =
-                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, "BUS");
+                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
 
         em.flush();
         em.clear();
@@ -355,9 +354,9 @@ class GroupServiceTest {
         Users user = savedUser("test@test.com", "테스트 이름");
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
         Participation participationAdmin =
-                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, "BUS");
+                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, PUBLIC);
         Participation participationUser =
-                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, "BUS");
+                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
 
         // when
         groupService.participateRemoval(participationUser.getParticipationId(), admin);
@@ -377,9 +376,9 @@ class GroupServiceTest {
         Users user = savedUser("test@test.com", "테스트 이름");
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
         Participation participationAdmin =
-                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, "BUS");
+                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, PUBLIC);
         Participation participationUser =
-                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, "BUS");
+                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
 
         // when // then
         assertThatThrownBy(() -> groupService.participateRemoval(participationAdmin.getParticipationId(), user))
@@ -395,9 +394,9 @@ class GroupServiceTest {
         Users user = savedUser("test@test.com", "테스트 이름");
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
         Participation participationAdmin =
-                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, "BUS");
+                savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, PUBLIC);
         Participation participationUser =
-                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, "BUS");
+                savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
 
         em.flush();
         em.clear();
@@ -448,16 +447,16 @@ class GroupServiceTest {
         Users user1 = savedUser("test1@test.com", "테스트1");
         Users user2 = savedUser("test2@test.com", "테스트2");
 
-        savedParticipation(admin1, group1, "어드민", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(admin2, group2, "어드민", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(admin3, group3, "어드민", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(admin1, group1, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(admin2, group2, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(admin3, group3, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
 
-        savedParticipation(user1, group1, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(user1, group2, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(user1, group3, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(user1, group1, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user1, group2, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user1, group3, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
 
-        savedParticipation(user2, group1, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(user2, group3, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(user2, group1, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user2, group3, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
 
         em.flush();
         em.clear();
@@ -490,8 +489,9 @@ class GroupServiceTest {
                 .locationName("불광역")
                 .latitude(37.610553)
                 .longitude(126.92982)
-                .transportation("BUS")
+                .transportationType(PUBLIC)
                 .build();
+
         groupService.participateGroup(request, user);
 
         // when // then
@@ -540,10 +540,10 @@ class GroupServiceTest {
 
         Groups group = savedGroup(user1.getUserId(), "모이닷");
 
-        Participation participation1 = savedParticipation(user1, group, "모이닷1", "서울 성북구 보문로34다길 2", 36.123456, 127.1234567, "SUBWAY");
-        Participation participation2 = savedParticipation(user2, group, "모이닷2", "서울 강북구 도봉로 76가길 55", 36.123456, 127.1234567, "BUS");
-        Participation participation3 = savedParticipation(user3, group, "모이닷3", "서울 강북구 도봉로 76가길 54", 36.123456, 127.1234567, "SUBWAY");
-        Participation participation4 = savedParticipation(user4, group, "모이닷4", "경기도 부천시 부천로 1", 36.123456, 127.1234567, "BUS");
+        Participation participation1 = savedParticipation(user1, group, "모이닷1", "서울 성북구 보문로34다길 2", 36.123456, 127.1234567, PERSONAL);
+        Participation participation2 = savedParticipation(user2, group, "모이닷2", "서울 강북구 도봉로 76가길 55", 36.123456, 127.1234567, PUBLIC);
+        Participation participation3 = savedParticipation(user3, group, "모이닷3", "서울 강북구 도봉로 76가길 54", 36.123456, 127.1234567, PERSONAL);
+        Participation participation4 = savedParticipation(user4, group, "모이닷4", "경기도 부천시 부천로 1", 36.123456, 127.1234567, PUBLIC);
 
         em.flush();
         em.clear();
@@ -608,7 +608,7 @@ class GroupServiceTest {
     private Participation savedParticipation(
             Users user, Groups group, String userName,
             String locationName, Double latitude, Double longitude,
-            String type
+            TransportationType transportationType
     ) {
         return participationRepository.save(
                 Participation.builder()
@@ -618,7 +618,7 @@ class GroupServiceTest {
                         .locationName(locationName)
                         .latitude(latitude)
                         .longitude(longitude)
-                        .transportation(TransportationType.valueOf(type))
+                        .transportation(transportationType)
                         .build()
         );
     }

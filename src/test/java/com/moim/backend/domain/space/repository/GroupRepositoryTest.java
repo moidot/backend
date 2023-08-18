@@ -75,16 +75,16 @@ class GroupRepositoryTest {
         Users user1 = savedUser("test1@test.com", "테스트1");
         Users user2 = savedUser("test2@test.com", "테스트2");
 
-        savedParticipation(admin1, group1, "어드민", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(admin2, group2, "어드민", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(admin3, group3, "어드민", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(admin1, group1, "어드민", "아무데나", 36.23423, 127.32423, "PUBLIC");
+        savedParticipation(admin2, group2, "어드민", "아무데나", 36.23423, 127.32423, "PUBLIC");
+        savedParticipation(admin3, group3, "어드민", "아무데나", 36.23423, 127.32423, "PUBLIC");
 
-        savedParticipation(user1, group1, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(user1, group2, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(user1, group3, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(user1, group1, "양쿵", "아무데나", 36.23423, 127.32423, "PUBLIC");
+        savedParticipation(user1, group2, "양쿵", "아무데나", 36.23423, 127.32423, "PUBLIC");
+        savedParticipation(user1, group3, "양쿵", "아무데나", 36.23423, 127.32423, "PUBLIC");
 
-        savedParticipation(user2, group1, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(user2, group3, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(user2, group1, "양쿵", "아무데나", 36.23423, 127.32423, "PUBLIC");
+        savedParticipation(user2, group3, "양쿵", "아무데나", 36.23423, 127.32423, "PUBLIC");
 
         em.flush();
         em.clear();
@@ -128,9 +128,9 @@ class GroupRepositoryTest {
         Users user1 = savedUser("test1@test.com", "테스트1");
         Users user2 = savedUser("test2@test.com", "테스트2");
 
-        savedParticipation(admin1, group1, "어드민", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(user1, group1, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
-        savedParticipation(user2, group1, "양쿵", "아무데나", 36.23423, 127.32423, "BUS");
+        savedParticipation(admin1, group1, "어드민", "아무데나", 36.23423, 127.32423, "PUBLIC");
+        savedParticipation(user1, group1, "양쿵", "아무데나", 36.23423, 127.32423, "PUBLIC");
+        savedParticipation(user2, group1, "양쿵", "아무데나", 36.23423, 127.32423, "PUBLIC");
 
         Vote vote = voteRepository.save(
                 Vote.builder()
@@ -191,10 +191,10 @@ class GroupRepositoryTest {
 
         Groups group = savedGroup(user1.getUserId(), "모이닷");
 
-        Participation participation1 = savedParticipation(user1, group, "모이닷1", "서울 성북구 보문로34다길 2", 36.123456, 127.1234567, "SUBWAY");
-        Participation participation2 = savedParticipation(user2, group, "모이닷2", "서울 강북구 도봉로 76가길 55", 36.123456, 127.1234567, "BUS");
-        Participation participation3 = savedParticipation(user3, group, "모이닷3", "서울 강북구 도봉로 76가길 54", 36.123456, 127.1234567, "SUBWAY");
-        Participation participation4 = savedParticipation(user4, group, "모이닷4", "경기도 부천시 부천로 1", 36.123456, 127.1234567, "BUS");
+        Participation participation1 = savedParticipation(user1, group, "모이닷1", "서울 성북구 보문로34다길 2", 36.123456, 127.1234567, "PERSONAL");
+        Participation participation2 = savedParticipation(user2, group, "모이닷2", "서울 강북구 도봉로 76가길 55", 36.123456, 127.1234567, "PUBLIC");
+        Participation participation3 = savedParticipation(user3, group, "모이닷3", "서울 강북구 도봉로 76가길 54", 36.123456, 127.1234567, "PERSONAL");
+        Participation participation4 = savedParticipation(user4, group, "모이닷4", "경기도 부천시 부천로 1", 36.123456, 127.1234567, "PUBLIC");
 
         em.flush();
         em.clear();

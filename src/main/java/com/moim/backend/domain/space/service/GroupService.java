@@ -36,6 +36,8 @@ import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.function.Function;
 
+import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
+import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static com.moim.backend.domain.space.response.GroupResponse.Region.toLocalEntity;
 import static com.moim.backend.domain.space.response.GroupResponse.Participations.toParticipateEntity;
 import static com.moim.backend.global.common.Result.*;
@@ -67,7 +69,7 @@ public class GroupService {
         Groups group = getGroup(request.getGroupId());
 
         checkDuplicateParticipation(group, user);
-        validateTransportation(request.getTransportation());
+        validateTransportation(request.getTransportationType());
 
         // 어드민이 참여하는 경우 (즉, 모임이 생성된 직후)
         if (group.getAdminId().equals(user.getUserId())) {
@@ -231,8 +233,8 @@ public class GroupService {
         }
     }
 
-    private static void validateTransportation(String transportation) {
-        if (!transportation.equals("BUS") && !transportation.equals("SUBWAY")) {
+    private static void validateTransportation(TransportationType transportation) {
+        if (!transportation.equals(PUBLIC) && !transportation.equals(PERSONAL)) {
             throw new CustomException(INVALID_TRANSPORTATION);
         }
     }
@@ -364,7 +366,7 @@ public class GroupService {
                 .locationName(request.getLocationName())
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
-                .transportation(TransportationType.valueOf(request.getTransportation()))
+                .transportation(request.getTransportationType())
                 .password(encryptedPassword)
                 .build();
     }
