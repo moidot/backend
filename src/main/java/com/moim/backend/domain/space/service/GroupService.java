@@ -30,10 +30,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringTokenizer;
 import java.util.function.Function;
 
+import static com.moim.backend.domain.space.response.GroupResponse.Region.toLocalEntity;
+import static com.moim.backend.domain.space.response.GroupResponse.Participations.toParticipateEntity;
 import static com.moim.backend.global.common.Result.*;
 
 @Service
@@ -192,6 +196,15 @@ public class GroupService {
         return placeList.stream().map(toPlaceEntity(x, y, local)).toList();
     }
 
+    // 모임 참여자 정보 리스트 조회 API
+    public GroupResponse.Detail readParticipateGroupByRegion(Long groupId) {
+        Groups group = getGroupByFetchParticipation(groupId);
+        List<GroupResponse.Region> regions = getParticipantsByRegion(group);
+
+        return GroupResponse.Detail.response(group, regions);
+    }
+
+
     // validate
 
     private static URI createNaverRequestUri(String local, String keyword) {
@@ -206,7 +219,6 @@ public class GroupService {
                 .build()
                 .toUri();
     }
-
     private void checkDuplicateParticipation(Groups group, Users user) {
         if (participationRepository.countByGroupAndUserId(group, user.getUserId()) > 0) {
             throw new CustomException(DUPLICATE_PARTICIPATION);
@@ -231,7 +243,42 @@ public class GroupService {
         }
     }
 
+
+
     // method
+    private static List<GroupResponse.Region> getParticipantsByRegion(Groups group) {
+        List<GroupResponse.Region> regions = new ArrayList<>();
+
+        group.getParticipations().forEach(participation -> {
+            // 내 그룹화 지역 이름 생성
+            StringTokenizer st = new StringTokenizer(participation.getLocationName());
+            String regionName = String.format("%s %s", st.nextToken(), st.nextToken());
+
+            // 내 참여 정보 응답 객체 변환
+            GroupResponse.Participations participateEntity = toParticipateEntity(participation);
+
+            // 내 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 확인
+            Optional<GroupResponse.Region> optionalRegion = regions.stream()
+                    .filter(local -> local.getRegionName().equals(regionName))
+                    .findFirst();
+
+            // 존재하지 않는다면
+            if (optionalRegion.isEmpty()) {
+                // 내 그룹화 지역 등록 및 해당 그룹화 참여자로 등록
+                regions.add(toLocalEntity(regionName, participateEntity));
+            }
+            // 존재한다면
+            else {
+                GroupResponse.Region region = optionalRegion.get();
+                List<GroupResponse.Participations> participations = new ArrayList<>(region.getParticipations());
+                participations.add(participateEntity);
+                // 그룹화 되어있는 지역에 내 참여정보 등록
+                region.setParticipations(participations);
+            }
+        });
+
+        return regions;
+    }
 
     private static Function<NaverMapListDto.placeList, GroupResponse.Place> toPlaceEntity(Double x, Double y, String local) {
         return naver -> {
@@ -242,6 +289,12 @@ public class GroupService {
             response.setDistance(distance);
             return response;
         };
+    }
+
+    private Groups getGroupByFetchParticipation(Long groupId) {
+        return groupRepository.findByGroupParticipation(groupId).orElseThrow(
+                () -> new CustomException(NOT_FOUND_GROUP)
+        );
     }
 
     private static double calculateDistance(double lat1, double lon1, double lat2, double lon2, String unit) {
@@ -272,10 +325,7 @@ public class GroupService {
     }
 
     private Groups getGroup(Long groupId) {
-        return groupRepository.findById(groupId)
-                .orElseThrow(
-                        () -> new CustomException(NOT_FOUND_GROUP)
-                );
+        return groupRepository.findById(groupId).orElseThrow(() -> new CustomException(NOT_FOUND_GROUP));
     }
 
     public static String encrypt(String password) {

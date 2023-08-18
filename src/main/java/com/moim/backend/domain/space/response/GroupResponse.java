@@ -43,8 +43,72 @@ public class GroupResponse {
         }
     }
 
-    @Getter
+    @AllArgsConstructor
     @NoArgsConstructor
+    @Getter
+    @Builder
+    public static class Detail {
+        private Long groupId;
+        private Long adminId;
+        private String name;
+        private String date;
+        private List<Region> participantsByRegion;
+
+        public static Detail response(Groups group, List<Region> participantsByRegion) {
+            return Detail.builder()
+                    .groupId(group.getGroupId())
+                    .name(group.getName())
+                    .adminId(group.getAdminId())
+                    .date(group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .participantsByRegion(participantsByRegion)
+                    .build();
+        }
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Builder
+    public static class Region {
+        private String regionName;
+
+        @Setter
+        private List<Participations> participations;
+
+        public static Region toLocalEntity(String region, GroupResponse.Participations participation) {
+            return Region.builder()
+                    .regionName(region)
+                    .participations(List.of(participation))
+                    .build();
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class Participations {
+        private Long participationId;
+        private Long userId;
+        private String userName;
+        private String locationName;
+        private String transportation;
+
+        public static GroupResponse.Participations toParticipateEntity(Participation participation) {
+            return Participations.builder()
+                    .participationId(participation.getParticipationId())
+                    .userId(participation.getUserId())
+                    .userName(participation.getUserName())
+                    .locationName(participation.getLocationName())
+                    .transportation(participation.getTransportation().name())
+                    .build();
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
     public static class Participate {
         private Long participationId;
         private Long groupId;
@@ -54,18 +118,6 @@ public class GroupResponse {
         private Double latitude;
         private Double longitude;
         private String transportation;
-
-        @Builder
-        private Participate(Long participationId, Long groupId, Long userId, String userName, String locationName, Double latitude, Double longitude, String transportation) {
-            this.participationId = participationId;
-            this.groupId = groupId;
-            this.userId = userId;
-            this.userName = userName;
-            this.locationName = locationName;
-            this.latitude = latitude;
-            this.longitude = longitude;
-            this.transportation = transportation;
-        }
 
         public static GroupResponse.Participate response(Participation participation) {
             return Participate.builder()

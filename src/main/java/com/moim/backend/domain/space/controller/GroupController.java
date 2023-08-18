@@ -11,7 +11,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @RestController
@@ -28,6 +27,13 @@ public class GroupController {
     ) {
         return CustomResponseEntity.success(groupService.createGroup(request.toServiceRequest(), user));
     }
+
+    // 모임 참여자 정보 리스트 조회 API
+    @GetMapping("")
+    public CustomResponseEntity<GroupResponse.Detail> readParticipateGroupByRegion(@RequestParam Long groupId) {
+        return CustomResponseEntity.success(groupService.readParticipateGroupByRegion(groupId));
+    }
+
 
     // 모임 참여하기
     @PostMapping("/participate")
