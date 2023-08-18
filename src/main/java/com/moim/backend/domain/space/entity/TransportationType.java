@@ -4,7 +4,5 @@ import lombok.Getter;
 
 @Getter
 public enum TransportationType {
-    BUS,
-    SUBWAY,
-    CAR
+    PUBLIC, PERSONAL, NULL
 }
