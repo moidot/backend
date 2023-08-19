@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -141,9 +142,16 @@ public class VoteService {
         // 투표 종료
         vote.conclusionVote();
 
+        // 가장 높은 투표를 받은 장소 선정
+        BestPlace confirmPlace = group.getBestPlaces().stream()
+                .max(Comparator.comparing(bestPlace -> bestPlace.getSelectPlaces().size()))
+                .orElseThrow(() -> new CustomException(FAIL));
+        group.confirmPlace(confirmPlace.getPlaceName());
+
         // 종료 이후 현재 추천된 장소들의 현황을 조회
         List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
         List<VoteResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
+
         return VoteResponse.SelectResult.response(group, vote, voteStatuses);
     }
 
