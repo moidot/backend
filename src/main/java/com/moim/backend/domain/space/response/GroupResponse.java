@@ -174,16 +174,18 @@ public class GroupResponse {
         private String groupName;
         private String groupDate;
         private Integer groupParticipates;
+        private List<String> participantNames;
         private List<BestPlaces> bestPlaces;
 
         public static GroupResponse.MyParticipate response(
-                Groups group, List<GroupResponse.BestPlaces> bestPlaces
+                Groups group, List<GroupResponse.BestPlaces> bestPlaces, List<String> participantNames
         ) {
             return MyParticipate.builder()
                     .groupId(group.getGroupId())
                     .groupName(group.getName())
                     .groupDate(group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                     .groupParticipates(group.getParticipations().size())
+                    .participantNames(participantNames)
                     .bestPlaces(bestPlaces)
                     .build();
         }

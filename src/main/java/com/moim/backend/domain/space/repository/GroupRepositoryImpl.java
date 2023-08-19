@@ -32,7 +32,7 @@ public class GroupRepositoryImpl implements GroupCustomRepository {
     }
 
     @Override
-    public List<Groups> myParticipationGroups(Long userId) {
+    public List<Groups> findByGroupsByFetch(Long userId) {
         return queryFactory
                 .selectFrom(groups)
                 .innerJoin(groups.participations, participation)

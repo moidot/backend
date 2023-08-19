@@ -173,11 +173,13 @@ public class GroupService {
 
     // 내 모임 확인하기
     public List<GroupResponse.MyParticipate> getMyParticipate(Users user) {
-        List<Groups> groups = groupRepository.myParticipationGroups(user.getUserId());
+        List<Groups> groups = groupRepository.findByGroupsByFetch(user.getUserId());
         return groups.stream()
                 .map(group -> GroupResponse.MyParticipate.response(
-                        group, groupBestPlaceToList(group))
-                ).toList();
+                        group,
+                        groupBestPlaceToList(group),
+                        group.getParticipations().stream().map(Participation::getUserName).toList()))
+                .toList();
     }
 
     // 모임 장소 추천 조회 리스트 API
@@ -221,6 +223,7 @@ public class GroupService {
                 .build()
                 .toUri();
     }
+
     private void checkDuplicateParticipation(Groups group, Users user) {
         if (participationRepository.countByGroupAndUserId(group, user.getUserId()) > 0) {
             throw new CustomException(DUPLICATE_PARTICIPATION);
@@ -244,7 +247,6 @@ public class GroupService {
             throw new CustomException(NOT_MATCHED_PARTICIPATE);
         }
     }
-
 
 
     // method
