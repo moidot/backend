@@ -20,7 +20,7 @@ public class GroupController {
 
     private final GroupService groupService;
 
-    // 모임 생성하기
+    // 모임 생성 API
     @PostMapping("")
     public CustomResponseEntity<GroupResponse.Create> createGroup(
             @RequestBody @Valid GroupRequest.Create request, @Login Users user
@@ -34,7 +34,7 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.readParticipateGroupByRegion(groupId));
     }
 
-    // 모임 참여하기
+    // 모임 참여 API
     @PostMapping("/participate")
     public CustomResponseEntity<GroupResponse.Participate> participateGroup(
             @RequestBody @Valid GroupRequest.Participate request, @Login Users user
@@ -42,7 +42,7 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.participateGroup(request.toServiceRequest(), user));
     }
 
-    // 모임 삭제하기
+    // 모임 삭제 API
     @DeleteMapping("")
     public CustomResponseEntity<Void> deleteGroup(
             @RequestParam Long groupId, @Login Users user
@@ -50,7 +50,7 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.participateDelete(groupId, user));
     }
 
-    // 모임 참여 정보 수정
+    // 내 참여 정보 수정 API
     @PatchMapping("/participate")
     public CustomResponseEntity<GroupResponse.ParticipateUpdate> participateUpdate(
             @RequestBody @Valid GroupRequest.ParticipateUpdate request, @Login Users user
@@ -58,7 +58,7 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.participateUpdate(request.toServiceRequest(), user));
     }
 
-    // 모임 나가기
+    // 모임 나가기 API
     @DeleteMapping("/participate")
     public CustomResponseEntity<GroupResponse.Exit> participateExit(
             @RequestParam Long participateId, @Login Users user
@@ -66,7 +66,7 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.participateExit(participateId, user));
     }
 
-    // 모임원 내보내기 (Admin)
+    // 모임원 내보내기 API
     @DeleteMapping("/participate/removal")
     public CustomResponseEntity<Void> participateRemoval(
             @RequestParam Long participateId, @Login Users user
@@ -74,7 +74,7 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.participateRemoval(participateId, user));
     }
 
-    // 모임 추천 지역 조회하기
+    // 모임 추천 지역 조회하기 API
     @GetMapping("/best-region")
     public CustomResponseEntity<List<BestSubwayInterface>> getBestRegion(
             @RequestParam Long groupId
@@ -82,7 +82,7 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.getBestRegion(groupId));
     }
 
-    // 내 모임 확인하기
+    // 내 모임 확인하기 API
     @GetMapping("/participate")
     public CustomResponseEntity<List<GroupResponse.MyParticipate>> getMyParticipate(
             @Login Users user

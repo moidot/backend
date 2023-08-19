@@ -52,6 +52,19 @@ include::{snippets}/participation-exit/form-parameters.adoc[]
 include::{snippets}/participation-exit/http-response.adoc[]
 include::{snippets}/participation-exit/response-fields.adoc[]
 
+=== 모임 삭제 API
+
+==== HTTP Request Header
+include::{snippets}/group-delete/request-headers.adoc[]
+
+==== HTTP Request FormParameter
+include::{snippets}/group-delete/form-parameters.adoc[]
+include::{snippets}/group-delete/http-request.adoc[]
+
+==== HTTP Response body
+include::{snippets}/group-delete/http-response.adoc[]
+include::{snippets}/group-delete/response-fields.adoc[]
+
 === 모임원 내보내기 API
 
 ==== HTTP Request Headers

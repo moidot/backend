@@ -314,7 +314,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 ));
     }
 
-    @DisplayName("모임 삭제하기 API")
+    @DisplayName("모임 삭제 API")
     @Test
     void groupDelete() throws Exception {
         // given
@@ -335,6 +335,14 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         formParameters(
                                 parameterWithName("groupId")
                                         .description("그룹 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data").type(JsonFieldType.NULL)
+                                        .description("Always NULL")
                         )
                 ));
     }
