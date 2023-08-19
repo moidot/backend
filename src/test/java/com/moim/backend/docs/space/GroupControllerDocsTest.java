@@ -405,23 +405,9 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .groupName("그룹1")
                 .groupDate("2023-07-15")
                 .groupParticipates(3)
+                .confirmPlace("none")
+                .bestPlaceNames(List.of("종로5가역","종로3가역","동대문역"))
                 .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
-                .bestPlaces(
-                        List.of(
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(764L)
-                                        .bestPlaceName("종로5가역")
-                                        .build(),
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(765L)
-                                        .bestPlaceName("종로3가역")
-                                        .build(),
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(763L)
-                                        .bestPlaceName("동대문역")
-                                        .build()
-                        )
-                )
                 .build();
 
         GroupResponse.MyParticipate data2 = GroupResponse.MyParticipate.builder()
@@ -429,23 +415,9 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .groupName("그룹2")
                 .groupDate("2023-07-28")
                 .groupParticipates(3)
+                .confirmPlace("교대역")
+                .bestPlaceNames(List.of("강남역","교대역","역삼역"))
                 .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
-                .bestPlaces(
-                        List.of(
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(737L)
-                                        .bestPlaceName("강남역")
-                                        .build(),
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(736L)
-                                        .bestPlaceName("교대역")
-                                        .build(),
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(738L)
-                                        .bestPlaceName("역삼역")
-                                        .build()
-                        )
-                )
                 .build();
 
         given(groupService.getMyParticipate(any()))
@@ -477,14 +449,12 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("그룹 모임날짜"),
                                 fieldWithPath("data[].groupParticipates").type(NUMBER)
                                         .description("그룹 참여자 수 / Integer"),
+                                fieldWithPath("data[].confirmPlace").type(STRING)
+                                        .description("그룹 확정 장소 / 미확정 : 'none' "),
                                 fieldWithPath("data[].participantNames[]").type(ARRAY)
                                         .description("그룹 참여자 이름 리스트"),
-                                fieldWithPath("data[].bestPlaces[]").type(ARRAY)
-                                        .description("그룹 추천장소 현황"),
-                                fieldWithPath("data[].bestPlaces[].bestPlaceId").type(NUMBER)
-                                        .description("그룹 추천장소 ID / Long"),
-                                fieldWithPath("data[].bestPlaces[].bestPlaceName").type(STRING)
-                                        .description("그룹 추천장소 이름")
+                                fieldWithPath("data[].bestPlaceNames[]").type(ARRAY)
+                                        .description("그룹 추천장소 현황 리스트")
                         )
                 ));
     }

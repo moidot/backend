@@ -174,35 +174,21 @@ public class GroupResponse {
         private String groupName;
         private String groupDate;
         private Integer groupParticipates;
+        private String confirmPlace;
+        private List<String> bestPlaceNames;
         private List<String> participantNames;
-        private List<BestPlaces> bestPlaces;
 
         public static GroupResponse.MyParticipate response(
-                Groups group, List<GroupResponse.BestPlaces> bestPlaces, List<String> participantNames
+                Groups group, List<String> bestPlaceNames, List<String> participantNames
         ) {
             return MyParticipate.builder()
                     .groupId(group.getGroupId())
                     .groupName(group.getName())
                     .groupDate(group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                     .groupParticipates(group.getParticipations().size())
+                    .confirmPlace(group.getPlace())
+                    .bestPlaceNames(bestPlaceNames)
                     .participantNames(participantNames)
-                    .bestPlaces(bestPlaces)
-                    .build();
-        }
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class BestPlaces {
-        private Long bestPlaceId;
-        private String bestPlaceName;
-
-        public static GroupResponse.BestPlaces response(BestPlace bestPlace) {
-            return GroupResponse.BestPlaces.builder()
-                    .bestPlaceId(bestPlace.getBestPlaceId())
-                    .bestPlaceName(bestPlace.getPlaceName())
                     .build();
         }
     }

@@ -177,7 +177,7 @@ public class GroupService {
         return groups.stream()
                 .map(group -> GroupResponse.MyParticipate.response(
                         group,
-                        groupBestPlaceToList(group),
+                        group.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
                         group.getParticipations().stream().map(Participation::getUserName).toList()))
                 .toList();
     }
@@ -377,13 +377,5 @@ public class GroupService {
         return participationRepository.findById(id).orElseThrow(
                 () -> new CustomException(NOT_FOUND_PARTICIPATE)
         );
-    }
-
-    private static List<GroupResponse.BestPlaces> groupBestPlaceToList(Groups group) {
-        // 로직상 NPE 가 발생할 수 없음
-        List<BestPlace> bestPlaces = group.getBestPlaces();
-        return bestPlaces.stream()
-                .map(GroupResponse.BestPlaces::response)
-                .toList();
     }
 }

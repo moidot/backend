@@ -122,7 +122,7 @@ class GroupServiceTest {
                 )
                 .contains(
                         saveGroup.getGroupId(), admin.getUserId(), "커피나무",
-                        "어드민", 37.591043, 127.019721,"PUBLIC"
+                        "어드민", 37.591043, 127.019721, "PUBLIC"
                 );
 
         assertThat(participation.getPassword()).isEqualTo(encrypt("2345"));
@@ -468,14 +468,13 @@ class GroupServiceTest {
         assertThat(response).hasSize(3);
 
         assertThat(response.get(0))
-                .extracting("groupId", "groupName", "groupDate", "groupParticipates")
-                .contains(group1.getGroupId(), "그룹1", "2023-07-10", 3);
+                .extracting("groupId", "groupName", "groupDate", "groupParticipates", "confirmPlace")
+                .contains(group1.getGroupId(), "그룹1", "2023-07-10", 3, "none");
 
-        assertThat(response.get(0).getParticipantNames()).isEqualTo(List.of("어드민","양쿵","주쿵"));
+        assertThat(response.get(0).getParticipantNames()).isEqualTo(List.of("어드민", "양쿵", "주쿵"));
 
-        assertThat(response.get(0).getBestPlaces())
+        assertThat(response.get(0).getBestPlaceNames())
                 .hasSize(3)
-                .extracting("bestPlaceName")
                 .contains("의정부역", "서울역", "개봉역");
     }
 
