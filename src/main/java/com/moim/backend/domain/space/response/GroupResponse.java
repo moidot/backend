@@ -172,6 +172,7 @@ public class GroupResponse {
     public static class MyParticipate {
         private Long groupId;
         private String groupName;
+        private String groupAdminName;
         private String groupDate;
         private Integer groupParticipates;
         private String confirmPlace;
@@ -179,11 +180,12 @@ public class GroupResponse {
         private List<String> participantNames;
 
         public static GroupResponse.MyParticipate response(
-                Groups group, List<String> bestPlaceNames, List<String> participantNames
+                Groups group, String groupAdminName, List<String> bestPlaceNames, List<String> participantNames
         ) {
             return MyParticipate.builder()
                     .groupId(group.getGroupId())
                     .groupName(group.getName())
+                    .groupAdminName(groupAdminName)
                     .groupDate(group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                     .groupParticipates(group.getParticipations().size())
                     .confirmPlace(group.getPlace())

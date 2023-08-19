@@ -173,10 +173,15 @@ public class GroupService {
 
     // 내 모임 확인하기
     public List<GroupResponse.MyParticipate> getMyParticipate(Users user) {
-        List<Groups> groups = groupRepository.findByGroupsByFetch(user.getUserId());
+        List<Groups> groups = groupRepository.findByGroupsFetch(user.getUserId());
         return groups.stream()
                 .map(group -> GroupResponse.MyParticipate.response(
                         group,
+                        group.getParticipations().stream()
+                                .filter(participation -> participation.getUserId().equals(group.getAdminId()))
+                                .map(Participation::getUserName).findFirst().orElseThrow(
+                                        () -> new CustomException(NOT_FOUND_PARTICIPATE)
+                                ),
                         group.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
                         group.getParticipations().stream().map(Participation::getUserName).toList()))
                 .toList();
