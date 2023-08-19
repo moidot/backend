@@ -1,48 +1,22 @@
-=== 토큰으로 유저 이름 가져오는 API
+=== 소셜 로그인 API
 
-==== HTTP Request Body
-include::{snippets}/get-user-name-by-token/http-request.adoc[]
+==== ⬇️ 플랫폼 별 로그인 페이지
+===== 네이버
+[source,http,options="nowrap"]
+https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=PTZPaqShPpkBUX1ethFy&state=STATE_STRING&redirect_uri=http://ec2-3-36-231-219.ap-northeast-2.compute.amazonaws.com/auth/signin
 
-==== HTTP Response
-include::{snippets}/get-user-name-by-token/http-response.adoc[]
-include::{snippets}/get-user-name-by-token/response-fields.adoc[]
+===== 카카오
+[source,http,options="nowrap"]
+https://kauth.kakao.com/oauth/authorize?client_id=da98b670c28171c6bae91e1f6fa272c3&redirect_uri=http://ec2-3-36-231-219.ap-northeast-2.compute.amazonaws.com/auth/signin&response_type=code
 
-=== 이메일로 로그인하는 API
+===== 구글
+[source,http,options="nowrap"]
+https://accounts.google.com/o/oauth2/v2/auth?client_id=478295786445-vre0p84v6qeu2ioh73mpv4s99iin3klj.apps.googleusercontent.com&redirect_uri=http://ec2-3-36-231-219.ap-northeast-2.compute.amazonaws.com/auth/signin&response_type=code&scope=email%20profile%20openid&access_type=offline
 
-==== HTTP Request Body
-include::{snippets}/login-by-email/http-request.adoc[]
-include::{snippets}/login-by-email/request-fields.adoc[]
+==== HTTP Request QueryParameters
+include::{snippets}/social-login/query-parameters.adoc[]
+include::{snippets}/social-login/http-request.adoc[]
 
-==== HTTP Response
-include::{snippets}/login-by-email/http-response.adoc[]
-include::{snippets}/login-by-email/response-fields.adoc[]
-
-=== 카카오 로그인 API
-
-==== HTTP Request Body
-include::{snippets}/login-by-kakao/http-request.adoc[]
-include::{snippets}/login-by-kakao/query-parameters.adoc[]
-
-==== HTTP Response
-include::{snippets}/login-by-kakao/http-response.adoc[]
-include::{snippets}/login-by-kakao/response-fields.adoc[]
-
-=== 네이버 로그인 API
-
-==== HTTP Request Body
-include::{snippets}/login-by-naver/http-request.adoc[]
-include::{snippets}/login-by-naver/query-parameters.adoc[]
-
-==== HTTP Response
-include::{snippets}/login-by-naver/http-response.adoc[]
-include::{snippets}/login-by-naver/response-fields.adoc[]
-
-=== 구글 로그인 API
-
-==== HTTP Request Body
-include::{snippets}/login-by-google/http-request.adoc[]
-include::{snippets}/login-by-google/query-parameters.adoc[]
-
-==== HTTP Response
-include::{snippets}/login-by-google/http-response.adoc[]
-include::{snippets}/login-by-google/response-fields.adoc[]
+==== HTTP Response body
+include::{snippets}/social-login/http-response.adoc[]
+include::{snippets}/social-login/response-fields.adoc[]
