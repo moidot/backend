@@ -455,8 +455,8 @@ class GroupServiceTest {
         savedParticipation(user1, group2, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
         savedParticipation(user1, group3, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
 
-        savedParticipation(user2, group1, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
-        savedParticipation(user2, group3, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user2, group1, "주쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user2, group3, "주쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
 
         em.flush();
         em.clear();
@@ -470,6 +470,8 @@ class GroupServiceTest {
         assertThat(response.get(0))
                 .extracting("groupId", "groupName", "groupDate", "groupParticipates")
                 .contains(group1.getGroupId(), "그룹1", "2023-07-10", 3);
+
+        assertThat(response.get(0).getParticipantNames()).isEqualTo(List.of("어드민","양쿵","주쿵"));
 
         assertThat(response.get(0).getBestPlaces())
                 .hasSize(3)

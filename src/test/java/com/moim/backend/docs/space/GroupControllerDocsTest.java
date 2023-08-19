@@ -405,6 +405,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .groupName("그룹1")
                 .groupDate("2023-07-15")
                 .groupParticipates(3)
+                .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .bestPlaces(
                         List.of(
                                 GroupResponse.BestPlaces.builder()
@@ -427,7 +428,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .groupId(2L)
                 .groupName("그룹2")
                 .groupDate("2023-07-28")
-                .groupParticipates(7)
+                .groupParticipates(3)
+                .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .bestPlaces(
                         List.of(
                                 GroupResponse.BestPlaces.builder()
@@ -475,7 +477,9 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("그룹 모임날짜"),
                                 fieldWithPath("data[].groupParticipates").type(NUMBER)
                                         .description("그룹 참여자 수 / Integer"),
-                                fieldWithPath("data[].bestPlaces[]").type(JsonFieldType.ARRAY)
+                                fieldWithPath("data[].participantNames[]").type(ARRAY)
+                                        .description("그룹 참여자 이름 리스트"),
+                                fieldWithPath("data[].bestPlaces[]").type(ARRAY)
                                         .description("그룹 추천장소 현황"),
                                 fieldWithPath("data[].bestPlaces[].bestPlaceId").type(NUMBER)
                                         .description("그룹 추천장소 ID / Long"),
@@ -636,15 +640,15 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("홈페이지 URL"),
                                 fieldWithPath("data[].detail.tel").type(STRING)
                                         .description("전화번호"),
-                                fieldWithPath("data[].detail.category[]").type(JsonFieldType.ARRAY)
+                                fieldWithPath("data[].detail.category[]").type(ARRAY)
                                         .description("카테고리 목록 / List<String>"),
                                 fieldWithPath("data[].detail.x").type(STRING)
                                         .description("위도"),
                                 fieldWithPath("data[].detail.y").type(STRING)
                                         .description("경도"),
-                                fieldWithPath("data[].detail.thumUrls[]").type(JsonFieldType.ARRAY)
+                                fieldWithPath("data[].detail.thumUrls[]").type(ARRAY)
                                         .description("상세 이미지 URL 목록 / List<String>"),
-                                fieldWithPath("data[].detail.menuInfo[]").type(JsonFieldType.ARRAY)
+                                fieldWithPath("data[].detail.menuInfo[]").type(ARRAY)
                                         .description("메뉴 정보 목록 / List<String>")
                         )
                 ));
@@ -672,7 +676,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .adminId(1L)
                                 .name("모이닷 팀 프로젝트")
                                 .date("2023-12-01")
-                                .participantsByRegion(List.of(region1,region2,region3))
+                                .participantsByRegion(List.of(region1, region2, region3))
                                 .build()
                 );
 
