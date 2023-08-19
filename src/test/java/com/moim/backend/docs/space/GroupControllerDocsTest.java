@@ -403,6 +403,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         GroupResponse.MyParticipate data1 = GroupResponse.MyParticipate.builder()
                 .groupId(1L)
                 .groupName("그룹1")
+                .groupAdminName("양파쿵야")
                 .groupDate("2023-07-15")
                 .groupParticipates(3)
                 .confirmPlace("none")
@@ -413,6 +414,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         GroupResponse.MyParticipate data2 = GroupResponse.MyParticipate.builder()
                 .groupId(2L)
                 .groupName("그룹2")
+                .groupAdminName("주먹밥쿵야")
                 .groupDate("2023-07-28")
                 .groupParticipates(3)
                 .confirmPlace("교대역")
@@ -445,6 +447,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("그룹 ID"),
                                 fieldWithPath("data[].groupName").type(STRING)
                                         .description("그룹 이름"),
+                                fieldWithPath("data[].groupAdminName").type(STRING)
+                                        .description("그룹 모임장 이름"),
                                 fieldWithPath("data[].groupDate").type(STRING)
                                         .description("그룹 모임날짜"),
                                 fieldWithPath("data[].groupParticipates").type(NUMBER)

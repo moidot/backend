@@ -89,7 +89,7 @@ class GroupRepositoryTest {
         em.clear();
 
         // when
-        List<Groups> groups = groupRepository.findByGroupsByFetch(user1.getUserId());
+        List<Groups> groups = groupRepository.findByGroupsFetch(user1.getUserId());
 
         // then
         assertThat(groups).hasSize(3)

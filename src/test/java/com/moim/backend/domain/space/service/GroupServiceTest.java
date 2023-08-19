@@ -468,8 +468,8 @@ class GroupServiceTest {
         assertThat(response).hasSize(3);
 
         assertThat(response.get(0))
-                .extracting("groupId", "groupName", "groupDate", "groupParticipates", "confirmPlace")
-                .contains(group1.getGroupId(), "그룹1", "2023-07-10", 3, "none");
+                .extracting("groupId", "groupName", "groupAdminName", "groupDate", "groupParticipates", "confirmPlace")
+                .contains(group1.getGroupId(), "어드민", "그룹1", "2023-07-10", 3, "none");
 
         assertThat(response.get(0).getParticipantNames()).isEqualTo(List.of("어드민", "양쿵", "주쿵"));
 
