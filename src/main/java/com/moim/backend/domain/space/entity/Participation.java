@@ -60,6 +60,6 @@ public class Participation {
         this.locationName = request.getLocationName();
         this.latitude = request.getLatitude();
         this.longitude = request.getLongitude();
-        this.transportation = TransportationType.valueOf(request.getTransportation());
+        this.transportation = request.getTransportationType();
     }
 }

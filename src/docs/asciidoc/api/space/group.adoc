@@ -84,13 +84,29 @@ include::{snippets}/my-participate/request-headers.adoc[]
 include::{snippets}/my-participate/http-response.adoc[]
 include::{snippets}/my-participate/response-fields.adoc[]
 
-=== 추천된 장소 상세보기 API
+=== 모임 장소 추천 조회 리스트 API
 
-==== HTTP Request PathParameters
-include::{snippets}/detail-recommended/http-request.adoc[]
-include::{snippets}/detail-recommended/path-parameters.adoc[]
+==== HTTP Request QueryParameters
+include::{snippets}/read-bestPlace-keyword/query-parameters.adoc[]
+[source,http,options="nowrap"]
+----
+GET /api/v1/group/best-region/place?x=127.232943&y=37.6823811&local=성신여대입구역AD&keyword=식당 HTTP/1.1
+Host: localhost:8080
+----
 
-==== HTTP Response Body
+==== HTTP Response body
+include::{snippets}/read-bestPlace-keyword/http-response.adoc[]
 
-include::{snippets}/detail-recommended/http-response.adoc[]
-include::{snippets}/detail-recommended/response-fields.adoc[]
+> 예시는 3개지만 12개의 관련 항목을 응답
+
+include::{snippets}/read-bestPlace-keyword/response-fields.adoc[]
+
+=== 모임 참여자 정보 리스트 조회 API
+
+==== HTTP Request QueryParameters
+include::{snippets}/read-participate-region/query-parameters.adoc[]
+include::{snippets}/read-participate-region/http-request.adoc[]
+
+==== HTTP Response body
+include::{snippets}/read-participate-region/http-response.adoc[]
+include::{snippets}/read-participate-region/response-fields.adoc[]

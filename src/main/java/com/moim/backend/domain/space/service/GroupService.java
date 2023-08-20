@@ -13,9 +13,9 @@ import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.CarMoveInfo;
 import com.moim.backend.domain.space.response.GroupResponse;
-import com.moim.backend.domain.space.response.KakaoMapDetailDto;
 import com.moim.backend.domain.space.response.MiddlePoint;
 import com.moim.backend.domain.space.response.PlaceRouteResponse;
+import com.moim.backend.domain.space.response.NaverMapListDto;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
@@ -33,16 +33,20 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringTokenizer;
+import java.util.function.Function;
 
+import static com.moim.backend.domain.space.response.GroupResponse.Region.toLocalEntity;
+import static com.moim.backend.domain.space.response.GroupResponse.Participations.toParticipateEntity;
 import static com.moim.backend.global.common.Result.*;
 
 @Service
@@ -73,7 +77,7 @@ public class GroupService {
         Groups group = getGroup(request.getGroupId());
 
         checkDuplicateParticipation(group, user);
-        validateTransportation(request.getTransportation());
+        validateTransportation(request.getTransportationType());
 
         // 어드민이 참여하는 경우 (즉, 모임이 생성된 직후)
         if (group.getAdminId().equals(user.getUserId())) {
@@ -162,7 +166,7 @@ public class GroupService {
         return null;
     }
 
-//     불필요한 코드 제거 버전
+    // 모임 추천 지역 조회하기
     public List<PlaceRouteResponse> getBestRegion(Long groupId) {
         Groups group = getGroup(groupId);
         MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
@@ -176,7 +180,7 @@ public class GroupService {
             PlaceRouteResponse placeRouteResponse = new PlaceRouteResponse(bestSubway);
 
             for (Participation participation : participations) {
-                if ((participation.getTransportation() == TransportationType.BUS)) {
+                if ((participation.getTransportation() == TransportationType.PUBLIC)) {
                     addBusRouteToResponse(bestSubway, participation, placeRouteResponse);
                 } else {
                     addCarRouteToResponse(bestSubway, participation, placeRouteResponse);
@@ -252,8 +256,47 @@ public class GroupService {
                 ).toList();
     }
 
+    // 모임 장소 추천 조회 리스트 API
+    public List<GroupResponse.Place> keywordCentralizedMeetingSpot(Double x, Double y, String local, String keyword) {
+        // 네이버 API 요청
+        URI uri = createNaverRequestUri(local, keyword);
+        ResponseEntity<NaverMapListDto> naverResponse = restTemplate.getForEntity(uri.toString(), NaverMapListDto.class);
+
+        // 응답 처리
+        Optional<NaverMapListDto> optionalBody = Optional.ofNullable(naverResponse.getBody());
+        if (!naverResponse.getStatusCode().is2xxSuccessful() || optionalBody.isEmpty()) {
+            throw new CustomException(NOT_REQUEST_NAVER);
+        }
+
+        // 장소 정보 가져오기
+        List<NaverMapListDto.placeList> placeList = optionalBody.get().getResult().getPlace().getList();
+
+        return placeList.stream().map(toPlaceEntity(x, y, local)).toList();
+    }
+
+    // 모임 참여자 정보 리스트 조회 API
+    public GroupResponse.Detail readParticipateGroupByRegion(Long groupId) {
+        Groups group = getGroupByFetchParticipation(groupId);
+        List<GroupResponse.Region> regions = getParticipantsByRegion(group);
+
+        return GroupResponse.Detail.response(group, regions);
+    }
+
 
     // validate
+
+    private static URI createNaverRequestUri(String local, String keyword) {
+        return UriComponentsBuilder.fromHttpUrl("https://map.naver.com/v5/api/search")
+                .queryParam("caller", "pcweb")
+                .queryParam("query", local + keyword)
+                .queryParam("type", "all")
+                .queryParam("page", 1)
+                .queryParam("displayCount", 12)
+                .queryParam("isPlaceRecommendationReplace", true)
+                .queryParam("lang", "ko")
+                .build()
+                .toUri();
+    }
     private void checkDuplicateParticipation(Groups group, Users user) {
         if (participationRepository.countByGroupAndUserId(group, user.getUserId()) > 0) {
             throw new CustomException(DUPLICATE_PARTICIPATION);
@@ -266,8 +309,8 @@ public class GroupService {
         }
     }
 
-    private static void validateTransportation(String transportation) {
-        if (!transportation.equals("BUS") && !transportation.equals("SUBWAY")) {
+    private static void validateTransportation(TransportationType transportation) {
+        if (!transportation.equals(TransportationType.PUBLIC) && !transportation.equals(TransportationType.PERSONAL)) {
             throw new CustomException(INVALID_TRANSPORTATION);
         }
     }
@@ -278,13 +321,89 @@ public class GroupService {
         }
     }
 
+
+
     // method
+    private static List<GroupResponse.Region> getParticipantsByRegion(Groups group) {
+        List<GroupResponse.Region> regions = new ArrayList<>();
+
+        group.getParticipations().forEach(participation -> {
+            // 내 그룹화 지역 이름 생성
+            StringTokenizer st = new StringTokenizer(participation.getLocationName());
+            String regionName = String.format("%s %s", st.nextToken(), st.nextToken());
+
+            // 내 참여 정보 응답 객체 변환
+            GroupResponse.Participations participateEntity = toParticipateEntity(participation);
+
+            // 내 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 확인
+            Optional<GroupResponse.Region> optionalRegion = regions.stream()
+                    .filter(local -> local.getRegionName().equals(regionName))
+                    .findFirst();
+
+            // 존재하지 않는다면
+            if (optionalRegion.isEmpty()) {
+                // 내 그룹화 지역 등록 및 해당 그룹화 참여자로 등록
+                regions.add(toLocalEntity(regionName, participateEntity));
+            }
+            // 존재한다면
+            else {
+                GroupResponse.Region region = optionalRegion.get();
+                List<GroupResponse.Participations> participations = new ArrayList<>(region.getParticipations());
+                participations.add(participateEntity);
+                // 그룹화 되어있는 지역에 내 참여정보 등록
+                region.setParticipations(participations);
+            }
+        });
+
+        return regions;
+    }
+
+    private static Function<NaverMapListDto.placeList, GroupResponse.Place> toPlaceEntity(Double x, Double y, String local) {
+        return naver -> {
+            GroupResponse.Place response = GroupResponse.Place.response(naver, local);
+            double placeX = Double.parseDouble(naver.getX());
+            double placeY = Double.parseDouble(naver.getY());
+            String distance = String.format("%s(으)로부터 %sm", local, (int) calculateDistance(y, x, placeY, placeX, "meter"));
+            response.setDistance(distance);
+            return response;
+        };
+    }
+
+    private Groups getGroupByFetchParticipation(Long groupId) {
+        return groupRepository.findByGroupParticipation(groupId).orElseThrow(
+                () -> new CustomException(NOT_FOUND_GROUP)
+        );
+    }
+
+    private static double calculateDistance(double lat1, double lon1, double lat2, double lon2, String unit) {
+
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+
+        if (unit.equals("kilometer")) {
+            dist = dist * 1.609344;
+        } else if (unit.equals("meter")) {
+            dist = dist * 1609.344;
+        }
+
+        return (dist);
+    }
+
+
+    private static double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    private static double rad2deg(double rad) {
+        return (rad * 180 / Math.PI);
+    }
 
     private Groups getGroup(Long groupId) {
-        return groupRepository.findById(groupId)
-                .orElseThrow(
-                        () -> new CustomException(NOT_FOUND_GROUP)
-                );
+        return groupRepository.findById(groupId).orElseThrow(() -> new CustomException(NOT_FOUND_GROUP));
     }
 
     public static String encrypt(String password) {
@@ -323,7 +442,7 @@ public class GroupService {
                 .locationName(request.getLocationName())
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
-                .transportation(TransportationType.valueOf(request.getTransportation()))
+                .transportation(request.getTransportationType())
                 .password(encryptedPassword)
                 .build();
     }
@@ -340,25 +459,6 @@ public class GroupService {
         return bestPlaces.stream()
                 .map(GroupResponse.BestPlaces::response)
                 .toList();
-    }
-
-    public GroupResponse.detailRecommendedPlace detailRecommendedPlace(Long id) {
-        RestTemplate restTemplate = new RestTemplate();
-        KakaoMapDetailDto kakaoMapDetailDto;
-
-        try {
-            kakaoMapDetailDto = restTemplate.getForObject(
-                    "https://place.map.kakao.com/main/v/" + id, KakaoMapDetailDto.class
-            );
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            throw new CustomException(UNEXPECTED_EXCEPTION);
-        }
-
-        if (kakaoMapDetailDto == null) {
-            throw new CustomException(UNEXPECTED_EXCEPTION);
-        }
-
-        return GroupResponse.detailRecommendedPlace.response(kakaoMapDetailDto);
     }
 
     private void addBusRouteToResponse(
@@ -395,4 +495,5 @@ public class GroupService {
         ).getBody();
         placeRouteResponse.addMoveUserInfo(participation, carMoveInfo);
     }
+
 }

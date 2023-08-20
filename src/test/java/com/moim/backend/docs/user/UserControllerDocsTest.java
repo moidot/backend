@@ -13,6 +13,8 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static com.moim.backend.domain.user.config.Platform.KAKAO;
+import static com.moim.backend.domain.user.config.Platform.NAVER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -21,6 +23,8 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.JsonFieldType.NUMBER;
+import static org.springframework.restdocs.payload.JsonFieldType.STRING;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -41,194 +45,41 @@ public class UserControllerDocsTest extends RestDocsSupport {
         return new UserController(userService);
     }
 
-    @DisplayName("이메일로 로그인하는 API")
+    @DisplayName("소셜 로그인 API")
     @Test
-    void loginByEmail() throws Exception {
+    void loginByOAuth() throws Exception {
         // given
-        UserRequest.Login request = new UserRequest.Login("test@gmail.com", "테스터");
 
-        given(userService.login(any()))
-                .willReturn(UserResponse.Login.builder()
-                        .email("test@gmail.com")
-                        .name("테스터")
-                        .token(token)
-                        .build());
-
-        // when // then
-        mockMvc.perform(
-                        MockMvcRequestBuilders.post("/user/login")
-                                .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andDo(document("login-by-email",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        requestFields(
-                                fieldWithPath("email").type(JsonFieldType.STRING)
-                                        .description("이메일"),
-                                fieldWithPath("name").type(JsonFieldType.STRING)
-                                        .description("이름")
-                        ),
-                        responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
-                                        .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                        .description("상태 메세지"),
-                                fieldWithPath("data.email").type(JsonFieldType.STRING)
-                                        .description("유저 이메일"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING)
-                                        .description("유저 이름"),
-                                fieldWithPath("data.token").type(JsonFieldType.STRING)
-                                        .description("엑세스 토큰(시간, 이메일, 이름에 따라 달라짐)")
-                        ))
+        given(userService.loginByOAuth("Hx-PXmWuFaGakYCEy8hkUIVOWUSXIOtD7cosKDSIKsiwodR1g35KXQQWX9H4hXlcpZ45eSgo3dGkWWWOSX-z9iQ", NAVER))
+                .willReturn(
+                        UserResponse.Login.builder()
+                                .email("moidots@gmail.com")
+                                .name("모이닷")
+                                .token(token)
+                                .build()
                 );
-    }
-
-    @DisplayName("토큰으로 유저 이름 가져오는 API")
-    @Test
-    void getUserNameByToken() throws Exception {
-        // given
-        given(userService.getUserNameByToken(any()))
-                .willReturn("테스터");
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/user")
-                                .header("Authorization", "JWT AccessToken")
+                        MockMvcRequestBuilders.get("/auth/signin")
+                                .param("code", "Hx-PXmWuFaGakYCEy8hkUIVOWUSXIOtD7cosKDSIKsiwodR1g35KXQQWX9H4hXlcpZ45eSgo3dGkWWWOSX-z9iQ")
+                                .param("platform", "NAVER")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("get-user-name-by-token",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
-                                        .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                        .description("상태 메세지"),
-                                fieldWithPath("data").type(JsonFieldType.STRING)
-                                        .description("이름")
-                        ))
-                );
-    }
-
-    @DisplayName("카카오 로그인")
-    @Test
-    void loginByKakao() throws Exception {
-        // given
-        given(userService.loginByOAuth(any(), eq(Platform.KAKAO)))
-                .willReturn(UserResponse.Login.builder()
-                        .email("test@gmail.com")
-                        .name("테스터")
-                        .token(token)
-                        .build());
-
-        // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/user/login/kakao")
-                                .param("code", code)
-                )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andDo(document("login-by-kakao",
+                .andDo(document("social-login",
                         preprocessResponse(prettyPrint()),
                         queryParameters(
-                                parameterWithName("code")
-                                        .description("카카오 인가 코드")
+                                parameterWithName("code").description("소셜 로그인 redirect 인가 코드"),
+                                parameterWithName("platform").description("플랫폼 : 'NAVER' / 'KAKAO' / 'GOOGLE' ")
                         ),
                         responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
-                                        .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                        .description("상태 메세지"),
-                                fieldWithPath("data.email").type(JsonFieldType.STRING)
-                                        .description("유저 이메일"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING)
-                                        .description("유저 이름"),
-                                fieldWithPath("data.token").type(JsonFieldType.STRING)
-                                        .description("엑세스 토큰(시간, 이메일, 이름에 따라 달라짐)")
-                        ))
-                );
+                                fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                                fieldWithPath("message").type(STRING).description("상태 메세지"),
+                                fieldWithPath("data.email").type(STRING).description("유저 이메일"),
+                                fieldWithPath("data.name").type(STRING).description("유저 이름"),
+                                fieldWithPath("data.token").type(STRING).description("발급된 JWT 토큰")
+                        )
+                ));
     }
-
-    @DisplayName("네이버 로그인")
-    @Test
-    void loginByNaver() throws Exception {
-        // given
-        given(userService.loginByOAuth(any(), eq(Platform.NAVER)))
-                .willReturn(UserResponse.Login.builder()
-                        .email("test@gmail.com")
-                        .name("테스터")
-                        .token(token)
-                        .build());
-
-        // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/user/login/naver")
-                                .param("code", code)
-                )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andDo(document("login-by-naver",
-                        preprocessResponse(prettyPrint()),
-                        queryParameters(
-                                parameterWithName("code")
-                                        .description("네이버 인가 코드")
-                        ),
-                        responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
-                                        .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                        .description("상태 메세지"),
-                                fieldWithPath("data.email").type(JsonFieldType.STRING)
-                                        .description("유저 이메일"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING)
-                                        .description("유저 이름"),
-                                fieldWithPath("data.token").type(JsonFieldType.STRING)
-                                        .description("엑세스 토큰(시간, 이메일, 이름에 따라 달라짐)")
-                        ))
-                );
-    }
-
-    @DisplayName("구글 로그인")
-    @Test
-    void loginByGoogle() throws Exception {
-        // given
-        given(userService.loginByOAuth(any(), eq(Platform.GOOGLE)))
-                .willReturn(UserResponse.Login.builder()
-                        .email("test@gmail.com")
-                        .name("테스터")
-                        .token(token)
-                        .build());
-
-        // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/user/login/google")
-                                .param("code", code)
-                )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andDo(document("login-by-google",
-                        preprocessResponse(prettyPrint()),
-                        queryParameters(
-                                parameterWithName("code")
-                                        .description("구글 인가 코드")
-                        ),
-                        responseFields(
-                                fieldWithPath("code").type(JsonFieldType.NUMBER)
-                                        .description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                        .description("상태 메세지"),
-                                fieldWithPath("data.email").type(JsonFieldType.STRING)
-                                        .description("유저 이메일"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING)
-                                        .description("유저 이름"),
-                                fieldWithPath("data.token").type(JsonFieldType.STRING)
-                                        .description("엑세스 토큰(시간, 이메일, 이름에 따라 달라짐)")
-                        ))
-                );
-    }
-
 }

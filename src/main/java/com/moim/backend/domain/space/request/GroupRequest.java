@@ -1,11 +1,16 @@
 package com.moim.backend.domain.space.request;
 
+import com.moim.backend.domain.space.entity.TransportationType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+
+import static jakarta.persistence.EnumType.STRING;
 
 public class GroupRequest {
 
@@ -46,8 +51,9 @@ public class GroupRequest {
         @NotNull(message = "경도를 입력하지 않았습니다.")
         private Double longitude;
 
+        @Enumerated(STRING)
         @NotNull(message = "이동 수단을 입력하지 않았습니다.")
-        private String transportation;
+        private TransportationType transportationType;
 
         private String password;
 
@@ -58,7 +64,7 @@ public class GroupRequest {
                     .locationName(locationName)
                     .latitude(latitude)
                     .longitude(longitude)
-                    .transportation(transportation)
+                    .transportationType(transportationType)
                     .password(password)
                     .build();
         }
@@ -84,8 +90,9 @@ public class GroupRequest {
         @NotNull
         private Double longitude;
 
+        @Enumerated(value = STRING)
         @NotNull
-        private String transportation;
+        private TransportationType transportationType;
 
         public GroupServiceRequest.ParticipateUpdate toServiceRequest() {
             return GroupServiceRequest.ParticipateUpdate.builder()
@@ -94,7 +101,7 @@ public class GroupRequest {
                     .locationName(locationName)
                     .latitude(latitude)
                     .longitude(longitude)
-                    .transportation(transportation)
+                    .transportationType(transportationType)
                     .build();
         }
     }

@@ -12,17 +12,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class UserControllerTest extends ControllerTestSupport {
 
-    @DisplayName("이메일로 로그인")
+    @DisplayName("소셜 로그인 API")
     @Test
-    void loginByEmail() throws Exception {
+    void loginByOAuth() throws Exception {
         // given
-        UserRequest.Login request = new UserRequest.Login("yujung-31476@naver.com", "김유정");
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/user/login")
-                                .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
+                        MockMvcRequestBuilders.get("/auth/signin")
+                                .param("code", "Hx-PXmWuFaGakYCEy8hkUIVOWUSXIOtD7cosKDSIKsiwodR1g35KXQQWX9H4hXlcpZ45eSgo3dGkWWWOSX-z9iQ")
+                                .param("platform", "NAVER")
                 )
                 .andDo(print())
                 .andExpect(status().isOk());

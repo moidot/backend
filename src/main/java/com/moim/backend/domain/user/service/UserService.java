@@ -9,6 +9,7 @@ import com.moim.backend.global.auth.jwt.JwtService;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,30 +17,32 @@ import static com.moim.backend.global.common.Result.UNEXPECTED_EXCEPTION;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 
     private final List<OAuth2LoginService> oAuth2LoginServices;
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    public String getUserNameByToken(Users user) {
-        return user.getName();
-    }
-
-    // 테스트용 이메일 로그인
-    public UserResponse.Login login(UserRequest.Login request) {
-        Users user = saveOrUpdate(request);
-
-        return UserResponse.Login.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .token(jwtService.createToken(user.getEmail()))
-                .build();
-    }
-
     // 소셜 로그인
+    @Transactional
     public UserResponse.Login loginByOAuth(String code, Platform platform) {
         // 요청된 로그인 플랫폼 확인 후 소셜 로그인 진행
+        Users userEntity = oauthLoginProcess(code, platform);
+
+        // 현재 서비스 내 회원인지 검증 및 save
+        Users user = saveOrUpdate(userEntity);
+
+        // 서비스 JWT 토큰 발급
+        String accessToken = jwtService.createToken(user.getEmail());
+
+        return UserResponse.Login.response(user, accessToken);
+    }
+
+
+    // method
+
+    private Users oauthLoginProcess(String code, Platform platform) {
         Users userEntity = null;
 
         for (OAuth2LoginService oAuth2LoginService : oAuth2LoginServices) {
@@ -52,28 +55,7 @@ public class UserService {
         if (userEntity == null) {
             throw new CustomException(UNEXPECTED_EXCEPTION);
         }
-
-        // 현재 서비스 내 회원인지 검증 및 save
-        Users user = saveOrUpdate(userEntity);
-
-        // 서비스 JWT 토큰 발급
-        String accessToken = jwtService.createToken(user.getEmail());
-
-        return UserResponse.Login.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .token(accessToken)
-                .build();
-    }
-
-    // method
-
-    private Users saveOrUpdate(UserRequest.Login request) {
-        Users user = userRepository.findByEmail(request.getEmail())
-                .map(entity -> entity.update(request.getName()))
-                .orElse(toUserEntity(request));
-
-        return userRepository.save(user);
+        return userEntity;
     }
 
     private Users saveOrUpdate(Users userEntity) {
@@ -91,10 +73,4 @@ public class UserService {
                 .build();
     }
 
-    private Users toUserEntity(UserRequest.Login request) {
-        return Users.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .build();
-    }
 }

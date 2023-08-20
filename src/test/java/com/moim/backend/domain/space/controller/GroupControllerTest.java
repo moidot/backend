@@ -2,6 +2,7 @@ package com.moim.backend.domain.space.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.moim.backend.domain.ControllerTestSupport;
+import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,7 +59,7 @@ class GroupControllerTest extends ControllerTestSupport {
     void participationGroup() throws Exception {
         // given
         GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, "꿀보이스", "쇼파르", 37.5660, 126.9784, "BUS", "123456");
+                = new GroupRequest.Participate(1L, "꿀보이스", "쇼파르", 37.5660, 126.9784, PUBLIC, "123456");
 
         // when // then
         mockMvc.perform(
@@ -75,7 +77,7 @@ class GroupControllerTest extends ControllerTestSupport {
     void participationGroupFailsWhenLatitudeNotProvided() throws Exception {
         // given
         GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, "꿀보이스", "쇼파르", null, 126.9784, "BUS", "abc123");
+                = new GroupRequest.Participate(1L, "꿀보이스", "쇼파르", null, 126.9784, PUBLIC, "abc123");
 
         // when // then
         mockMvc.perform(
@@ -93,7 +95,7 @@ class GroupControllerTest extends ControllerTestSupport {
     void participationUpdate() throws Exception {
         // given
         GroupRequest.ParticipateUpdate request
-                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, "BUS");
+                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, PUBLIC);
 
         // when // then
         mockMvc.perform(
@@ -111,7 +113,7 @@ class GroupControllerTest extends ControllerTestSupport {
     void participationUpdateFailsWhenUserNameNotProvided() throws Exception {
         // given
         GroupRequest.ParticipateUpdate request
-                = new GroupRequest.ParticipateUpdate(1L, " ", "쇼파르", 37.5660, 126.9784, "BUS");
+                = new GroupRequest.ParticipateUpdate(1L, " ", "쇼파르", 37.5660, 126.9784, PUBLIC);
 
         // when // then
         mockMvc.perform(
@@ -192,13 +194,30 @@ class GroupControllerTest extends ControllerTestSupport {
                 .andExpect(status().isOk());
     }
 
-    @DisplayName("추천된 장소 상세보기 API")
+    @DisplayName("모임 장소 추천 조회 리스트 API")
     @Test
-    void RecommendedPlaceDetails() throws Exception {
+    void keywordCentralizedMeetingSpot() throws Exception {
         // given
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group/{id}", 26974293L)
+                        MockMvcRequestBuilders.get("/api/v1/group/best-region/place")
+                                .param("x", "127.232943")
+                                .param("y", "37.6823811")
+                                .param("local", "성신여대입구역")
+                                .param("keyword", "식당")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("모임 참여자 정보 리스트 조회 API")
+    @Test
+    void readParticipateGroupByRegion() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/v1/group")
+                                .param("groupId", "1")
                 )
                 .andDo(print())
                 .andExpect(status().isOk());
