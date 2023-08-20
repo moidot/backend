@@ -1,6 +1,7 @@
 package com.moim.backend.domain.space.response;
 
 import com.moim.backend.domain.space.entity.Participation;
+import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,8 +24,19 @@ public class PlaceRouteResponse {
         this.longitude = bestSubway.getLongitude();
     }
 
-    public void addMoveUserInfo(MoveUserInfo moveUserInfo) {
-        this.moveUserInfo.add(moveUserInfo);
+    public void addMoveUserInfo(
+            Participation participation,
+            BusGraphicDataResponse busGraphicDataResponse,
+            BusPathResponse busPathResponse
+    ) {
+        this.moveUserInfo.add(new MoveUserInfo(participation, busGraphicDataResponse, busPathResponse));
+    }
+
+    public void addMoveUserInfo(
+            Participation participation,
+            CarMoveInfo carMoveInfo
+    ) {
+        this.moveUserInfo.add(new MoveUserInfo(participation, carMoveInfo));
     }
 
     @Getter
@@ -32,22 +44,36 @@ public class PlaceRouteResponse {
     public static class MoveUserInfo {
         private Long userId;
         private String userName;
+        private TransportationType transportationType;
         private int transitCount; // 총 환승 횟수
         private int totalTime; // 단위: 분(m)
         private Double totalDistance;
-        private List<GraphicDataResponse.Lane> lane;
+        private List<PathDto> path;
 
         public MoveUserInfo(
                 Participation participation,
-                GraphicDataResponse graphicDataResponse,
-                SearchPathResponse searchPathResponse
+                BusGraphicDataResponse busGraphicDataResponse,
+                BusPathResponse busPathResponse
         ) {
             this.userId = participation.getUserId();
             this.userName = participation.getUserName();
-            this.transitCount = searchPathResponse.getTotalTransitCount();
-            this.totalTime = searchPathResponse.getTotalTime();
-            this.totalDistance = searchPathResponse.getTotalDistance();
-            this.lane = graphicDataResponse.getLane();
+            this.transportationType = participation.getTransportation();
+            this.transitCount = busPathResponse.getTotalTransitCount();
+            this.totalTime = busPathResponse.getTotalTime();
+            this.totalDistance = busPathResponse.getTotalDistance();
+            this.path = busGraphicDataResponse.getPathList();
+        }
+
+        public MoveUserInfo(
+                Participation participation,
+                CarMoveInfo carMoveInfo
+        ) {
+            this.userId = participation.getUserId();
+            this.userName = participation.getUserName();
+            this.transportationType = participation.getTransportation();
+            this.totalTime = carMoveInfo.getTotalTime();
+            this.totalDistance = carMoveInfo.getTotalDistance();
+            this.path = carMoveInfo.getPathList();
         }
     }
 
