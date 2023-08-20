@@ -3,6 +3,7 @@ package com.moim.backend.domain.space.response;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class PlaceRouteResponse {
 
     private String name;
@@ -41,6 +43,7 @@ public class PlaceRouteResponse {
 
     @Getter
     @NoArgsConstructor
+    @AllArgsConstructor
     public static class MoveUserInfo {
         private Long userId;
         private String userName;

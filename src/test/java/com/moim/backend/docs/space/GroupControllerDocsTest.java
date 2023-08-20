@@ -2,9 +2,13 @@ package com.moim.backend.docs.space;
 
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
+import com.moim.backend.domain.space.entity.Participation;
+import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.KakaoMapDetailDto;
+import com.moim.backend.domain.space.response.PathDto;
+import com.moim.backend.domain.space.response.PlaceRouteResponse;
 import com.moim.backend.domain.space.service.GroupService;
 import com.moim.backend.domain.subway.response.BestSubway;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
@@ -343,26 +347,35 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @DisplayName("모임 추천 지역 조회하기 API")
     @Test
     void getBestRegion() throws Exception {
+        List<PathDto> path = List.of(
+                PathDto.builder().latitude(37.496592).longitude(126.862355).build(),
+                PathDto.builder().latitude(37.496604).longitude(126.862604).build(),
+                PathDto.builder().latitude(37.496699).longitude(126.863088).build(),
+                PathDto.builder().latitude(37.496837).longitude(126.863448).build(),
+                PathDto.builder().latitude(37.497112).longitude(126.863885).build(),
+                PathDto.builder().latitude(37.499301).longitude(126.866645).build(),
+                PathDto.builder().latitude(37.499421).longitude(126.866938).build(),
+                PathDto.builder().latitude(37.499421).longitude(126.866938).build()
+        );
+
         // given
-        List<BestSubwayInterface> bestSubwayList = List.of(
-                new BestSubway("독바위", 37.618456, 126.933031, 2842.204594299132),
-                new BestSubway("불광", 37.610553, 126.92982, 3392.8990231398966),
-                new BestSubway("불광", 37.610873, 126.92939, 3412.2536548883427),
-                new BestSubway("녹번", 37.600927, 126.935756, 3582.0186756314224),
-                new BestSubway("연신내", 37.619229, 126.921038, 3870.912704056272),
-                new BestSubway("연신내", 37.618636, 126.920625, 3915.770625983176),
-                new BestSubway("북한산보국문", 37.612072, 127.008251, 4049.387636179618),
-                new BestSubway("역촌", 37.606021, 126.922744, 4176.163056775289),
-                new BestSubway("홍제", 37.589066, 126.943736, 4258.981576036244),
-                new BestSubway("구파발", 37.636763, 126.918821, 4292.193359562507)
+        List<PlaceRouteResponse.MoveUserInfo> moveUserInfoList = List.of(
+                new PlaceRouteResponse.MoveUserInfo(1L, "김유정", TransportationType.BUS, 2, 68, 15928.0, path),
+                new PlaceRouteResponse.MoveUserInfo(2L, "천현우", TransportationType.BUS, 2, 96, 27725.0, path)
+        );
+        List<PlaceRouteResponse> placeRouteResponseList = List.of(
+                new PlaceRouteResponse("안국", 37.576477, 126.985443, moveUserInfoList),
+                new PlaceRouteResponse("경복궁(정부서울청사)", 37.575762, 126.97353, moveUserInfoList),
+                new PlaceRouteResponse("광화문(세종문화회관)", 37.571525, 126.97717, moveUserInfoList)
+
         );
         given(groupService.getBestRegion(any()))
-                .willReturn(bestSubwayList);
+                .willReturn(placeRouteResponseList);
 
         // when // then
         mockMvc.perform(
                         RestDocumentationRequestBuilders.get("/api/v1/group/best-region")
-                                .param("groupId", String.valueOf(14L))
+                                .param("groupId", String.valueOf(1L))
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -378,13 +391,29 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("message").type(JsonFieldType.STRING)
                                         .description("상태 메세지"),
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING)
-                                        .description("지하철역 이름"),
+                                        .description("추천 지역 이름"),
                                 fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER)
-                                        .description("지하철역 위도"),
+                                        .description("추천 지역 위도"),
                                 fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER)
-                                        .description("지하철역 경도"),
-                                fieldWithPath("data[].distanceFromMiddlePoint").type(JsonFieldType.NUMBER)
-                                        .description("중간좌표로부터 지하철역까지의 거리(단위: m)")
+                                        .description("추천 지역 경도"),
+                                fieldWithPath("data[].moveUserInfo[].userId").type(JsonFieldType.NUMBER)
+                                        .description("유저 아이디"),
+                                fieldWithPath("data[].moveUserInfo[].userName").type(JsonFieldType.STRING)
+                                        .description("유저 이름"),
+                                fieldWithPath("data[].moveUserInfo[].transportationType").type(JsonFieldType.STRING)
+                                        .description("유저 이동 수단"),
+                                fieldWithPath("data[].moveUserInfo[].transitCount").type(JsonFieldType.NUMBER)
+                                        .description("유저 총 환승횟수"),
+                                fieldWithPath("data[].moveUserInfo[].totalTime").type(JsonFieldType.NUMBER)
+                                        .description("유저 총 이동 시간(분)"),
+                                fieldWithPath("data[].moveUserInfo[].transportationType").type(JsonFieldType.STRING)
+                                        .description("유저 이동 수단"),
+                                fieldWithPath("data[].moveUserInfo[].totalDistance").type(JsonFieldType.NUMBER)
+                                        .description("유저 이동 거리(m)"),
+                                fieldWithPath("data[].moveUserInfo[].path[].x").type(JsonFieldType.NUMBER)
+                                        .description("경로(경도)"),
+                                fieldWithPath("data[].moveUserInfo[].path[].y").type(JsonFieldType.NUMBER)
+                                        .description("경로(위도)")
                         )
                 ));
     }
@@ -474,7 +503,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("그룹 추천장소 ID / Long"),
                                 fieldWithPath("data[].bestPlaces[].bestPlaceName").type(JsonFieldType.STRING)
                                         .description("그룹 추천장소 이름")
-                                )
+                        )
                 ));
     }
 
