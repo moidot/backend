@@ -1,6 +1,7 @@
 package com.moim.backend.domain.space.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.moim.backend.domain.space.entity.Participation;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +20,9 @@ public class BusGraphicDataResponse implements PathGraphicDataInterface {
     }
 
     @Override
-    public List<PathDto> getPathList() {
+    public List<PathDto> getPathList(Participation participation) {
         List<PathDto> path = new ArrayList<>();
+        path.add(PathDto.builder().latitude(participation.getLatitude()).longitude(participation.getLongitude()).build());
         result.lane.get(0).section.forEach(section -> {
             path.addAll(section.graphPos);
         });

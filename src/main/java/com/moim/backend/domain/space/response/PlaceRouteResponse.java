@@ -64,7 +64,7 @@ public class PlaceRouteResponse {
             this.transitCount = busPathResponse.getTotalTransitCount();
             this.totalTime = busPathResponse.getTotalTime();
             this.totalDistance = busPathResponse.getTotalDistance();
-            this.path = busGraphicDataResponse.getPathList();
+            this.path = busGraphicDataResponse.getPathList(participation);
         }
 
         public MoveUserInfo(
@@ -76,7 +76,7 @@ public class PlaceRouteResponse {
             this.transportationType = participation.getTransportation();
             this.totalTime = carMoveInfo.getTotalTime();
             this.totalDistance = carMoveInfo.getTotalDistance();
-            this.path = carMoveInfo.getPathList();
+            this.path = carMoveInfo.getPathList(participation);
         }
     }
 
