@@ -62,7 +62,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.post("/api/v1/group")
+                        RestDocumentationRequestBuilders.post("/group")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -125,7 +125,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.post("/api/v1/group/participate")
+                        RestDocumentationRequestBuilders.post("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -198,7 +198,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.patch("/api/v1/group/participate")
+                        RestDocumentationRequestBuilders.patch("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -252,7 +252,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 );
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.delete("/api/v1/group/participate")
+                        RestDocumentationRequestBuilders.delete("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .param("participateId", String.valueOf(1L))
                 )
@@ -287,7 +287,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         // given
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.delete("/api/v1/group/participate/removal")
+                        RestDocumentationRequestBuilders.delete("/group/participate/removal")
                                 .header("Authorization", "JWT AccessToken")
                                 .param("participateId", String.valueOf(1L))
                 )
@@ -320,7 +320,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         // given
         // when// then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.delete("/api/v1/group")
+                        RestDocumentationRequestBuilders.delete("/group")
                                 .header("Authorization", "JWT AccessToken")
                                 .param("groupId", String.valueOf(1L))
                 )
@@ -368,7 +368,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/api/v1/group/best-region")
+                        RestDocumentationRequestBuilders.get("/group/best-region")
                                 .param("groupId", String.valueOf(14L))
                 )
                 .andDo(print())
@@ -427,7 +427,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group/participate")
+                        MockMvcRequestBuilders.get("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                 )
                 .andDo(print())
@@ -569,7 +569,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/api/v1/group/best-region/place")
+                        RestDocumentationRequestBuilders.get("/group/best-region/place")
                                 .param("x", "127.232943")
                                 .param("y", "37.6823811")
                                 .param("local", "성신여대입구역")
@@ -656,7 +656,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group")
+                        MockMvcRequestBuilders.get("/group")
                                 .param("groupId", "1")
                 )
                 .andDo(print())

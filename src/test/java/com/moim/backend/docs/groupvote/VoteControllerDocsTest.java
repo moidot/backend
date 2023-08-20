@@ -61,7 +61,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.post("/api/v1/group/{groupId}/vote", 1L)
+                        RestDocumentationRequestBuilders.post("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -133,7 +133,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.post("/api/v1/group/{groupId}/vote/select", 1L)
+                        RestDocumentationRequestBuilders.post("/group/{groupId}/vote/select", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .param("bestPlaceIds", bestPlaceIds)
                 )
@@ -210,7 +210,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/api/v1/group/{groupId}/vote", 1L)
+                        RestDocumentationRequestBuilders.get("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                 )
                 .andDo(print())
@@ -291,7 +291,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/api/v1/group/{groupId}/vote/select", 1L)
+                        RestDocumentationRequestBuilders.get("/group/{groupId}/vote/select", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .param("bestPlaceId", "1")
                 )
@@ -351,7 +351,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
 
         // when// then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.patch("/api/v1/group/{groupId}/vote", 1L)
+                        RestDocumentationRequestBuilders.patch("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                 )
                 .andDo(print())

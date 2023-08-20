@@ -132,13 +132,6 @@ public class GroupService {
         return GroupResponse.Exit.response(false, "모임에서 나갔습니다.");
     }
 
-    private Vote getVote(Groups group) {
-        return voteRepository.findByGroupId(group.getGroupId()).orElseThrow(
-                () -> new CustomException(NOT_CREATED_VOTE)
-        );
-    }
-
-
     // 모임원 내보내기
     @Transactional
     public Void participateRemoval(Long participateId, Users user) {
