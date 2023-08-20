@@ -5,16 +5,26 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GraphicDataResponse {
+public class BusGraphicDataResponse implements PathGraphicDataInterface {
     private Result result;
 
     public List<Lane> getLane() {
         return result.lane;
+    }
+
+    @Override
+    public List<PathDto> getPathList() {
+        List<PathDto> path = new ArrayList<>();
+        result.lane.get(0).section.forEach(section -> {
+            path.addAll(section.graphPos);
+        });
+        return path;
     }
 
     @Getter
@@ -37,18 +47,8 @@ public class GraphicDataResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Section {
-        private List<GraphPos> graphPos;
+        private List<PathDto> graphPos;
 
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class GraphPos {
-        @JsonProperty("x")
-        private Double longitude;
-        @JsonProperty("y")
-        private Double latitude;
     }
 
 }

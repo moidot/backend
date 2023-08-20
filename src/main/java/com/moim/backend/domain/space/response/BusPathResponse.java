@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SearchPathResponse{
+public class BusPathResponse {
 
     private Result result;
     private Info bestPathInfo;
