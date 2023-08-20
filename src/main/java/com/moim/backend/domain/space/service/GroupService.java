@@ -192,61 +192,6 @@ public class GroupService {
         return placeRouteResponseList;
     }
 
-//    public List<PlaceRouteResponse> getBestRegion(Long groupId) {
-//        Groups group = getGroup(groupId);
-//        MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
-//        List<BestSubwayInterface> bestSubwayList = subwayRepository.getBestSubwayList(
-//                middlePoint.getLatitude(), middlePoint.getLongitude()
-//        );
-//
-//        List<PlaceRouteResponse> placeRouteResponseList = new ArrayList<>();
-//        List<Participation> participations = participationRepository.findAllByGroup(group);
-//        bestSubwayList.forEach(bestSubway -> {
-//            PlaceRouteResponse placeRouteResponse = new PlaceRouteResponse(bestSubway);
-//
-//            for (Participation participation : participations) {
-//                SearchPathResponse searchPathResponse = restTemplate.getForObject(
-//                        odsayProperties.getSearchPathUriWithParams(bestSubway, participation),
-//                        SearchPathResponse.class
-//                );
-//
-//                if (searchPathResponse.getResult() == null) {
-//                    System.out.println("========================== 실패 ==========================");
-//                    System.out.println("요청 URI: " + odsayProperties.getSearchPathUriWithParams(bestSubway, participation).toString());
-//                    System.out.println("지하철 이름 = " + bestSubway.getName());
-//                    System.out.println("참여자 이름 = " + participation.getUserName());
-//                } else {
-//                    System.out.println("========================== 성공 ==========================");
-//                    System.out.println("요청 URI: " + odsayProperties.getSearchPathUriWithParams(bestSubway, participation).toString());
-//                    System.out.println("지하철 이름 = " + bestSubway.getName());
-//                    System.out.println("참여자 이름 = " + participation.getUserName());
-//                    GraphicDataResponse graphicDataResponse = restTemplate.getForObject(
-//                            odsayProperties.getGraphicDataUriWIthParams(searchPathResponse.getPathInfoMapObj()),
-//                            GraphicDataResponse.class
-//                    );
-//                    if (graphicDataResponse.getResult() == null) {
-//                        System.out.println("========================== [그래픽] 실패 ==========================");
-//                        System.out.println("요청 URI: " + odsayProperties.getSearchPathUriWithParams(bestSubway, participation).toString());
-//                        System.out.println("지하철 이름 = " + bestSubway.getName());
-//                        System.out.println("참여자 이름 = " + participation.getUserName());
-//                    } else {
-//                        System.out.println("========================== [그래픽] 성공 ==========================");
-//                        System.out.println("요청 URI: " + odsayProperties.getSearchPathUriWithParams(bestSubway, participation).toString());
-//                        System.out.println("지하철 이름 = " + bestSubway.getName());
-//                        System.out.println("참여자 이름 = " + participation.getUserName());
-//                        PlaceRouteResponse.MoveUserInfo moveUserInfo = new PlaceRouteResponse.MoveUserInfo(
-//                                participation, graphicDataResponse, searchPathResponse
-//                        );
-//                        placeRouteResponse.addMoveUserInfo(moveUserInfo);
-//                    }
-//                }
-//            }
-//            placeRouteResponseList.add(placeRouteResponse);
-//        });
-//
-//        return placeRouteResponseList;
-//    }
-
     // 내 모임 확인하기
     public List<GroupResponse.MyParticipate> getMyParticipate(Users user) {
         List<Groups> groups = groupRepository.myParticipationGroups(user.getUserId());
@@ -484,7 +429,7 @@ public class GroupService {
             BestSubwayInterface bestSubway, Participation participation, PlaceRouteResponse placeRouteResponse
     ) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "KakaoAK da98b670c28171c6bae91e1f6fa272c3");
+        headers.set("Authorization", "KakaoAK " + kakaoProperties.getClientId());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         CarMoveInfo carMoveInfo = restTemplate.exchange(
