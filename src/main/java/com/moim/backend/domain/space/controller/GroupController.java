@@ -2,8 +2,8 @@ package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
+import com.moim.backend.domain.space.response.PlaceRouteResponse;
 import com.moim.backend.domain.space.service.GroupService;
-import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.global.auth.Login;
 import com.moim.backend.global.common.CustomResponseEntity;
@@ -76,7 +76,7 @@ public class GroupController {
 
     // 모임 추천 지역 조회하기
     @GetMapping("/best-region")
-    public CustomResponseEntity<List<BestSubwayInterface>> getBestRegion(
+    public CustomResponseEntity<List<PlaceRouteResponse>> getBestRegion(
             @RequestParam Long groupId
     ) {
         return CustomResponseEntity.success(groupService.getBestRegion(groupId));
