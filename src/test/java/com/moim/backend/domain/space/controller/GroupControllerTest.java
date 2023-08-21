@@ -27,7 +27,7 @@ class GroupControllerTest extends ControllerTestSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/v1/group")
+                        MockMvcRequestBuilders.post("/group")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -45,7 +45,7 @@ class GroupControllerTest extends ControllerTestSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/v1/group")
+                        MockMvcRequestBuilders.post("/group")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -63,7 +63,7 @@ class GroupControllerTest extends ControllerTestSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/v1/group/participate")
+                        MockMvcRequestBuilders.post("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -81,7 +81,7 @@ class GroupControllerTest extends ControllerTestSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/v1/group/participate")
+                        MockMvcRequestBuilders.post("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -99,7 +99,7 @@ class GroupControllerTest extends ControllerTestSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.patch("/api/v1/group/participate")
+                        MockMvcRequestBuilders.patch("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -117,7 +117,7 @@ class GroupControllerTest extends ControllerTestSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.patch("/api/v1/group/participate")
+                        MockMvcRequestBuilders.patch("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -132,7 +132,7 @@ class GroupControllerTest extends ControllerTestSupport {
         // given
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.delete("/api/v1/group/participate")
+                        MockMvcRequestBuilders.delete("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .param("participateId", String.valueOf(123L))
                 )
@@ -146,7 +146,7 @@ class GroupControllerTest extends ControllerTestSupport {
         // given
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.delete("/api/v1/group/participate")
+                        MockMvcRequestBuilders.delete("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                 )
                 .andDo(print())
@@ -159,7 +159,7 @@ class GroupControllerTest extends ControllerTestSupport {
         // given
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.delete("/api/v1/group/participate/removal")
+                        MockMvcRequestBuilders.delete("/group/participate/removal")
                                 .header("Authorization", "JWT AccessToken")
                                 .param("participateId", String.valueOf(1L))
                 )
@@ -173,7 +173,7 @@ class GroupControllerTest extends ControllerTestSupport {
         // given
         // when// then
         mockMvc.perform(
-                        MockMvcRequestBuilders.delete("/api/v1/group")
+                        MockMvcRequestBuilders.delete("/group")
                                 .header("Authorization", "JWT AccessToken")
                                 .param("groupId", String.valueOf(1L))
                 )
@@ -187,7 +187,7 @@ class GroupControllerTest extends ControllerTestSupport {
         // given
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group/participate")
+                        MockMvcRequestBuilders.get("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                 )
                 .andDo(print())
@@ -200,7 +200,7 @@ class GroupControllerTest extends ControllerTestSupport {
         // given
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group/best-region/place")
+                        MockMvcRequestBuilders.get("/group/best-region/place")
                                 .param("x", "127.232943")
                                 .param("y", "37.6823811")
                                 .param("local", "성신여대입구역")
@@ -216,7 +216,7 @@ class GroupControllerTest extends ControllerTestSupport {
         // given
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group")
+                        MockMvcRequestBuilders.get("/group")
                                 .param("groupId", "1")
                 )
                 .andDo(print())

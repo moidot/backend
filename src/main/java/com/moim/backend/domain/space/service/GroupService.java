@@ -140,13 +140,6 @@ public class GroupService {
         return GroupResponse.Exit.response(false, "모임에서 나갔습니다.");
     }
 
-    private Vote getVote(Groups group) {
-        return voteRepository.findByGroupId(group.getGroupId()).orElseThrow(
-                () -> new CustomException(NOT_CREATED_VOTE)
-        );
-    }
-
-
     // 모임원 내보내기
     @Transactional
     public Void participateRemoval(Long participateId, Users user) {
@@ -194,11 +187,18 @@ public class GroupService {
 
     // 내 모임 확인하기
     public List<GroupResponse.MyParticipate> getMyParticipate(Users user) {
-        List<Groups> groups = groupRepository.myParticipationGroups(user.getUserId());
+        List<Groups> groups = groupRepository.findByGroupsFetch(user.getUserId());
         return groups.stream()
                 .map(group -> GroupResponse.MyParticipate.response(
-                        group, groupBestPlaceToList(group))
-                ).toList();
+                        group,
+                        group.getParticipations().stream()
+                                .filter(participation -> participation.getUserId().equals(group.getAdminId()))
+                                .map(Participation::getUserName).findFirst().orElseThrow(
+                                        () -> new CustomException(NOT_FOUND_PARTICIPATE)
+                                ),
+                        group.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
+                        group.getParticipations().stream().map(Participation::getUserName).toList()))
+                .toList();
     }
 
     // 모임 장소 추천 조회 리스트 API
@@ -242,6 +242,7 @@ public class GroupService {
                 .build()
                 .toUri();
     }
+
     private void checkDuplicateParticipation(Groups group, Users user) {
         if (participationRepository.countByGroupAndUserId(group, user.getUserId()) > 0) {
             throw new CustomException(DUPLICATE_PARTICIPATION);
@@ -265,7 +266,6 @@ public class GroupService {
             throw new CustomException(NOT_MATCHED_PARTICIPATE);
         }
     }
-
 
 
     // method
@@ -396,14 +396,6 @@ public class GroupService {
         return participationRepository.findById(id).orElseThrow(
                 () -> new CustomException(NOT_FOUND_PARTICIPATE)
         );
-    }
-
-    private static List<GroupResponse.BestPlaces> groupBestPlaceToList(Groups group) {
-        // 로직상 NPE 가 발생할 수 없음
-        List<BestPlace> bestPlaces = group.getBestPlaces();
-        return bestPlaces.stream()
-                .map(GroupResponse.BestPlaces::response)
-                .toList();
     }
 
     private void addBusRouteToResponse(

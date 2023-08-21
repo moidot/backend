@@ -61,7 +61,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.post("/api/v1/group/{groupId}/vote", 1L)
+                        RestDocumentationRequestBuilders.post("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -133,7 +133,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.post("/api/v1/group/{groupId}/vote/select", 1L)
+                        RestDocumentationRequestBuilders.post("/group/{groupId}/vote/select", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .param("bestPlaceIds", bestPlaceIds)
                 )
@@ -210,7 +210,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/api/v1/group/{groupId}/vote", 1L)
+                        RestDocumentationRequestBuilders.get("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                 )
                 .andDo(print())
@@ -291,7 +291,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/api/v1/group/{groupId}/vote/select", 1L)
+                        RestDocumentationRequestBuilders.get("/group/{groupId}/vote/select", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .param("bestPlaceId", "1")
                 )
@@ -336,6 +336,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .groupId(1L)
                 .groupName("모이닷 모임")
                 .groupDate("2023-08-04")
+                .confirmPlace("성신여대입구역")
                 .voteId(3L)
                 .isClosed(true)
                 .isAnonymous(true)
@@ -350,7 +351,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
 
         // when// then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.patch("/api/v1/group/{groupId}/vote", 1L)
+                        RestDocumentationRequestBuilders.patch("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                 )
                 .andDo(print())
@@ -376,6 +377,8 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                                         .description("그룹 이름"),
                                 fieldWithPath("data.groupDate").type(JsonFieldType.STRING).
                                         description("그룹 날짜"),
+                                fieldWithPath("data.confirmPlace").type(JsonFieldType.STRING).
+                                        description("확정된 모임 장소"),
                                 fieldWithPath("data.voteId").type(JsonFieldType.NUMBER)
                                         .description("투표 ID"),
                                 fieldWithPath("data.isClosed").type(JsonFieldType.BOOLEAN)

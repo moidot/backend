@@ -59,7 +59,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.post("/api/v1/group")
+                        RestDocumentationRequestBuilders.post("/group")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -122,7 +122,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.post("/api/v1/group/participate")
+                        RestDocumentationRequestBuilders.post("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -195,7 +195,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.patch("/api/v1/group/participate")
+                        RestDocumentationRequestBuilders.patch("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -249,7 +249,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 );
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.delete("/api/v1/group/participate")
+                        RestDocumentationRequestBuilders.delete("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .param("participateId", String.valueOf(1L))
                 )
@@ -284,7 +284,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         // given
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.delete("/api/v1/group/participate/removal")
+                        RestDocumentationRequestBuilders.delete("/group/participate/removal")
                                 .header("Authorization", "JWT AccessToken")
                                 .param("participateId", String.valueOf(1L))
                 )
@@ -311,13 +311,13 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 ));
     }
 
-    @DisplayName("모임 삭제하기 API")
+    @DisplayName("모임 삭제 API")
     @Test
     void groupDelete() throws Exception {
         // given
         // when// then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.delete("/api/v1/group")
+                        RestDocumentationRequestBuilders.delete("/group")
                                 .header("Authorization", "JWT AccessToken")
                                 .param("groupId", String.valueOf(1L))
                 )
@@ -332,6 +332,14 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         formParameters(
                                 parameterWithName("groupId")
                                         .description("그룹 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(NUMBER)
+                                        .description("상태 코드"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("상태 메세지"),
+                                fieldWithPath("data").type(JsonFieldType.NULL)
+                                        .description("Always NULL")
                         )
                 ));
     }
@@ -366,8 +374,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/api/v1/group/best-region")
-                                .param("groupId", String.valueOf(1L))
+                        RestDocumentationRequestBuilders.get("/group/best-region")
+                                .param("groupId", String.valueOf(14L))
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -417,47 +425,23 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         GroupResponse.MyParticipate data1 = GroupResponse.MyParticipate.builder()
                 .groupId(1L)
                 .groupName("그룹1")
+                .groupAdminName("양파쿵야")
                 .groupDate("2023-07-15")
                 .groupParticipates(3)
-                .bestPlaces(
-                        List.of(
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(764L)
-                                        .bestPlaceName("종로5가역")
-                                        .build(),
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(765L)
-                                        .bestPlaceName("종로3가역")
-                                        .build(),
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(763L)
-                                        .bestPlaceName("동대문역")
-                                        .build()
-                        )
-                )
+                .confirmPlace("none")
+                .bestPlaceNames(List.of("종로5가역","종로3가역","동대문역"))
+                .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .build();
 
         GroupResponse.MyParticipate data2 = GroupResponse.MyParticipate.builder()
                 .groupId(2L)
                 .groupName("그룹2")
+                .groupAdminName("주먹밥쿵야")
                 .groupDate("2023-07-28")
-                .groupParticipates(7)
-                .bestPlaces(
-                        List.of(
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(737L)
-                                        .bestPlaceName("강남역")
-                                        .build(),
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(736L)
-                                        .bestPlaceName("교대역")
-                                        .build(),
-                                GroupResponse.BestPlaces.builder()
-                                        .bestPlaceId(738L)
-                                        .bestPlaceName("역삼역")
-                                        .build()
-                        )
-                )
+                .groupParticipates(3)
+                .confirmPlace("교대역")
+                .bestPlaceNames(List.of("강남역","교대역","역삼역"))
+                .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .build();
 
         given(groupService.getMyParticipate(any()))
@@ -465,7 +449,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group/participate")
+                        MockMvcRequestBuilders.get("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                 )
                 .andDo(print())
@@ -485,16 +469,18 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("그룹 ID"),
                                 fieldWithPath("data[].groupName").type(STRING)
                                         .description("그룹 이름"),
+                                fieldWithPath("data[].groupAdminName").type(STRING)
+                                        .description("그룹 모임장 이름"),
                                 fieldWithPath("data[].groupDate").type(STRING)
                                         .description("그룹 모임날짜"),
                                 fieldWithPath("data[].groupParticipates").type(NUMBER)
                                         .description("그룹 참여자 수 / Integer"),
-                                fieldWithPath("data[].bestPlaces[]").type(JsonFieldType.ARRAY)
-                                        .description("그룹 추천장소 현황"),
-                                fieldWithPath("data[].bestPlaces[].bestPlaceId").type(NUMBER)
-                                        .description("그룹 추천장소 ID / Long"),
-                                fieldWithPath("data[].bestPlaces[].bestPlaceName").type(STRING)
-                                        .description("그룹 추천장소 이름")
+                                fieldWithPath("data[].confirmPlace").type(STRING)
+                                        .description("그룹 확정 장소 / 미확정 : 'none' "),
+                                fieldWithPath("data[].participantNames[]").type(ARRAY)
+                                        .description("그룹 참여자 이름 리스트"),
+                                fieldWithPath("data[].bestPlaceNames[]").type(ARRAY)
+                                        .description("그룹 추천장소 현황 리스트")
                         )
                 ));
     }
@@ -605,7 +591,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/api/v1/group/best-region/place")
+                        RestDocumentationRequestBuilders.get("/group/best-region/place")
                                 .param("x", "127.232943")
                                 .param("y", "37.6823811")
                                 .param("local", "성신여대입구역")
@@ -650,15 +636,15 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         .description("홈페이지 URL"),
                                 fieldWithPath("data[].detail.tel").type(STRING)
                                         .description("전화번호"),
-                                fieldWithPath("data[].detail.category[]").type(JsonFieldType.ARRAY)
+                                fieldWithPath("data[].detail.category[]").type(ARRAY)
                                         .description("카테고리 목록 / List<String>"),
                                 fieldWithPath("data[].detail.x").type(STRING)
                                         .description("위도"),
                                 fieldWithPath("data[].detail.y").type(STRING)
                                         .description("경도"),
-                                fieldWithPath("data[].detail.thumUrls[]").type(JsonFieldType.ARRAY)
+                                fieldWithPath("data[].detail.thumUrls[]").type(ARRAY)
                                         .description("상세 이미지 URL 목록 / List<String>"),
-                                fieldWithPath("data[].detail.menuInfo[]").type(JsonFieldType.ARRAY)
+                                fieldWithPath("data[].detail.menuInfo[]").type(ARRAY)
                                         .description("메뉴 정보 목록 / List<String>")
                         )
                 ));
@@ -686,13 +672,13 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .adminId(1L)
                                 .name("모이닷 팀 프로젝트")
                                 .date("2023-12-01")
-                                .participantsByRegion(List.of(region1,region2,region3))
+                                .participantsByRegion(List.of(region1, region2, region3))
                                 .build()
                 );
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group")
+                        MockMvcRequestBuilders.get("/group")
                                 .param("groupId", "1")
                 )
                 .andDo(print())

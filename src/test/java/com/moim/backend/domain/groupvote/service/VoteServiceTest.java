@@ -325,7 +325,7 @@ class VoteServiceTest {
                 .contains(-2006, "해당 장소를 투표한 인원은 0명 입니다.");
     }
 
-    @DisplayName("어드민이 자신의 그룹의 투표를 종료한다.")
+    @DisplayName("어드민이 자신의 그룹의 투표를 종료하고 가장 높은 선택을 받은 장소가 선정된다.")
     @Test
     void conclusionVote() {
         // given
@@ -353,10 +353,10 @@ class VoteServiceTest {
 
         // then
         assertThat(response)
-                .extracting("groupId", "voteId", "groupName", "groupDate", "endAt", "isClosed")
+                .extracting("groupId", "voteId", "groupName", "groupDate", "endAt", "isClosed", "confirmPlace")
                 .contains(
                         group.getGroupId(), vote.getVoteId(),
-                        group.getName(), "2023-07-10", "2023-08-03 12:00:00", true
+                        group.getName(), "2023-07-10", "2023-08-03 12:00:00", true, "강남역"
                 );
 
         assertThat(response.getVoteStatuses())
@@ -374,7 +374,7 @@ class VoteServiceTest {
         assertThat(validateVote.getIsClosed()).isTrue();
     }
 
-    @DisplayName("어드민이 자신의 그룹의 투표를 종료한다.")
+    @DisplayName("일반 유저가 자신의 그룹의 투표를 종료하려할때 익셉션이 발생한다.")
     @Test
     void conclusionWithNotAdminThrowException() {
         // given

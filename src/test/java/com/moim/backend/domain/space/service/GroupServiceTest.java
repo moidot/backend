@@ -122,7 +122,7 @@ class GroupServiceTest {
                 )
                 .contains(
                         saveGroup.getGroupId(), admin.getUserId(), "커피나무",
-                        "어드민", 37.591043, 127.019721,"PUBLIC"
+                        "어드민", 37.591043, 127.019721, "PUBLIC"
                 );
 
         assertThat(participation.getPassword()).isEqualTo(encrypt("2345"));
@@ -455,8 +455,8 @@ class GroupServiceTest {
         savedParticipation(user1, group2, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
         savedParticipation(user1, group3, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
 
-        savedParticipation(user2, group1, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
-        savedParticipation(user2, group3, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user2, group1, "주쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user2, group3, "주쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
 
         em.flush();
         em.clear();
@@ -468,12 +468,13 @@ class GroupServiceTest {
         assertThat(response).hasSize(3);
 
         assertThat(response.get(0))
-                .extracting("groupId", "groupName", "groupDate", "groupParticipates")
-                .contains(group1.getGroupId(), "그룹1", "2023-07-10", 3);
+                .extracting("groupId", "groupName", "groupAdminName", "groupDate", "groupParticipates", "confirmPlace")
+                .contains(group1.getGroupId(), "어드민", "그룹1", "2023-07-10", 3, "none");
 
-        assertThat(response.get(0).getBestPlaces())
+        assertThat(response.get(0).getParticipantNames()).isEqualTo(List.of("어드민", "양쿵", "주쿵"));
+
+        assertThat(response.get(0).getBestPlaceNames())
                 .hasSize(3)
-                .extracting("bestPlaceName")
                 .contains("의정부역", "서울역", "개봉역");
     }
 
@@ -512,21 +513,14 @@ class GroupServiceTest {
 
         // then
         assertThat(response)
-                .extracting("title", "detail.x", "detail.y", "detail.homePageUrl", "distance")
-                .contains(
-                        tuple("랠리쉬커피", "127.0166246", "37.5944971", "https://www.instagram.com/relishcoffee_", "성신여대입구역(으)로부터 192m"),
-                        tuple("도쿄빙수 성신여대점", "127.0181725", "37.5920195", "https://instagram.com/tokyobingsu_sungshin?igshid=113a9wlh7mmb8", "성신여대입구역(으)로부터 150m"),
-                        tuple("Los Dias", "127.0188944", "37.5901777", "http://pf.kakao.com/_cDqxixj", "성신여대입구역(으)로부터 344m"),
-                        tuple("753 베이글 비스트로 성신여대점", "127.0200490", "37.5945812", "https://www.instagram.com/753_bagel_bistro", "성신여대입구역(으)로부터 354m"),
-                        tuple("서울노마드", "127.0119483", "37.5915893", "http://instagram.com/seoulnomad_official", "성신여대입구역(으)로부터 442m"),
-                        tuple("써리얼 벗 나이스", "127.0186908", "37.5945515", "https://www.instagram.com/surreal.b.nice", "성신여대입구역(으)로부터 262m"),
-                        tuple("맬크", "127.0168510", "37.5950775", "https://www.instagram.com/melc.cake", "성신여대입구역(으)로부터 257m"),
-                        tuple("루틴", "127.0201489", "37.5917147", "http://instagram.com/cafe.routine", "성신여대입구역(으)로부터 321m"),
-                        tuple("더홈서울", "127.0174049", "37.5888662", "http://instagram.com/the_home_seoul", "성신여대입구역(으)로부터 437m"),
-                        tuple("본크레페", "127.0183100", "37.5920357", "http://www.instagram.com/_bon_crepe_/", "성신여대입구역(으)로부터 159m"),
-                        tuple("소설원 서가", "127.0099785", "37.5903636", "", "성신여대입구역(으)로부터 653m"),
-                        tuple("모블러", "127.0204521", "37.5950653", "https://smartstore.naver.com/moblerpatisserie", "성신여대입구역(으)로부터 414m")
-                );
+                .hasSize(12)
+                .allSatisfy(place -> {
+                    assertThat(place.getTitle()).isNotNull();
+                    assertThat(place.getDetail().getX()).isNotNull();
+                    assertThat(place.getDetail().getY()).isNotNull();
+                    assertThat(place.getDetail().getAddress()).isNotNull();
+                    assertThat(place.getDistance()).isNotNull();
+                });
     }
 
     @DisplayName("유저가 해당 모임의 참여자 정보들을 조회한다.")

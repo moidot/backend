@@ -1,5 +1,7 @@
 package com.moim.backend.domain.groupvote.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.moim.backend.domain.groupvote.entity.Vote;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
@@ -9,11 +11,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 public class VoteResponse {
 
@@ -53,6 +55,8 @@ public class VoteResponse {
         private Long groupId;
         private String groupName;
         private String groupDate;
+        @JsonInclude(value = NON_NULL)
+        private String confirmPlace;
         private Long voteId;
         private Boolean isClosed;
         private Boolean isAnonymous;
@@ -76,6 +80,7 @@ public class VoteResponse {
                     .groupId(group.getGroupId())
                     .groupName(group.getName())
                     .groupDate(groupDate)
+                    .confirmPlace(group.getPlace())
                     .voteId(vote.getVoteId())
                     .isClosed(vote.getIsClosed())
                     .isAnonymous(vote.getIsAnonymous())

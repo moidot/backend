@@ -11,7 +11,6 @@ import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
-import com.moim.backend.global.common.exception.CustomException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,7 +57,7 @@ class GroupRepositoryTest {
 
     @DisplayName("유저가 참여하고있는 모임의 정보를 fetchJoin 으로 데이터를 가져온다.")
     @Test
-    void fetchJoinParticipateMyGroupData() {
+    void findByGroupsByFetch() {
         // given
         Users admin1 = savedUser("admin1@test.com", "어드민1");
         Users admin2 = savedUser("admin2@test.com", "어드민2");
@@ -90,7 +89,7 @@ class GroupRepositoryTest {
         em.clear();
 
         // when
-        List<Groups> groups = groupRepository.myParticipationGroups(user1.getUserId());
+        List<Groups> groups = groupRepository.findByGroupsFetch(user1.getUserId());
 
         // then
         assertThat(groups).hasSize(3)

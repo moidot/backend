@@ -34,4 +34,8 @@ public class Groups {
 
     @OneToMany(mappedBy = "group")
     private List<BestPlace> bestPlaces;
+
+    public void confirmPlace(String place) {
+        this.place = place;
+    }
 }

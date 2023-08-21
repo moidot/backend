@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface GroupCustomRepository {
     Optional<Groups> findByIdToFetchJoinBestPlace(Long groupId);
-    List<Groups> myParticipationGroups(Long userId);
+    List<Groups> findByGroupsFetch(Long userId);
     Optional<Groups> findByGroupParticipation(Long groupId);
 }

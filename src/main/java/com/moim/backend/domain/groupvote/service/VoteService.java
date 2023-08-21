@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,7 @@ public class VoteService {
     private final BestPlaceRepository bestPlaceRepository;
     private final SelectPlaceRepository selectPlaceRepository;
 
+    // 투표 생성 API
     @Transactional
     public VoteResponse.Create createVote(VoteServiceRequest.Create request, Long groupId, Users user) {
         Groups group = getGroups(groupId);
@@ -59,6 +61,7 @@ public class VoteService {
         return VoteResponse.Create.response(vote);
     }
 
+    // 투표 참여 API
     @Transactional
     public VoteResponse.SelectResult selectVote(Long groupId, List<Long> bestPlaceIds, Users user, LocalDateTime now) {
         // 투표 개설 및 투표에 대한 유효성 검증
@@ -91,11 +94,9 @@ public class VoteService {
         return VoteResponse.SelectResult.response(group, vote, voteStatuses);
     }
 
+    // 투표 읽기 API
     public VoteResponse.SelectResult readVote(Long groupId, Users user) {
         Groups group = getGroups(groupId);
-
-        // TODO: 어떤 방식이 프론트엔드에서 처리하기 편한지 확인해봐야 할 것 같음
-        // 투표가 개설되지 않은 상태면 Exception 발생
         Vote vote = getVote(groupId);
 
         // 투표 이후 현재 추천된 장소들의 현황을 조회
@@ -104,6 +105,7 @@ public class VoteService {
         return VoteResponse.SelectResult.response(group, vote, voteStatuses);
     }
 
+    // 해당 장소 투표한 인원 리스트 조회하기 API
     public List<VoteResponse.SelectPlaceUser> readSelectPlaceUsers(Long groupId, Long bestPlaceId, Users user) {
         // 그룹의 추천장소와 투표 리스트를 fetch 조회
         Groups group = groupRepository.findByIdToFetchJoinBestPlace(groupId)
@@ -130,6 +132,7 @@ public class VoteService {
                 }).toList();
     }
 
+    // 투표 종료하기 API
     @Transactional
     public VoteResponse.SelectResult conclusionVote(Long groupId, Users user) {
         Groups group = getGroups(groupId);
@@ -141,9 +144,16 @@ public class VoteService {
         // 투표 종료
         vote.conclusionVote();
 
+        // 가장 높은 투표를 받은 장소 선정
+        BestPlace confirmPlace = group.getBestPlaces().stream()
+                .max(Comparator.comparing(bestPlace -> bestPlace.getSelectPlaces().size()))
+                .orElseThrow(() -> new CustomException(FAIL));
+        group.confirmPlace(confirmPlace.getPlaceName());
+
         // 종료 이후 현재 추천된 장소들의 현황을 조회
         List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
         List<VoteResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
+
         return VoteResponse.SelectResult.response(group, vote, voteStatuses);
     }
 

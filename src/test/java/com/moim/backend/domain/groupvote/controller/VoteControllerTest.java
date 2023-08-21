@@ -26,7 +26,7 @@ class VoteControllerTest extends ControllerTestSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/v1/group/{groupId}/vote", 1L)
+                        MockMvcRequestBuilders.post("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -44,7 +44,7 @@ class VoteControllerTest extends ControllerTestSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/v1/group/{groupId}/vote", 1L)
+                        MockMvcRequestBuilders.post("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -62,7 +62,7 @@ class VoteControllerTest extends ControllerTestSupport {
 
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/v1/group/{groupId}/vote/select", 1L)
+                        MockMvcRequestBuilders.post("/group/{groupId}/vote/select", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .param("bestPlaceIds", StringUtils.collectionToCommaDelimitedString(bestPlaceIds))
                 )
@@ -76,7 +76,7 @@ class VoteControllerTest extends ControllerTestSupport {
         // given
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group/{groupId}/vote", 1L)
+                        MockMvcRequestBuilders.get("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                 )
                 .andDo(print())
@@ -89,7 +89,7 @@ class VoteControllerTest extends ControllerTestSupport {
         // given
         // when // then
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/group/{groupId}/vote/select", 1L)
+                        MockMvcRequestBuilders.get("/group/{groupId}/vote/select", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .param("bestPlaceId", "1")
                 )
@@ -104,7 +104,7 @@ class VoteControllerTest extends ControllerTestSupport {
 
         // when// then
         mockMvc.perform(
-                        MockMvcRequestBuilders.patch("/api/v1/group/{groupId}/vote", 1L)
+                        MockMvcRequestBuilders.patch("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                 )
                 .andDo(print())
