@@ -1,10 +1,15 @@
 package com.moim.backend.domain.user.config;
 
+import com.moim.backend.domain.space.entity.Participation;
+import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
 
 @Data
 @Configuration
@@ -16,6 +21,7 @@ public class KakaoProperties {
     private String grantType;
     private String clientId;
     private String redirectUri;
+    private String searchPathUri;
 
     public MultiValueMap<String, String> getRequestParameter(String code) {
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
@@ -25,5 +31,15 @@ public class KakaoProperties {
         parameters.add("code", code);
         return parameters;
     }
+
+    public URI getSearchCarPathUriWithParams(BestSubwayInterface bestSubway, Participation participation) {
+        return UriComponentsBuilder.fromHttpUrl(searchPathUri)
+                .queryParam("origin", participation.getLongitude() + "," + participation.getLatitude())
+                .queryParam("destination", bestSubway.getLongitude() + "," + bestSubway.getLatitude())
+                .build()
+                .toUri();
+    }
+
+
 
 }

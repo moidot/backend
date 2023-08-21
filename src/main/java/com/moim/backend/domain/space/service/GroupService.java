@@ -2,6 +2,7 @@ package com.moim.backend.domain.space.service;
 
 import com.moim.backend.domain.groupvote.entity.Vote;
 import com.moim.backend.domain.groupvote.repository.VoteRepository;
+import com.moim.backend.domain.space.config.OdsayProperties;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
@@ -10,17 +11,25 @@ import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
+import com.moim.backend.domain.space.response.CarMoveInfo;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.MiddlePoint;
+import com.moim.backend.domain.space.response.PlaceRouteResponse;
 import com.moim.backend.domain.space.response.NaverMapListDto;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.config.KakaoProperties;
 import com.moim.backend.domain.user.entity.Users;
+import com.moim.backend.domain.space.response.BusGraphicDataResponse;
+import com.moim.backend.domain.space.response.BusPathResponse;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +45,6 @@ import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.function.Function;
 
-import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
-import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static com.moim.backend.domain.space.response.GroupResponse.Region.toLocalEntity;
 import static com.moim.backend.domain.space.response.GroupResponse.Participations.toParticipateEntity;
 import static com.moim.backend.global.common.Result.*;
@@ -47,13 +54,14 @@ import static com.moim.backend.global.common.Result.*;
 @RequiredArgsConstructor
 public class GroupService {
 
-    private final KakaoProperties kakaoProperties;
-    private final RestTemplate restTemplate = new RestTemplate();
     private final VoteRepository voteRepository;
     private final GroupRepository groupRepository;
     private final ParticipationRepository participationRepository;
     private final BestPlaceRepository bestPlaceRepository;
     private final SubwayRepository subwayRepository;
+    private final OdsayProperties odsayProperties;
+    private final KakaoProperties kakaoProperties;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     // 모임 생성
     @Transactional
@@ -152,16 +160,29 @@ public class GroupService {
     }
 
     // 모임 추천 지역 조회하기
-    public List<BestSubwayInterface> getBestRegion(Long groupId) {
+    public List<PlaceRouteResponse> getBestRegion(Long groupId) {
         Groups group = getGroup(groupId);
         MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
         List<BestSubwayInterface> bestSubwayList = subwayRepository.getBestSubwayList(
                 middlePoint.getLatitude(), middlePoint.getLongitude()
         );
-        // TODO : 이름이 같은 역일 경우 중간 지점에 더 가까운 역으로 조회(DB 또는 Application 계층 중 어디에서 처리해야할지 고민)
-        // TODO : 조회한 역이 적절하지 않은 경우 인기 지역 조회
 
-        return bestSubwayList;
+        List<PlaceRouteResponse> placeRouteResponseList = new ArrayList<>();
+        List<Participation> participations = participationRepository.findAllByGroup(group);
+        bestSubwayList.forEach(bestSubway -> {
+            PlaceRouteResponse placeRouteResponse = new PlaceRouteResponse(bestSubway);
+
+            for (Participation participation : participations) {
+                if ((participation.getTransportation() == TransportationType.PUBLIC)) {
+                    addBusRouteToResponse(bestSubway, participation, placeRouteResponse);
+                } else {
+                    addCarRouteToResponse(bestSubway, participation, placeRouteResponse);
+                }
+            }
+            placeRouteResponseList.add(placeRouteResponse);
+        });
+
+        return placeRouteResponseList;
     }
 
     // 내 모임 확인하기
@@ -235,7 +256,7 @@ public class GroupService {
     }
 
     private static void validateTransportation(TransportationType transportation) {
-        if (!transportation.equals(PUBLIC) && !transportation.equals(PERSONAL)) {
+        if (!transportation.equals(TransportationType.PUBLIC) && !transportation.equals(TransportationType.PERSONAL)) {
             throw new CustomException(INVALID_TRANSPORTATION);
         }
     }
@@ -376,4 +397,40 @@ public class GroupService {
                 () -> new CustomException(NOT_FOUND_PARTICIPATE)
         );
     }
+
+    private void addBusRouteToResponse(
+            BestSubwayInterface bestSubway, Participation participation, PlaceRouteResponse placeRouteResponse
+    ) {
+        BusPathResponse busPathResponse = restTemplate.getForObject(
+                odsayProperties.getSearchPathUriWithParams(bestSubway, participation),
+                BusPathResponse.class
+        );
+
+        if (busPathResponse.getResult() != null) {
+            BusGraphicDataResponse busGraphicDataResponse = restTemplate.getForObject(
+                    odsayProperties.getGraphicDataUriWIthParams(busPathResponse.getPathInfoMapObj()),
+                    BusGraphicDataResponse.class
+            );
+            if (busGraphicDataResponse.getResult() != null) {
+                placeRouteResponse.addMoveUserInfo(participation, busGraphicDataResponse, busPathResponse);
+            }
+        }
+    }
+
+    private void addCarRouteToResponse(
+            BestSubwayInterface bestSubway, Participation participation, PlaceRouteResponse placeRouteResponse
+    ) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "KakaoAK " + kakaoProperties.getClientId());
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        CarMoveInfo carMoveInfo = restTemplate.exchange(
+                kakaoProperties.getSearchCarPathUriWithParams(bestSubway, participation),
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                CarMoveInfo.class
+        ).getBody();
+        placeRouteResponse.addMoveUserInfo(participation, carMoveInfo);
+    }
+
 }
