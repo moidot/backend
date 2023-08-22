@@ -26,6 +26,7 @@ import com.moim.backend.domain.space.response.BusPathResponse;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -39,6 +40,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +53,7 @@ import static com.moim.backend.domain.space.response.GroupResponse.Participation
 import static com.moim.backend.global.common.Result.*;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class GroupService {
@@ -161,6 +165,8 @@ public class GroupService {
 
     // 모임 추천 지역 조회하기
     public List<PlaceRouteResponse> getBestRegion(Long groupId) {
+        Instant start = Instant.now();
+
         Groups group = getGroup(groupId);
         MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
         List<BestSubwayInterface> bestSubwayList = subwayRepository.getBestSubwayList(
@@ -182,6 +188,8 @@ public class GroupService {
             placeRouteResponseList.add(placeRouteResponse);
         });
 
+        Instant end = Instant.now();
+        log.info("[ 추천 지역 조회 시간: {}ms ] ========================================", Duration.between(start, end).toMillis());
         return placeRouteResponseList;
     }
 
@@ -404,25 +412,44 @@ public class GroupService {
     private void addBusRouteToResponse(
             BestSubwayInterface bestSubway, Participation participation, PlaceRouteResponse placeRouteResponse
     ) {
+        Instant start = Instant.now();
+
         BusPathResponse busPathResponse = restTemplate.getForObject(
                 odsayProperties.getSearchPathUriWithParams(bestSubway, participation),
                 BusPathResponse.class
         );
 
-        if (busPathResponse.getResult() != null) {
+        if (busPathResponse.getResult() == null) {
+            log.debug("[ 버스 길찾기 실패 ] ========================================");
+            log.debug("지역: {}, url: {}", bestSubway.getName(), odsayProperties.getSearchPathUriWithParams(bestSubway, participation));
+        } else {
+            log.debug("[ 버스 길찾기 성공 ] ========================================");
+            log.debug("지역: {}, url: {}", bestSubway.getName(), odsayProperties.getSearchPathUriWithParams(bestSubway, participation));
+
             BusGraphicDataResponse busGraphicDataResponse = restTemplate.getForObject(
                     odsayProperties.getGraphicDataUriWIthParams(busPathResponse.getPathInfoMapObj()),
                     BusGraphicDataResponse.class
             );
-            if (busGraphicDataResponse.getResult() != null) {
+            if (busPathResponse.getResult() == null) {
+                log.debug("[ 버스 그래픽 데이터 조회 실패 ] ========================================");
+                log.debug("지역: {}, url: {}", bestSubway.getName(), odsayProperties.getSearchPathUriWithParams(bestSubway, participation));
+            } else {
+                log.debug("[ 버스 그래픽 데이터 조회 성공 ] ========================================");
+                log.debug("지역: {}, url: {}", bestSubway.getName(), odsayProperties.getSearchPathUriWithParams(bestSubway, participation));
+
                 placeRouteResponse.addMoveUserInfo(participation, busGraphicDataResponse, busPathResponse);
             }
         }
+
+        Instant end = Instant.now();
+        log.info("[ 버스 경로 조회 시간: {}ms ] ========================================", Duration.between(start, end).toMillis());
     }
 
     private void addCarRouteToResponse(
             BestSubwayInterface bestSubway, Participation participation, PlaceRouteResponse placeRouteResponse
     ) {
+        Instant start = Instant.now();
+
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "KakaoAK " + kakaoProperties.getClientId());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -433,7 +460,18 @@ public class GroupService {
                 new HttpEntity<>(headers),
                 CarMoveInfo.class
         ).getBody();
-        placeRouteResponse.addMoveUserInfo(participation, carMoveInfo);
+        if (carMoveInfo.getRoutes() == null) {
+            log.debug("[ 차 길찾기 조회 실패 ] ========================================");
+            log.debug("지역: {}, url: {}", bestSubway.getName(), kakaoProperties.getSearchCarPathUriWithParams(bestSubway, participation));
+        } else {
+            log.debug("[ 차 길찾기 조회 성공 ] ========================================");
+            log.debug("지역: {}, url: {}", bestSubway.getName(), kakaoProperties.getSearchCarPathUriWithParams(bestSubway, participation));
+
+            placeRouteResponse.addMoveUserInfo(participation, carMoveInfo);
+        }
+
+        Instant end = Instant.now();
+        log.info("[ 차 경로 조회 시간: {}ms ] ========================================", Duration.between(start, end).toMillis());
     }
 
 }
