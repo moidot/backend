@@ -188,6 +188,9 @@ public class GroupService {
     // 내 모임 확인하기
     public List<GroupResponse.MyParticipate> getMyParticipate(Users user) {
         List<Groups> groups = groupRepository.findByGroupsFetch(user.getUserId());
+        if (groups.isEmpty()) {
+            throw new CustomException(Result.NO_PARTICIPATION_INFO_AVAILABLE);
+        }
         return groups.stream()
                 .map(group -> GroupResponse.MyParticipate.response(
                         group,

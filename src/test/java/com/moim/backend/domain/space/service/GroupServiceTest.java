@@ -478,6 +478,21 @@ class GroupServiceTest {
                 .contains("의정부역", "서울역", "개봉역");
     }
 
+    @DisplayName("유저가 자신의 모임들을 확인할때 아직 아무것도 참여하지 않았다.")
+    @Test
+    void getMyParticipateIsNonList() {
+        // given
+        Users admin1 = savedUser("admin1@test.com", "어드민1");
+
+        em.flush();
+        em.clear();
+
+        // when // then
+        assertThatThrownBy(() -> groupService.getMyParticipate(admin1))
+                .extracting("result.code", "result.message")
+                .contains(-1008, "현재 참여하고 있는 모임이 존재하지 않습니다.");
+    }
+
     @DisplayName("동일한 유저가 동일한 그룹에 중복으로 참여할 수 없다.")
     @Test
     void throwsExceptionWhenDuplicateParticipation() {
