@@ -74,7 +74,7 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.participateRemoval(participateId, user));
     }
 
-    // 모임 추천 지역 조회하기 API
+    // 모임 추천 역(랜드마크) 조회하기 API
     @GetMapping("/best-region")
     public CustomResponseEntity<List<PlaceRouteResponse>> getBestRegion(
             @RequestParam Long groupId
