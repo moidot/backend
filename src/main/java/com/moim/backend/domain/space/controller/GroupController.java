@@ -30,7 +30,9 @@ public class GroupController {
 
     // 모임 참여자 정보 리스트 조회 API
     @GetMapping("")
-    public CustomResponseEntity<GroupResponse.Detail> readParticipateGroupByRegion(@RequestParam Long groupId) {
+    public CustomResponseEntity<GroupResponse.Detail> readParticipateGroupByRegion(
+            @RequestParam Long groupId
+    ) {
         return CustomResponseEntity.success(groupService.readParticipateGroupByRegion(groupId));
     }
 

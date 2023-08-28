@@ -1,12 +1,13 @@
 package com.moim.backend.domain.space.response;
 
-import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
 import lombok.*;
 
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GroupResponse {
@@ -55,11 +56,15 @@ public class GroupResponse {
         private List<Region> participantsByRegion;
 
         public static Detail response(Groups group, List<Region> participantsByRegion) {
+            String date = Optional.ofNullable(group.getDate())
+                    .map(d -> d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .orElse(null);
+
             return Detail.builder()
                     .groupId(group.getGroupId())
                     .name(group.getName())
                     .adminId(group.getAdminId())
-                    .date(group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .date(date)
                     .participantsByRegion(participantsByRegion)
                     .build();
         }
