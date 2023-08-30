@@ -11,27 +11,18 @@ import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
-import com.moim.backend.domain.space.response.CarMoveInfo;
-import com.moim.backend.domain.space.response.GroupResponse;
-import com.moim.backend.domain.space.response.MiddlePoint;
-import com.moim.backend.domain.space.response.PlaceRouteResponse;
-import com.moim.backend.domain.space.response.NaverMapListDto;
+import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.config.KakaoProperties;
 import com.moim.backend.domain.user.entity.Users;
-import com.moim.backend.domain.space.response.BusGraphicDataResponse;
-import com.moim.backend.domain.space.response.BusPathResponse;
+import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -48,8 +39,8 @@ import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.function.Function;
 
-import static com.moim.backend.domain.space.response.GroupResponse.Region.toLocalEntity;
 import static com.moim.backend.domain.space.response.GroupResponse.Participations.toParticipateEntity;
+import static com.moim.backend.domain.space.response.GroupResponse.Region.toLocalEntity;
 import static com.moim.backend.global.common.Result.*;
 
 @Service
@@ -58,6 +49,7 @@ import static com.moim.backend.global.common.Result.*;
 @RequiredArgsConstructor
 public class GroupService {
 
+    private final UserRepository userRepository;
     private final VoteRepository voteRepository;
     private final GroupRepository groupRepository;
     private final ParticipationRepository participationRepository;
@@ -78,6 +70,7 @@ public class GroupService {
     // 모임 참여
     @Transactional
     public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request, Users user) {
+        validateLocationName(request.getLocationName());
         Groups group = getGroup(request.getGroupId());
 
         checkDuplicateParticipation(group, user);
@@ -238,9 +231,7 @@ public class GroupService {
         return GroupResponse.Detail.response(group, regions);
     }
 
-
     // validate
-
     private static URI createNaverRequestUri(String local, String keyword) {
         return UriComponentsBuilder.fromHttpUrl("https://map.naver.com/v5/api/search")
                 .queryParam("caller", "pcweb")
@@ -252,6 +243,13 @@ public class GroupService {
                 .queryParam("lang", "ko")
                 .build()
                 .toUri();
+    }
+
+    private static void validateLocationName(String locationName) {
+        String[] validateLocation = locationName.split(" ");
+        if (validateLocation.length < 2) {
+            throw new CustomException(INCORRECT_LOCATION_NAME);
+        }
     }
 
     private void checkDuplicateParticipation(Groups group, Users user) {
