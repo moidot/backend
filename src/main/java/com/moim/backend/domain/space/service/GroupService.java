@@ -226,9 +226,42 @@ public class GroupService {
     // 모임 참여자 정보 리스트 조회 API
     public GroupResponse.Detail readParticipateGroupByRegion(Long groupId) {
         Groups group = getGroupByFetchParticipation(groupId);
-        List<GroupResponse.Region> regions = getParticipantsByRegion(group);
+        Users admin = getUser(group.getAdminId());
 
-        return GroupResponse.Detail.response(group, regions);
+        List<GroupResponse.Region> regions = new ArrayList<>();
+        group.getParticipations().forEach(participation -> {
+            // 내 그룹화 지역 이름 생성
+            String regionName = getRegionName(participation);
+
+            // 내 참여 정보 응답 객체 변환
+            Users user = getUser(participation.getUserId());
+            GroupResponse.Participations participateEntity = toParticipateEntity(participation, user);
+
+            // 내 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 확인
+            Optional<GroupResponse.Region> optionalRegion = regions.stream()
+                    .filter(local -> local.getRegionName().equals(regionName))
+                    .findFirst();
+
+            // 존재하지 않는다면
+            if (optionalRegion.isEmpty()) {
+                regions.add(toLocalEntity(regionName, participateEntity));
+            }
+            // 존재한다면
+            else {
+                GroupResponse.Region region = optionalRegion.get();
+                List<GroupResponse.Participations> participations = new ArrayList<>(region.getParticipations());
+                participations.add(participateEntity);
+                region.setParticipations(participations);
+            }
+        });
+
+        return GroupResponse.Detail.response(group, admin, regions);
+    }
+
+    private Users getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(NOT_FOUND_PARTICIPATE)
+        );
     }
 
     // validate
@@ -278,38 +311,10 @@ public class GroupService {
 
 
     // method
-    private static List<GroupResponse.Region> getParticipantsByRegion(Groups group) {
-        List<GroupResponse.Region> regions = new ArrayList<>();
-
-        group.getParticipations().forEach(participation -> {
-            // 내 그룹화 지역 이름 생성
-            StringTokenizer st = new StringTokenizer(participation.getLocationName());
-            String regionName = String.format("%s %s", st.nextToken(), st.nextToken());
-
-            // 내 참여 정보 응답 객체 변환
-            GroupResponse.Participations participateEntity = toParticipateEntity(participation);
-
-            // 내 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 확인
-            Optional<GroupResponse.Region> optionalRegion = regions.stream()
-                    .filter(local -> local.getRegionName().equals(regionName))
-                    .findFirst();
-
-            // 존재하지 않는다면
-            if (optionalRegion.isEmpty()) {
-                // 내 그룹화 지역 등록 및 해당 그룹화 참여자로 등록
-                regions.add(toLocalEntity(regionName, participateEntity));
-            }
-            // 존재한다면
-            else {
-                GroupResponse.Region region = optionalRegion.get();
-                List<GroupResponse.Participations> participations = new ArrayList<>(region.getParticipations());
-                participations.add(participateEntity);
-                // 그룹화 되어있는 지역에 내 참여정보 등록
-                region.setParticipations(participations);
-            }
-        });
-
-        return regions;
+    private static String getRegionName(Participation participation) {
+        validateLocationName(participation.getLocationName());
+        StringTokenizer st = new StringTokenizer(participation.getLocationName());
+        return String.format("%s %s", st.nextToken(), st.nextToken());
     }
 
     private static Function<NaverMapListDto.placeList, GroupResponse.Place> toPlaceEntity(Double x, Double y, String local) {
