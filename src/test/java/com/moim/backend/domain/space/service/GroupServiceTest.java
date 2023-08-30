@@ -100,7 +100,7 @@ class GroupServiceTest {
         Users participateUser = savedUser("test2@test.com", "테스트 이름2");
         Groups saveGroup = savedGroup(admin.getUserId(), "테스트 그룹");
         GroupRequest.Participate request = new GroupRequest.Participate(
-                saveGroup.getGroupId(), "어드민", "커피나무", 37.591043, 127.019721, PUBLIC, "2345"
+                saveGroup.getGroupId(), "어드민", "서울 성북구 보문로34다길 2", 37.591043, 127.019721, PUBLIC, "2345"
         );
 
         em.flush();
@@ -121,7 +121,7 @@ class GroupServiceTest {
                         "transportation"
                 )
                 .contains(
-                        saveGroup.getGroupId(), admin.getUserId(), "커피나무",
+                        saveGroup.getGroupId(), admin.getUserId(), "서울 성북구 보문로34다길 2",
                         "어드민", 37.591043, 127.019721, "PUBLIC"
                 );
 
@@ -144,7 +144,7 @@ class GroupServiceTest {
         Groups saveGroup = savedGroup(user.getUserId(), "테스트 그룹");
 
         GroupRequest.Participate request = new GroupRequest.Participate(
-                saveGroup.getGroupId(), "경기도불주먹", "커피나무", 37.5660, 126.9784,
+                saveGroup.getGroupId(), "경기도불주먹", "서울 성북구 보문로34다길 2", 37.5660, 126.9784,
                 PUBLIC, "2345"
         );
 
@@ -161,12 +161,31 @@ class GroupServiceTest {
                         "transportation"
                 )
                 .contains(
-                        saveGroup.getGroupId(), participateUser.getUserId(), "커피나무",
+                        saveGroup.getGroupId(), participateUser.getUserId(), "서울 성북구 보문로34다길 2",
                         "경기도불주먹", 37.5660, 126.9784, "PUBLIC"
                 );
 
         Participation participation = participationRepository.findById(response.getParticipationId()).get();
         assertThat(participation.getPassword()).isEqualTo(encrypt("2345"));
+    }
+
+    @DisplayName("하나의 유저가 하나의 그룹에 참가할때 위치 이름이 잘못됐을 경우 Exception 이 발생한다.")
+    @Test
+    void participateWithValidateLocationThrowException() {
+        // given
+        Users user = savedUser("test@test.com", "테스트 이름");
+        Users participateUser = savedUser("test2@test.com", "테스트 이름2");
+        Groups saveGroup = savedGroup(user.getUserId(), "테스트 그룹");
+
+        GroupRequest.Participate request = new GroupRequest.Participate(
+                saveGroup.getGroupId(), "경기도불주먹", "서울", 37.5660, 126.9784,
+                PUBLIC, "2345"
+        );
+
+        // when //then
+        assertThatThrownBy(() -> groupService.participateGroup(request.toServiceRequest(), participateUser))
+                .extracting("result.code", "result.message")
+                .contains(-1009, "잘못된 지역 이름 입니다.");
     }
 
     @DisplayName("하나의 유저가 하나의 그룹에 참가할때 비밀번호를 입력하지 않는다.")
@@ -181,7 +200,7 @@ class GroupServiceTest {
 
         GroupRequest.Participate request =
                 new GroupRequest.Participate(
-                        saveGroup.getGroupId(), "경기도불주먹", "커피나무",
+                        saveGroup.getGroupId(), "경기도불주먹", "서울 성북구 보문로34다길 2",
                         37.5660, 126.9784, PUBLIC, null
                 );
 
@@ -197,7 +216,7 @@ class GroupServiceTest {
                         "longitude", "transportation"
                 )
                 .contains(
-                        saveGroup.getGroupId(), "커피나무",
+                        saveGroup.getGroupId(), "서울 성북구 보문로34다길 2",
                         participateUser.getUserId(), "경기도불주먹", 37.5660,
                         126.9784, "PUBLIC"
                 );
@@ -216,7 +235,7 @@ class GroupServiceTest {
 
         GroupRequest.Participate request =
                 new GroupRequest.Participate(
-                        saveGroup.getGroupId(), "경기도불주먹", "커피나무",
+                        saveGroup.getGroupId(), "경기도불주먹", "서울 성북구 보문로34다길 2",
                         37.5660, 126.9784, TransportationType.NULL, "2345"
                 );
 
@@ -502,7 +521,7 @@ class GroupServiceTest {
         GroupServiceRequest.Participate request = GroupServiceRequest.Participate.builder()
                 .groupId(group.getGroupId())
                 .userName("테스터")
-                .locationName("불광역")
+                .locationName("서울 성북구 보문로34다길 2")
                 .latitude(37.610553)
                 .longitude(126.92982)
                 .transportationType(PUBLIC)
