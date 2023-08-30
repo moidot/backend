@@ -13,12 +13,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
+import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
+import org.springframework.restdocs.operation.preprocess.OperationPreprocessor;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.List;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.moim.backend.domain.space.entity.TransportationType.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -105,8 +109,11 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void participationGroup() throws Exception {
         // given
-        GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, "안지영", "쇼파르", 37.5660, 126.9784, TransportationType.PUBLIC, "123456");
+        GroupRequest.Participate request = new GroupRequest.Participate(
+                1L, "안지영", "서울 성북구 보문로34다길 2",
+                37.209043, 126.329194, PUBLIC,
+                "123456"
+        );
 
         given(groupService.participateGroup(any(), any()))
                 .willReturn(
@@ -115,70 +122,64 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .groupId(1L)
                                 .userId(1L)
                                 .userName("안지영")
-                                .locationName("쇼파르")
-                                .latitude(37.57449)
-                                .longitude(126.89521)
+                                .locationName("서울 성북구 보문로34다길 2")
+                                .latitude(37.209043)
+                                .longitude(126.329194)
                                 .transportation("PUBLIC")
                                 .build()
                 );
 
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.post("/group/participate")
+                .header(AUTHORIZATION, "Bearer {token}")
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON);
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("스페이스 참여 API")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .requestFields(
+                        fieldWithPath("groupId").type(NUMBER).description("그룹 ID / Long"),
+                        fieldWithPath("userName").type(STRING).description("유저 닉네임"),
+                        fieldWithPath("locationName").type(STRING).description("출발 위치 이름"),
+                        fieldWithPath("latitude").type(NUMBER).description("위도 / Double"),
+                        fieldWithPath("longitude").type(NUMBER).description("경도 / Double"),
+                        fieldWithPath("transportationType").type(STRING).description("대중교통 : 'PUBLIC' / 자동차 : 'PERSONAL'"),
+                        fieldWithPath("password").type(STRING).description("모임 내 비밀번호").optional())
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER)
+                                .description("상태 코드"),
+                        fieldWithPath("message").type(STRING)
+                                .description("상태 메세지"),
+                        fieldWithPath("data.participationId").type(NUMBER)
+                                .description("모임 참여자 ID / Long"),
+                        fieldWithPath("data.groupId").type(NUMBER)
+                                .description("그룹 ID / Long"),
+                        fieldWithPath("data.userId").type(NUMBER)
+                                .description("유저 ID / Long"),
+                        fieldWithPath("data.userName").type(STRING)
+                                .description("유저 닉네임"),
+                        fieldWithPath("data.locationName").type(STRING)
+                                .description("출발 위치"),
+                        fieldWithPath("data.latitude").type(NUMBER)
+                                .description("위도 / Double"),
+                        fieldWithPath("data.longitude").type(NUMBER)
+                                .description("경도 / Long"),
+                        fieldWithPath("data.transportation").type(STRING)
+                                .description("내 이동수단"))
+                .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("group-participation", prettyPrint(), prettyPrint(), parameters);
+
         // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.post("/group/participate")
-                                .header(AUTHORIZATION, "Bearer {token}")
-                                .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
+        mockMvc.perform(httpRequest)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("group-participation",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("스페이스 API")
-                                .summary("스페이스 참여 API")
-                                .requestHeaders(
-                                        headerWithName("Authorization")
-                                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
-                                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
-                                .requestFields(
-                                        fieldWithPath("groupId").type(NUMBER)
-                                                .description("그룹 ID / Long"),
-                                        fieldWithPath("userName").type(STRING)
-                                                .description("유저 닉네임"),
-                                        fieldWithPath("locationName").type(STRING)
-                                                .description("출발 위치 이름"),
-                                        fieldWithPath("latitude").type(NUMBER)
-                                                .description("위도 / Double"),
-                                        fieldWithPath("longitude").type(NUMBER)
-                                                .description("경도 / Double"),
-                                        fieldWithPath("transportationType").type(STRING)
-                                                .description("대중교통 : 'PUBLIC' / 자동차 : 'PERSONAL'"),
-                                        fieldWithPath("password").type(STRING)
-                                                .optional()
-                                                .description("모임 내 비밀번호"))
-                                .responseFields(
-                                        fieldWithPath("code").type(NUMBER)
-                                                .description("상태 코드"),
-                                        fieldWithPath("message").type(STRING)
-                                                .description("상태 메세지"),
-                                        fieldWithPath("data.participationId").type(NUMBER)
-                                                .description("모임 참여자 ID / Long"),
-                                        fieldWithPath("data.groupId").type(NUMBER)
-                                                .description("그룹 ID / Long"),
-                                        fieldWithPath("data.userId").type(NUMBER)
-                                                .description("유저 ID / Long"),
-                                        fieldWithPath("data.userName").type(STRING)
-                                                .description("유저 닉네임"),
-                                        fieldWithPath("data.locationName").type(STRING)
-                                                .description("출발 위치"),
-                                        fieldWithPath("data.latitude").type(NUMBER)
-                                                .description("위도 / Double"),
-                                        fieldWithPath("data.longitude").type(NUMBER)
-                                                .description("경도 / Long"),
-                                        fieldWithPath("data.transportation").type(STRING)
-                                                .description("내 이동수단"))
-                                .build())));
+                .andDo(document);
     }
 
     @DisplayName("내 참여 정보 수정 API")
@@ -186,7 +187,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     void participationUpdate() throws Exception {
         // given
         GroupRequest.ParticipateUpdate request
-                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, TransportationType.PERSONAL);
+                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, PERSONAL);
 
         given(groupService.participateUpdate(any(), any()))
                 .willReturn(
@@ -367,8 +368,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // given
         List<PlaceRouteResponse.MoveUserInfo> moveUserInfoList = List.of(
-                new PlaceRouteResponse.MoveUserInfo(1L, "김유정", TransportationType.PUBLIC, 2, 68, 15928.0, path),
-                new PlaceRouteResponse.MoveUserInfo(2L, "천현우", TransportationType.PUBLIC, 2, 96, 27725.0, path)
+                new PlaceRouteResponse.MoveUserInfo(1L, "김유정", PUBLIC, 2, 68, 15928.0, path),
+                new PlaceRouteResponse.MoveUserInfo(2L, "천현우", PUBLIC, 2, 96, 27725.0, path)
         );
         List<PlaceRouteResponse> placeRouteResponseList = List.of(
                 new PlaceRouteResponse("안국", 37.576477, 126.985443, moveUserInfoList),
@@ -664,29 +665,59 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @DisplayName("모임 참여자 정보 리스트 조회 API")
     @Test
     void readParticipateGroupByRegion() throws Exception {
-        GroupResponse.Participations participations1 = new GroupResponse.Participations(1L, 1L, "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC");
-        GroupResponse.Participations participations2 = new GroupResponse.Participations(2L, 13L, "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC");
+        GroupResponse.Participations participations1 =
+                new GroupResponse.Participations(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC");
+        GroupResponse.Participations participations2 =
+                new GroupResponse.Participations(2L, "park@naver.com", "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC");
         GroupResponse.Region region1 = new GroupResponse.Region("서울 성북구", List.of(participations1, participations2));
 
-        GroupResponse.Participations participations3 = new GroupResponse.Participations(3L, 25L, "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL");
-        GroupResponse.Participations participations4 = new GroupResponse.Participations(4L, 6L, "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC");
+        GroupResponse.Participations participations3 =
+                new GroupResponse.Participations(3L, "cheon@gmail.com", "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL");
+        GroupResponse.Participations participations4 =
+                new GroupResponse.Participations(4L, "moram@gmail.com", "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC");
         GroupResponse.Region region2 = new GroupResponse.Region("서울 강북구", List.of(participations3, participations4));
 
-        GroupResponse.Participations participations5 = new GroupResponse.Participations(3L, 25L, "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL");
-        GroupResponse.Region region3 = new GroupResponse.Region("경기도 부천시", List.of(participations5));
+        GroupResponse.Participations participations5 =
+                new GroupResponse.Participations(3L, "enfp@gmail.com", "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL");
+        GroupResponse.Region region3 =
+                new GroupResponse.Region("경기도 부천시", List.of(participations5));
 
         // given
         given(groupService.readParticipateGroupByRegion(anyLong()))
                 .willReturn(
                         GroupResponse.Detail.builder()
                                 .groupId(1L)
-                                .adminId(1L)
+                                .adminEmail("kim@naver.com")
                                 .name("모이닷 팀 프로젝트")
                                 .date("2023-12-01")
                                 .participantsByRegion(List.of(region1, region2, region3))
                                 .build()
                 );
 
+        String participationsByRegion = "data.participantsByRegion[]";
+        String participations = participationsByRegion + ".participations[]";
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("스페이스 전체 참여자 조회 API")
+                .queryParameters(
+                        parameterWithName("groupId").description("그룹 Id"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"),
+                        fieldWithPath("data.groupId").type(NUMBER).description("그룹 ID"),
+                        fieldWithPath("data.adminEmail").type(STRING).description("그룹 어드민 이메일"),
+                        fieldWithPath("data.name").type(STRING).description("그룹 이름"),
+                        fieldWithPath("data.date").type(STRING).description("그룹 생성 날짜"),
+                        fieldWithPath(participationsByRegion).type(ARRAY).description("그룹화된 지역 리스트"),
+                        fieldWithPath(participationsByRegion + ".regionName").type(STRING).description("그룹화된 지역 이름"),
+                        fieldWithPath(participations).type(ARRAY).description("그룹화된 지역 참여자 리스트"),
+                        fieldWithPath(participations + ".participationId").type(NUMBER).description("참여 ID"),
+                        fieldWithPath(participations + ".userEmail").type(STRING).description("유저 이메"),
+                        fieldWithPath(participations + ".userName").type(STRING).description("유저 이름"),
+                        fieldWithPath(participations + ".locationName").type(STRING).description("유저 출발지 이름"),
+                        fieldWithPath(participations + ".transportation").type(STRING).description("유저 교통수단"))
+                .build();
         // when // then
         mockMvc.perform(
                         RestDocumentationRequestBuilders.get("/group")
@@ -696,40 +727,20 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .andExpect(status().isOk())
                 .andDo(document("read-participate-region",
                         preprocessResponse(prettyPrint()),
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("스페이스 API")
-                                .summary("스페이스 전체 참여자 조회 API")
-                                .queryParameters(
-                                        parameterWithName("groupId").description("그룹 Id"))
-                                .responseFields(
-                                        fieldWithPath("code").type(NUMBER)
-                                                .description("상태 코드"),
-                                        fieldWithPath("message").type(STRING)
-                                                .description("상태 메세지"),
-                                        fieldWithPath("data.groupId").type(NUMBER)
-                                                .description("그룹 ID"),
-                                        fieldWithPath("data.adminId").type(NUMBER)
-                                                .description("그룹 어드민 ID"),
-                                        fieldWithPath("data.name").type(STRING)
-                                                .description("그룹 이름"),
-                                        fieldWithPath("data.date").type(STRING)
-                                                .description("그룹 생성 날짜"),
-                                        fieldWithPath("data.participantsByRegion[]").type(ARRAY)
-                                                .description("그룹화된 지역 리스트"),
-                                        fieldWithPath("data.participantsByRegion[].regionName").type(STRING)
-                                                .description("그룹화된 지역 이름"),
-                                        fieldWithPath("data.participantsByRegion[].participations[]").type(ARRAY)
-                                                .description("그룹화된 지역 참여자 리스트"),
-                                        fieldWithPath("data.participantsByRegion[].participations[].participationId").type(NUMBER)
-                                                .description("참여 ID"),
-                                        fieldWithPath("data.participantsByRegion[].participations[].userId").type(NUMBER)
-                                                .description("유저 ID"),
-                                        fieldWithPath("data.participantsByRegion[].participations[].userName").type(STRING)
-                                                .description("유저 이름"),
-                                        fieldWithPath("data.participantsByRegion[].participations[].locationName").type(STRING)
-                                                .description("유저 출발지 이름"),
-                                        fieldWithPath("data.participantsByRegion[].participations[].transportation").type(STRING)
-                                                .description("유저 교통수단"))
-                                .build())));
+                        resource(parameters)));
+    }
+
+    // method
+    public static RestDocumentationResultHandler documentHandler(
+            String identifier, OperationPreprocessor request,
+            OperationPreprocessor response, ResourceSnippetParameters parameters
+    ) {
+        return document(identifier, preprocessRequest(request), preprocessResponse(response), resource(parameters));
+    }
+
+    public static RestDocumentationResultHandler documentHandler(
+            String identifier, OperationPreprocessor response, ResourceSnippetParameters parameters
+    ) {
+        return document(identifier, preprocessResponse(response), resource(parameters));
     }
 }

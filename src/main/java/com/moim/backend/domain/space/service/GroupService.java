@@ -11,27 +11,18 @@ import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
-import com.moim.backend.domain.space.response.CarMoveInfo;
-import com.moim.backend.domain.space.response.GroupResponse;
-import com.moim.backend.domain.space.response.MiddlePoint;
-import com.moim.backend.domain.space.response.PlaceRouteResponse;
-import com.moim.backend.domain.space.response.NaverMapListDto;
+import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestSubwayInterface;
 import com.moim.backend.domain.user.config.KakaoProperties;
 import com.moim.backend.domain.user.entity.Users;
-import com.moim.backend.domain.space.response.BusGraphicDataResponse;
-import com.moim.backend.domain.space.response.BusPathResponse;
+import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -48,8 +39,8 @@ import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.function.Function;
 
-import static com.moim.backend.domain.space.response.GroupResponse.Region.toLocalEntity;
 import static com.moim.backend.domain.space.response.GroupResponse.Participations.toParticipateEntity;
+import static com.moim.backend.domain.space.response.GroupResponse.Region.toLocalEntity;
 import static com.moim.backend.global.common.Result.*;
 
 @Service
@@ -58,6 +49,7 @@ import static com.moim.backend.global.common.Result.*;
 @RequiredArgsConstructor
 public class GroupService {
 
+    private final UserRepository userRepository;
     private final VoteRepository voteRepository;
     private final GroupRepository groupRepository;
     private final ParticipationRepository participationRepository;
@@ -78,6 +70,7 @@ public class GroupService {
     // 모임 참여
     @Transactional
     public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request, Users user) {
+        validateLocationName(request.getLocationName());
         Groups group = getGroup(request.getGroupId());
 
         checkDuplicateParticipation(group, user);
@@ -233,14 +226,45 @@ public class GroupService {
     // 모임 참여자 정보 리스트 조회 API
     public GroupResponse.Detail readParticipateGroupByRegion(Long groupId) {
         Groups group = getGroupByFetchParticipation(groupId);
-        List<GroupResponse.Region> regions = getParticipantsByRegion(group);
+        Users admin = getUser(group.getAdminId());
 
-        return GroupResponse.Detail.response(group, regions);
+        List<GroupResponse.Region> regions = new ArrayList<>();
+        group.getParticipations().forEach(participation -> {
+            // 내 그룹화 지역 이름 생성
+            String regionName = getRegionName(participation);
+
+            // 내 참여 정보 응답 객체 변환
+            Users user = getUser(participation.getUserId());
+            GroupResponse.Participations participateEntity = toParticipateEntity(participation, user);
+
+            // 내 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 확인
+            Optional<GroupResponse.Region> optionalRegion = regions.stream()
+                    .filter(local -> local.getRegionName().equals(regionName))
+                    .findFirst();
+
+            // 존재하지 않는다면
+            if (optionalRegion.isEmpty()) {
+                regions.add(toLocalEntity(regionName, participateEntity));
+            }
+            // 존재한다면
+            else {
+                GroupResponse.Region region = optionalRegion.get();
+                List<GroupResponse.Participations> participations = new ArrayList<>(region.getParticipations());
+                participations.add(participateEntity);
+                region.setParticipations(participations);
+            }
+        });
+
+        return GroupResponse.Detail.response(group, admin, regions);
     }
 
+    private Users getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(NOT_FOUND_PARTICIPATE)
+        );
+    }
 
     // validate
-
     private static URI createNaverRequestUri(String local, String keyword) {
         return UriComponentsBuilder.fromHttpUrl("https://map.naver.com/v5/api/search")
                 .queryParam("caller", "pcweb")
@@ -252,6 +276,13 @@ public class GroupService {
                 .queryParam("lang", "ko")
                 .build()
                 .toUri();
+    }
+
+    private static void validateLocationName(String locationName) {
+        String[] validateLocation = locationName.split(" ");
+        if (validateLocation.length < 2) {
+            throw new CustomException(INCORRECT_LOCATION_NAME);
+        }
     }
 
     private void checkDuplicateParticipation(Groups group, Users user) {
@@ -280,38 +311,10 @@ public class GroupService {
 
 
     // method
-    private static List<GroupResponse.Region> getParticipantsByRegion(Groups group) {
-        List<GroupResponse.Region> regions = new ArrayList<>();
-
-        group.getParticipations().forEach(participation -> {
-            // 내 그룹화 지역 이름 생성
-            StringTokenizer st = new StringTokenizer(participation.getLocationName());
-            String regionName = String.format("%s %s", st.nextToken(), st.nextToken());
-
-            // 내 참여 정보 응답 객체 변환
-            GroupResponse.Participations participateEntity = toParticipateEntity(participation);
-
-            // 내 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 확인
-            Optional<GroupResponse.Region> optionalRegion = regions.stream()
-                    .filter(local -> local.getRegionName().equals(regionName))
-                    .findFirst();
-
-            // 존재하지 않는다면
-            if (optionalRegion.isEmpty()) {
-                // 내 그룹화 지역 등록 및 해당 그룹화 참여자로 등록
-                regions.add(toLocalEntity(regionName, participateEntity));
-            }
-            // 존재한다면
-            else {
-                GroupResponse.Region region = optionalRegion.get();
-                List<GroupResponse.Participations> participations = new ArrayList<>(region.getParticipations());
-                participations.add(participateEntity);
-                // 그룹화 되어있는 지역에 내 참여정보 등록
-                region.setParticipations(participations);
-            }
-        });
-
-        return regions;
+    private static String getRegionName(Participation participation) {
+        validateLocationName(participation.getLocationName());
+        StringTokenizer st = new StringTokenizer(participation.getLocationName());
+        return String.format("%s %s", st.nextToken(), st.nextToken());
     }
 
     private static Function<NaverMapListDto.placeList, GroupResponse.Place> toPlaceEntity(Double x, Double y, String local) {
