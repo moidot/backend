@@ -581,8 +581,8 @@ class GroupServiceTest {
 
         // then
         assertThat(response)
-                .extracting("groupId", "name", "adminId", "date")
-                .contains(group.getGroupId(), "모이닷", group.getAdminId(), "2023-07-10");
+                .extracting("groupId", "name", "adminEmail", "date")
+                .contains(group.getGroupId(), "모이닷", user1.getEmail(), "2023-07-10");
 
         assertThat(response.getParticipantsByRegion())
                 .extracting("regionName")

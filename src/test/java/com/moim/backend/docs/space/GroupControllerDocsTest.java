@@ -666,19 +666,19 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void readParticipateGroupByRegion() throws Exception {
         GroupResponse.Participations participations1 =
-                new GroupResponse.Participations(1L, 1L, "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC");
+                new GroupResponse.Participations(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC");
         GroupResponse.Participations participations2 =
-                new GroupResponse.Participations(2L, 13L, "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC");
+                new GroupResponse.Participations(2L, "park@naver.com", "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC");
         GroupResponse.Region region1 = new GroupResponse.Region("서울 성북구", List.of(participations1, participations2));
 
         GroupResponse.Participations participations3 =
-                new GroupResponse.Participations(3L, 25L, "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL");
+                new GroupResponse.Participations(3L, "cheon@gmail.com", "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL");
         GroupResponse.Participations participations4 =
-                new GroupResponse.Participations(4L, 6L, "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC");
+                new GroupResponse.Participations(4L, "moram@gmail.com", "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC");
         GroupResponse.Region region2 = new GroupResponse.Region("서울 강북구", List.of(participations3, participations4));
 
         GroupResponse.Participations participations5 =
-                new GroupResponse.Participations(3L, 25L, "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL");
+                new GroupResponse.Participations(3L, "enfp@gmail.com", "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL");
         GroupResponse.Region region3 =
                 new GroupResponse.Region("경기도 부천시", List.of(participations5));
 
@@ -687,7 +687,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .willReturn(
                         GroupResponse.Detail.builder()
                                 .groupId(1L)
-                                .adminId(1L)
+                                .adminEmail("kim@naver.com")
                                 .name("모이닷 팀 프로젝트")
                                 .date("2023-12-01")
                                 .participantsByRegion(List.of(region1, region2, region3))
@@ -706,14 +706,14 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         fieldWithPath("code").type(NUMBER).description("상태 코드"),
                         fieldWithPath("message").type(STRING).description("상태 메세지"),
                         fieldWithPath("data.groupId").type(NUMBER).description("그룹 ID"),
-                        fieldWithPath("data.adminId").type(NUMBER).description("그룹 어드민 ID"),
+                        fieldWithPath("data.adminEmail").type(STRING).description("그룹 어드민 이메일"),
                         fieldWithPath("data.name").type(STRING).description("그룹 이름"),
                         fieldWithPath("data.date").type(STRING).description("그룹 생성 날짜"),
                         fieldWithPath(participationsByRegion).type(ARRAY).description("그룹화된 지역 리스트"),
                         fieldWithPath(participationsByRegion + ".regionName").type(STRING).description("그룹화된 지역 이름"),
                         fieldWithPath(participations).type(ARRAY).description("그룹화된 지역 참여자 리스트"),
                         fieldWithPath(participations + ".participationId").type(NUMBER).description("참여 ID"),
-                        fieldWithPath(participations + ".userId").type(NUMBER).description("유저 ID"),
+                        fieldWithPath(participations + ".userEmail").type(STRING).description("유저 이메"),
                         fieldWithPath(participations + ".userName").type(STRING).description("유저 이름"),
                         fieldWithPath(participations + ".locationName").type(STRING).description("유저 출발지 이름"),
                         fieldWithPath(participations + ".transportation").type(STRING).description("유저 교통수단"))
