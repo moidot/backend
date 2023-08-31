@@ -1,6 +1,6 @@
 package com.moim.backend.domain.subway.response;
 
-public interface BestSubwayInterface {
+public interface BestPlaceInterface {
 
     public String getName();
     public double getLatitude();

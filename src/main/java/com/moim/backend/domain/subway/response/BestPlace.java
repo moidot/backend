@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class BestSubway implements BestSubwayInterface {
+public class BestPlace implements BestPlaceInterface {
 
     private String name;
     private double latitude;
@@ -14,7 +14,7 @@ public class BestSubway implements BestSubwayInterface {
     private double distanceFromMiddlePoint;
 
     @Builder
-    public BestSubway(String name, double latitude, double longitude, double distanceFromMiddlePoint) {
+    public BestPlace(String name, double latitude, double longitude, double distanceFromMiddlePoint) {
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;

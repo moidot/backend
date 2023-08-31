@@ -1,7 +1,7 @@
 package com.moim.backend.domain.user.config;
 
 import com.moim.backend.domain.space.entity.Participation;
-import com.moim.backend.domain.subway.response.BestSubwayInterface;
+import com.moim.backend.domain.subway.response.BestPlaceInterface;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +32,7 @@ public class KakaoProperties {
         return parameters;
     }
 
-    public URI getSearchCarPathUriWithParams(BestSubwayInterface bestSubway, Participation participation) {
+    public URI getSearchCarPathUriWithParams(BestPlaceInterface bestSubway, Participation participation) {
         return UriComponentsBuilder.fromHttpUrl(searchPathUri)
                 .queryParam("origin", participation.getLongitude() + "," + participation.getLatitude())
                 .queryParam("destination", bestSubway.getLongitude() + "," + bestSubway.getLatitude())
