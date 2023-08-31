@@ -1,7 +1,7 @@
 package com.moim.backend.domain.space.config;
 
 import com.moim.backend.domain.space.entity.Participation;
-import com.moim.backend.domain.subway.response.BestSubwayInterface;
+import com.moim.backend.domain.subway.response.BestPlaceInterface;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +19,7 @@ public class OdsayProperties {
     private String searchPathUri;
     private String graphicDataUri;
 
-    public URI getSearchPathUriWithParams(BestSubwayInterface bestSubway, Participation participation) {
+    public URI getSearchPathUriWithParams(BestPlaceInterface bestSubway, Participation participation) {
         return UriComponentsBuilder.fromHttpUrl(searchPathUri)
                 .queryParam("apiKey", apiKey)
                 .queryParam("SX", participation.getLongitude())

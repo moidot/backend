@@ -2,6 +2,7 @@ package com.moim.backend.domain.space.service;
 
 import com.moim.backend.domain.groupvote.entity.Vote;
 import com.moim.backend.domain.groupvote.repository.VoteRepository;
+import com.moim.backend.domain.hotplace.repository.HotPlaceRepository;
 import com.moim.backend.domain.space.config.OdsayProperties;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
@@ -14,12 +15,13 @@ import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
-import com.moim.backend.domain.subway.response.BestSubwayInterface;
+import com.moim.backend.domain.subway.response.BestPlaceInterface;
 import com.moim.backend.domain.user.config.KakaoProperties;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
+import com.moim.backend.global.util.DistanceCalculator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -38,6 +40,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.moim.backend.domain.space.response.GroupResponse.Participations.toParticipateEntity;
 import static com.moim.backend.domain.space.response.GroupResponse.Region.toLocalEntity;
@@ -55,6 +58,7 @@ public class GroupService {
     private final ParticipationRepository participationRepository;
     private final BestPlaceRepository bestPlaceRepository;
     private final SubwayRepository subwayRepository;
+    private final HotPlaceRepository hotPlaceRepository;
     private final OdsayProperties odsayProperties;
     private final KakaoProperties kakaoProperties;
     private final RestTemplate restTemplate = new RestTemplate();
@@ -159,27 +163,30 @@ public class GroupService {
     // 모임 추천 지역 조회하기
     public List<PlaceRouteResponse> getBestRegion(Long groupId) {
         Instant start = Instant.now();
-
         Groups group = getGroup(groupId);
+        // 중간 좌표 구하기
         MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
-        List<BestSubwayInterface> bestSubwayList = subwayRepository.getBestSubwayList(
-                middlePoint.getLatitude(), middlePoint.getLongitude()
+
+        // 유효범위 찾기
+        List<Participation> participationList = participationRepository.findAllByGroup(group);
+        double validRange = getValidRange(participationList, middlePoint);
+
+        // 근처 지하철역 찾기
+        List<BestPlaceInterface> bestPlaceList = subwayRepository.getBestSubwayList(
+                middlePoint.getLatitude(), middlePoint.getLongitude(), validRange
         );
 
-        List<PlaceRouteResponse> placeRouteResponseList = new ArrayList<>();
-        List<Participation> participations = participationRepository.findAllByGroup(group);
-        bestSubwayList.forEach(bestSubway -> {
-            PlaceRouteResponse placeRouteResponse = new PlaceRouteResponse(bestSubway);
+        // 근처에 지하철역이 없다면, 인기 장소 찾기
+        if (bestPlaceList.isEmpty()) {
+            bestPlaceList = hotPlaceRepository.getBestHotPlaceList(
+                    middlePoint.getLatitude(), middlePoint.getLongitude(), validRange
+            );
+        }
 
-            for (Participation participation : participations) {
-                if ((participation.getTransportation() == TransportationType.PUBLIC)) {
-                    addBusRouteToResponse(bestSubway, participation, placeRouteResponse);
-                } else {
-                    addCarRouteToResponse(bestSubway, participation, placeRouteResponse);
-                }
-            }
-            placeRouteResponseList.add(placeRouteResponse);
-        });
+        // 경로 찾기
+        List<PlaceRouteResponse> placeRouteResponseList = bestPlaceList.stream().map(bestPlace ->
+                new PlaceRouteResponse(bestPlace, getMoveUserInfoList(bestPlace, participationList))
+        ).collect(Collectors.toList());
 
         Instant end = Instant.now();
         log.info("[ 추천 지역 조회 시간: {}ms ] ========================================", Duration.between(start, end).toMillis());
@@ -322,7 +329,7 @@ public class GroupService {
             GroupResponse.Place response = GroupResponse.Place.response(naver, local);
             double placeX = Double.parseDouble(naver.getX());
             double placeY = Double.parseDouble(naver.getY());
-            String distance = String.format("%s(으)로부터 %sm", local, (int) calculateDistance(y, x, placeY, placeX, "meter"));
+            String distance = String.format("%s(으)로부터 %sm", local, (int) DistanceCalculator.getDistance(y, x, placeY, placeX));
             response.setDistance(distance);
             return response;
         };
@@ -332,33 +339,6 @@ public class GroupService {
         return groupRepository.findByGroupParticipation(groupId).orElseThrow(
                 () -> new CustomException(NOT_FOUND_GROUP)
         );
-    }
-
-    private static double calculateDistance(double lat1, double lon1, double lat2, double lon2, String unit) {
-
-        double theta = lon1 - lon2;
-        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-
-        dist = Math.acos(dist);
-        dist = rad2deg(dist);
-        dist = dist * 60 * 1.1515;
-
-        if (unit.equals("kilometer")) {
-            dist = dist * 1.609344;
-        } else if (unit.equals("meter")) {
-            dist = dist * 1609.344;
-        }
-
-        return (dist);
-    }
-
-
-    private static double deg2rad(double deg) {
-        return (deg * Math.PI / 180.0);
-    }
-
-    private static double rad2deg(double rad) {
-        return (rad * 180 / Math.PI);
     }
 
     private Groups getGroup(Long groupId) {
@@ -412,22 +392,42 @@ public class GroupService {
         );
     }
 
-    private void addBusRouteToResponse(
-            BestSubwayInterface bestSubway, Participation participation, PlaceRouteResponse placeRouteResponse
+    private List<PlaceRouteResponse.MoveUserInfo> getMoveUserInfoList(
+            BestPlaceInterface bestPlace,
+            List<Participation> participationList
+    ) {
+        List<PlaceRouteResponse.MoveUserInfo> moveUserInfoList = new ArrayList<>();
+
+        participationList.forEach(participation -> {
+            if ((participation.getTransportation() == TransportationType.PUBLIC)) {
+                getBusRouteToResponse(bestPlace, participation)
+                        .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
+            } else if (participation.getTransportation() == TransportationType.PERSONAL) {
+                getCarRouteToResponse(bestPlace, participation)
+                        .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
+            }
+        });
+
+        return moveUserInfoList;
+    }
+
+    private Optional<PlaceRouteResponse.MoveUserInfo> getBusRouteToResponse(
+            BestPlaceInterface bestPlace, Participation participation
     ) {
         Instant start = Instant.now();
 
+        Optional<PlaceRouteResponse.MoveUserInfo> moveUserInfo = Optional.empty();
         BusPathResponse busPathResponse = restTemplate.getForObject(
-                odsayProperties.getSearchPathUriWithParams(bestSubway, participation),
+                odsayProperties.getSearchPathUriWithParams(bestPlace, participation),
                 BusPathResponse.class
         );
 
         if (busPathResponse.getResult() == null) {
             log.debug("[ 버스 길찾기 실패 ] ========================================");
-            log.debug("지역: {}, url: {}", bestSubway.getName(), odsayProperties.getSearchPathUriWithParams(bestSubway, participation));
+            log.debug("지역: {}, url: {}", bestPlace.getName(), odsayProperties.getSearchPathUriWithParams(bestPlace, participation));
         } else {
             log.debug("[ 버스 길찾기 성공 ] ========================================");
-            log.debug("지역: {}, url: {}", bestSubway.getName(), odsayProperties.getSearchPathUriWithParams(bestSubway, participation));
+            log.debug("지역: {}, url: {}", bestPlace.getName(), odsayProperties.getSearchPathUriWithParams(bestPlace, participation));
 
             BusGraphicDataResponse busGraphicDataResponse = restTemplate.getForObject(
                     odsayProperties.getGraphicDataUriWIthParams(busPathResponse.getPathInfoMapObj()),
@@ -435,46 +435,62 @@ public class GroupService {
             );
             if (busPathResponse.getResult() == null) {
                 log.debug("[ 버스 그래픽 데이터 조회 실패 ] ========================================");
-                log.debug("지역: {}, url: {}", bestSubway.getName(), odsayProperties.getSearchPathUriWithParams(bestSubway, participation));
+                log.debug("지역: {}, url: {}", bestPlace.getName(), odsayProperties.getSearchPathUriWithParams(bestPlace, participation));
             } else {
                 log.debug("[ 버스 그래픽 데이터 조회 성공 ] ========================================");
-                log.debug("지역: {}, url: {}", bestSubway.getName(), odsayProperties.getSearchPathUriWithParams(bestSubway, participation));
+                log.debug("지역: {}, url: {}", bestPlace.getName(), odsayProperties.getSearchPathUriWithParams(bestPlace, participation));
 
-                placeRouteResponse.addMoveUserInfo(participation, busGraphicDataResponse, busPathResponse);
+                moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(participation, busGraphicDataResponse, busPathResponse));
             }
         }
 
         Instant end = Instant.now();
         log.info("[ 버스 경로 조회 시간: {}ms ] ========================================", Duration.between(start, end).toMillis());
+        return moveUserInfo;
     }
 
-    private void addCarRouteToResponse(
-            BestSubwayInterface bestSubway, Participation participation, PlaceRouteResponse placeRouteResponse
+    private Optional<PlaceRouteResponse.MoveUserInfo> getCarRouteToResponse(
+            BestPlaceInterface bestPlace, Participation participation
     ) {
         Instant start = Instant.now();
 
+        Optional<PlaceRouteResponse.MoveUserInfo> moveUserInfo = Optional.empty();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "KakaoAK " + kakaoProperties.getClientId());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         CarMoveInfo carMoveInfo = restTemplate.exchange(
-                kakaoProperties.getSearchCarPathUriWithParams(bestSubway, participation),
+                kakaoProperties.getSearchCarPathUriWithParams(bestPlace, participation),
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
                 CarMoveInfo.class
         ).getBody();
         if (carMoveInfo.getRoutes() == null) {
             log.debug("[ 차 길찾기 조회 실패 ] ========================================");
-            log.debug("지역: {}, url: {}", bestSubway.getName(), kakaoProperties.getSearchCarPathUriWithParams(bestSubway, participation));
+            log.debug("지역: {}, url: {}", bestPlace.getName(), kakaoProperties.getSearchCarPathUriWithParams(bestPlace, participation));
         } else {
             log.debug("[ 차 길찾기 조회 성공 ] ========================================");
-            log.debug("지역: {}, url: {}", bestSubway.getName(), kakaoProperties.getSearchCarPathUriWithParams(bestSubway, participation));
+            log.debug("지역: {}, url: {}", bestPlace.getName(), kakaoProperties.getSearchCarPathUriWithParams(bestPlace, participation));
 
-            placeRouteResponse.addMoveUserInfo(participation, carMoveInfo);
+            moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(participation, carMoveInfo));
         }
 
         Instant end = Instant.now();
         log.info("[ 차 경로 조회 시간: {}ms ] ========================================", Duration.between(start, end).toMillis());
+        return moveUserInfo;
+    }
+
+    private double getValidRange(List<Participation> participationList, MiddlePoint middlePoint) {
+        double maxDistance = participationList.stream().mapToDouble(participation ->
+                DistanceCalculator.getDistance(
+                        participation.getLatitude(),
+                        participation.getLongitude(),
+                        middlePoint.getLatitude(),
+                        middlePoint.getLongitude()
+                )
+        ).max().getAsDouble();
+
+        return maxDistance / 2;
     }
 
 }

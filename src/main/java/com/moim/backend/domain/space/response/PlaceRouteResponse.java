@@ -2,7 +2,7 @@ package com.moim.backend.domain.space.response;
 
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
-import com.moim.backend.domain.subway.response.BestSubwayInterface;
+import com.moim.backend.domain.subway.response.BestPlaceInterface;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,25 +20,14 @@ public class PlaceRouteResponse {
     private Double longitude;
     private List<MoveUserInfo> moveUserInfo = new ArrayList<>();
 
-    public PlaceRouteResponse(BestSubwayInterface bestSubway) {
-        this.name = bestSubway.getName();
-        this.latitude = bestSubway.getLatitude();
-        this.longitude = bestSubway.getLongitude();
-    }
-
-    public void addMoveUserInfo(
-            Participation participation,
-            BusGraphicDataResponse busGraphicDataResponse,
-            BusPathResponse busPathResponse
+    public PlaceRouteResponse(
+            BestPlaceInterface bestPlace,
+            List<MoveUserInfo> moveUserInfoList
     ) {
-        this.moveUserInfo.add(new MoveUserInfo(participation, busGraphicDataResponse, busPathResponse));
-    }
-
-    public void addMoveUserInfo(
-            Participation participation,
-            CarMoveInfo carMoveInfo
-    ) {
-        this.moveUserInfo.add(new MoveUserInfo(participation, carMoveInfo));
+        this.name = bestPlace.getName();
+        this.latitude = bestPlace.getLatitude();
+        this.longitude = bestPlace.getLongitude();
+        this.moveUserInfo = moveUserInfoList;
     }
 
     @Getter
