@@ -3,7 +3,6 @@ package com.moim.backend.docs.space;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
-import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.PathDto;
@@ -14,21 +13,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
-import org.springframework.restdocs.operation.preprocess.OperationPreprocessor;
-import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.List;
 
-import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
-import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static com.moim.backend.domain.space.entity.TransportationType.*;
+import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
+import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.JsonFieldType.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -62,47 +58,49 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .build()
                 );
 
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.post("/group")
+                .header(AUTHORIZATION, "Bearer {token}")
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON);
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("스페이스 생성 API")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .requestFields(
+                        fieldWithPath("name").type(STRING)
+                                .description("모임 이름"),
+                        fieldWithPath("date").type(STRING)
+                                .description("모임 날짜 / 'yyyy-dd-mm'")
+                                .optional())
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER)
+                                .description("상태 코드"),
+                        fieldWithPath("message").type(STRING)
+                                .description("상태 메세지"),
+                        fieldWithPath("data.groupId").type(NUMBER)
+                                .description("모임 ID / Long"),
+                        fieldWithPath("data.adminId").type(NUMBER)
+                                .description("모임장 ID / Long"),
+                        fieldWithPath("data.name").type(STRING)
+                                .description("모임 이름"),
+                        fieldWithPath("data.date").type(STRING)
+                                .description("모임 날짜"),
+                        fieldWithPath("data.fixedPlace").type(STRING)
+                                .description("확정 장소"))
+                .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("group-create", prettyPrint(), prettyPrint(), parameters);
+
         // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.post("/group")
-                                .header(AUTHORIZATION, "Bearer {token}")
-                                .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
+        mockMvc.perform(httpRequest)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("group-create",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("스페이스 API")
-                                .summary("스페이스 생성 API")
-                                .requestHeaders(
-                                        headerWithName("Authorization")
-                                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
-                                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
-                                .requestFields(
-                                        fieldWithPath("name").type(STRING)
-                                                .description("모임 이름"),
-                                        fieldWithPath("date").type(STRING)
-                                                .description("모임 날짜 / 'yyyy-dd-mm'")
-                                                .optional())
-                                .responseFields(
-                                        fieldWithPath("code").type(NUMBER)
-                                                .description("상태 코드"),
-                                        fieldWithPath("message").type(STRING)
-                                                .description("상태 메세지"),
-                                        fieldWithPath("data.groupId").type(NUMBER)
-                                                .description("모임 ID / Long"),
-                                        fieldWithPath("data.adminId").type(NUMBER)
-                                                .description("모임장 ID / Long"),
-                                        fieldWithPath("data.name").type(STRING)
-                                                .description("모임 이름"),
-                                        fieldWithPath("data.date").type(STRING)
-                                                .description("모임 날짜"),
-                                        fieldWithPath("data.fixedPlace").type(STRING)
-                                                .description("확정 장소"))
-                                .build())));
+                .andDo(document);
     }
 
     @DisplayName("모임 참여 API")
@@ -197,48 +195,50 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .build()
                 );
 
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.patch("/group/participate")
+                .header(AUTHORIZATION, "Bearer {token}")
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON);
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("내 참여 정보 수정 API")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .requestFields(
+                        fieldWithPath("participateId").type(NUMBER)
+                                .description("참여 정보 ID / Long"),
+                        fieldWithPath("userName").type(STRING)
+                                .description("유저 닉네임"),
+                        fieldWithPath("locationName").type(STRING)
+                                .description("출발 위치 이름"),
+                        fieldWithPath("latitude").type(NUMBER)
+                                .description("위도 / Double"),
+                        fieldWithPath("longitude").type(NUMBER)
+                                .description("경도 / Double"),
+                        fieldWithPath("transportationType").type(STRING)
+                                .description("대중교통 : 'PUBLIC' / 자동차 : 'PERSONAL'"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER)
+                                .description("상태 코드"),
+                        fieldWithPath("message").type(STRING)
+                                .description("상태 메세지"),
+                        fieldWithPath("data.locationName").type(STRING)
+                                .description("출발 위치"),
+                        fieldWithPath("data.transportation").type(STRING)
+                                .description("내 이동수단"))
+                .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("participate-update", prettyPrint(), prettyPrint(), parameters);
+
         // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.patch("/group/participate")
-                                .header(AUTHORIZATION, "Bearer {token}")
-                                .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
+        mockMvc.perform(httpRequest)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("participate-update",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("스페이스 API")
-                                .summary("내 참여 정보 수정 API")
-                                .requestHeaders(
-                                        headerWithName("Authorization")
-                                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
-                                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
-                                .requestFields(
-                                        fieldWithPath("participateId").type(NUMBER)
-                                                .description("참여 정보 ID / Long"),
-                                        fieldWithPath("userName").type(STRING)
-                                                .description("유저 닉네임"),
-                                        fieldWithPath("locationName").type(STRING)
-                                                .description("출발 위치 이름"),
-                                        fieldWithPath("latitude").type(NUMBER)
-                                                .description("위도 / Double"),
-                                        fieldWithPath("longitude").type(NUMBER)
-                                                .description("경도 / Double"),
-                                        fieldWithPath("transportationType").type(STRING)
-                                                .description("대중교통 : 'PUBLIC' / 자동차 : 'PERSONAL'"))
-                                .responseFields(
-                                        fieldWithPath("code").type(NUMBER)
-                                                .description("상태 코드"),
-                                        fieldWithPath("message").type(STRING)
-                                                .description("상태 메세지"),
-                                        fieldWithPath("data.locationName").type(STRING)
-                                                .description("출발 위치"),
-                                        fieldWithPath("data.transportation").type(STRING)
-                                                .description("내 이동수단"))
-                                .build())));
+                .andDo(document);
     }
 
     @DisplayName("모임 나가기 API")
@@ -252,104 +252,114 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .message("모임에서 나갔습니다.")
                                 .build()
                 );
+
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.delete("/group/participate")
+                .header(AUTHORIZATION, "Bearer {token}")
+                .param("participateId", String.valueOf(1L));
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("스페이스 나가기 API")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .formParameters(
+                        parameterWithName("participateId")
+                                .description("참여자 정보 ID"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER)
+                                .description("상태 코드"),
+                        fieldWithPath("message").type(STRING)
+                                .description("상태 메세지"),
+                        fieldWithPath("data.isDeletedSpace").type(BOOLEAN)
+                                .description("모임 삭제 여부 : 어드민이 나간경우 모임이 삭제 / 참가자가 나간경우 모임 나가기"),
+                        fieldWithPath("data.message").type(STRING)
+                                .description("모임이 삭제되었습니다. / 모임에서 나갔습니다."))
+                .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("participation-exit", prettyPrint(), parameters);
+
         // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.delete("/group/participate")
-                                .header(AUTHORIZATION, "Bearer {token}")
-                                .param("participateId", String.valueOf(1L))
-                )
+        mockMvc.perform(httpRequest)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("participation-exit",
-                        preprocessResponse(prettyPrint()),
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("스페이스 API")
-                                .summary("스페이스 나가기 API")
-                                .requestHeaders(
-                                        headerWithName("Authorization")
-                                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
-                                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
-                                .formParameters(
-                                        parameterWithName("participateId")
-                                                .description("참여자 정보 ID"))
-                                .responseFields(
-                                        fieldWithPath("code").type(NUMBER)
-                                                .description("상태 코드"),
-                                        fieldWithPath("message").type(STRING)
-                                                .description("상태 메세지"),
-                                        fieldWithPath("data.isDeletedSpace").type(JsonFieldType.BOOLEAN)
-                                                .description("모임 삭제 여부 : 어드민이 나간경우 모임이 삭제 / 참가자가 나간경우 모임 나가기"),
-                                        fieldWithPath("data.message").type(STRING)
-                                                .description("모임이 삭제되었습니다. / 모임에서 나갔습니다."))
-                                .build())));
+                .andDo(document);
     }
 
     @DisplayName("모임원 내보내기 API")
     @Test
     void participateRemoval() throws Exception {
         // given
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.delete("/group/participate/removal")
+                .header(AUTHORIZATION, "Bearer {token}")
+                .param("participateId", String.valueOf(1L));
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("스페이스 내보내기 API")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .formParameters(
+                        parameterWithName("participateId")
+                                .description("참여자 정보 ID"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER)
+                                .description("상태 코드"),
+                        fieldWithPath("message").type(STRING)
+                                .description("상태 메세지"),
+                        fieldWithPath("data").type(NULL)
+                                .description("Always NULL"))
+                .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("participate-removal", prettyPrint(), parameters);
+
         // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.delete("/group/participate/removal")
-                                .header(AUTHORIZATION, "Bearer {token}")
-                                .param("participateId", String.valueOf(1L))
-                )
+        mockMvc.perform(httpRequest)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("participate-removal",
-                        preprocessResponse(prettyPrint()),
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("스페이스 API")
-                                .summary("스페이스 내보내기 API")
-                                .requestHeaders(
-                                        headerWithName("Authorization")
-                                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
-                                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
-                                .formParameters(
-                                        parameterWithName("participateId")
-                                                .description("참여자 정보 ID"))
-                                .responseFields(
-                                        fieldWithPath("code").type(NUMBER)
-                                                .description("상태 코드"),
-                                        fieldWithPath("message").type(STRING)
-                                                .description("상태 메세지"),
-                                        fieldWithPath("data").type(JsonFieldType.NULL)
-                                                .description("Always NULL"))
-                                .build())));
+                .andDo(document);
     }
 
     @DisplayName("모임 삭제 API")
     @Test
     void groupDelete() throws Exception {
         // given
-        // when// then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.delete("/group")
-                                .header(AUTHORIZATION, "Bearer {token}")
-                                .param("groupId", String.valueOf(1L))
-                )
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.delete("/group")
+                .header(AUTHORIZATION, "Bearer {token}")
+                .param("groupId", String.valueOf(1L));
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("스페이스 삭제 API")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .formParameters(
+                        parameterWithName("groupId")
+                                .description("그룹 ID"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER)
+                                .description("상태 코드"),
+                        fieldWithPath("message").type(STRING)
+                                .description("상태 메세지"),
+                        fieldWithPath("data").type(NULL)
+                                .description("Always NULL"))
+                .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("group-delete", prettyPrint(), parameters);
+
+        // when // then
+        mockMvc.perform(httpRequest)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("group-delete",
-                        preprocessResponse(prettyPrint()),
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("스페이스 API")
-                                .summary("스페이스 삭제 API")
-                                .requestHeaders(
-                                        headerWithName("Authorization")
-                                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
-                                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
-                                .formParameters(
-                                        parameterWithName("groupId")
-                                                .description("그룹 ID"))
-                                .responseFields(
-                                        fieldWithPath("code").type(NUMBER)
-                                                .description("상태 코드"),
-                                        fieldWithPath("message").type(STRING)
-                                                .description("상태 메세지"),
-                                        fieldWithPath("data").type(JsonFieldType.NULL)
-                                                .description("Always NULL"))
-                                .build())));
+                .andDo(document);
     }
 
     @DisplayName("모임 추천 역(랜드마크) 조회하기 API")
@@ -380,51 +390,54 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         given(groupService.getBestRegion(any()))
                 .willReturn(placeRouteResponseList);
 
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/group/best-region")
+                .param("groupId", String.valueOf(14L));
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("스페이스 추천 역(랜드마크) 조회 API")
+                .queryParameters(
+                        parameterWithName("groupId")
+                                .description("모이닷 스페이스 ID"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER)
+                                .description("상태 코드"),
+                        fieldWithPath("message").type(STRING)
+                                .description("상태 메세지"),
+                        fieldWithPath("data[].name").type(STRING)
+                                .description("추천 지역 이름"),
+                        fieldWithPath("data[].latitude").type(NUMBER)
+                                .description("추천 지역 위도"),
+                        fieldWithPath("data[].longitude").type(NUMBER)
+                                .description("추천 지역 경도"),
+                        fieldWithPath("data[].moveUserInfo[].userId").type(NUMBER)
+                                .description("유저 아이디"),
+                        fieldWithPath("data[].moveUserInfo[].userName").type(STRING)
+                                .description("유저 이름"),
+                        fieldWithPath("data[].moveUserInfo[].transportationType").type(STRING)
+                                .description("유저 이동 수단"),
+                        fieldWithPath("data[].moveUserInfo[].transitCount").type(NUMBER)
+                                .description("유저 총 환승횟수"),
+                        fieldWithPath("data[].moveUserInfo[].totalTime").type(NUMBER)
+                                .description("유저 총 이동 시간(분)"),
+                        fieldWithPath("data[].moveUserInfo[].transportationType").type(STRING)
+                                .description("유저 이동 수단"),
+                        fieldWithPath("data[].moveUserInfo[].totalDistance").type(NUMBER)
+                                .description("유저 이동 거리(m)"),
+                        fieldWithPath("data[].moveUserInfo[].path[].x").type(NUMBER)
+                                .description("경로(경도)"),
+                        fieldWithPath("data[].moveUserInfo[].path[].y").type(NUMBER)
+                                .description("경로(위도)"))
+                .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("get-best-region", prettyPrint(), parameters);
+
         // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/group/best-region")
-                                .param("groupId", String.valueOf(14L))
-                )
+        mockMvc.perform(httpRequest)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("get-best-region",
-                        preprocessResponse(prettyPrint()),
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("스페이스 API")
-                                .summary("스페이스 추천 역(랜드마크) 조회 API")
-                                .queryParameters(
-                                        parameterWithName("groupId")
-                                                .description("모이닷 스페이스 ID"))
-                                .responseFields(
-                                        fieldWithPath("code").type(NUMBER)
-                                                .description("상태 코드"),
-                                        fieldWithPath("message").type(STRING)
-                                                .description("상태 메세지"),
-                                        fieldWithPath("data[].name").type(JsonFieldType.STRING)
-                                                .description("추천 지역 이름"),
-                                        fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER)
-                                                .description("추천 지역 위도"),
-                                        fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER)
-                                                .description("추천 지역 경도"),
-                                        fieldWithPath("data[].moveUserInfo[].userId").type(JsonFieldType.NUMBER)
-                                                .description("유저 아이디"),
-                                        fieldWithPath("data[].moveUserInfo[].userName").type(JsonFieldType.STRING)
-                                                .description("유저 이름"),
-                                        fieldWithPath("data[].moveUserInfo[].transportationType").type(JsonFieldType.STRING)
-                                                .description("유저 이동 수단"),
-                                        fieldWithPath("data[].moveUserInfo[].transitCount").type(JsonFieldType.NUMBER)
-                                                .description("유저 총 환승횟수"),
-                                        fieldWithPath("data[].moveUserInfo[].totalTime").type(JsonFieldType.NUMBER)
-                                                .description("유저 총 이동 시간(분)"),
-                                        fieldWithPath("data[].moveUserInfo[].transportationType").type(JsonFieldType.STRING)
-                                                .description("유저 이동 수단"),
-                                        fieldWithPath("data[].moveUserInfo[].totalDistance").type(JsonFieldType.NUMBER)
-                                                .description("유저 이동 거리(m)"),
-                                        fieldWithPath("data[].moveUserInfo[].path[].x").type(JsonFieldType.NUMBER)
-                                                .description("경로(경도)"),
-                                        fieldWithPath("data[].moveUserInfo[].path[].y").type(JsonFieldType.NUMBER)
-                                                .description("경로(위도)"))
-                                .build())));
+                .andDo(document);
     }
 
     @DisplayName("내 모임 확인하기 API")
@@ -456,44 +469,47 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         given(groupService.getMyParticipate(any()))
                 .willReturn(List.of(data1, data2));
 
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/group/participate")
+                .header(AUTHORIZATION, "Bearer {token}");
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("내가 참여하고있는 스페이스 조회 API")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER)
+                                .description("상태 코드"),
+                        fieldWithPath("message").type(STRING)
+                                .description("상태 메세지"),
+                        fieldWithPath("data[].groupId").type(NUMBER)
+                                .description("그룹 ID"),
+                        fieldWithPath("data[].groupName").type(STRING)
+                                .description("그룹 이름"),
+                        fieldWithPath("data[].groupAdminName").type(STRING)
+                                .description("그룹 모임장 이름"),
+                        fieldWithPath("data[].groupDate").type(STRING)
+                                .description("그룹 모임날짜"),
+                        fieldWithPath("data[].groupParticipates").type(NUMBER)
+                                .description("그룹 참여자 수 / Integer"),
+                        fieldWithPath("data[].confirmPlace").type(STRING)
+                                .description("그룹 확정 장소 / 미확정 : 'none' "),
+                        fieldWithPath("data[].participantNames[]").type(ARRAY)
+                                .description("그룹 참여자 이름 리스트"),
+                        fieldWithPath("data[].bestPlaceNames[]").type(ARRAY)
+                                .description("그룹 추천장소 현황 리스트"))
+                .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("my-participate", prettyPrint(), parameters);
+
         // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/group/participate")
-                                .header(AUTHORIZATION, "Bearer {token}")
-                )
+        mockMvc.perform(httpRequest)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("my-participate",
-                        preprocessResponse(prettyPrint()),
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("스페이스 API")
-                                .summary("내가 참여하고있는 스페이스 조회 API")
-                                .requestHeaders(
-                                        headerWithName("Authorization")
-                                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
-                                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
-                                .responseFields(
-                                        fieldWithPath("code").type(NUMBER)
-                                                .description("상태 코드"),
-                                        fieldWithPath("message").type(STRING)
-                                                .description("상태 메세지"),
-                                        fieldWithPath("data[].groupId").type(NUMBER)
-                                                .description("그룹 ID"),
-                                        fieldWithPath("data[].groupName").type(STRING)
-                                                .description("그룹 이름"),
-                                        fieldWithPath("data[].groupAdminName").type(STRING)
-                                                .description("그룹 모임장 이름"),
-                                        fieldWithPath("data[].groupDate").type(STRING)
-                                                .description("그룹 모임날짜"),
-                                        fieldWithPath("data[].groupParticipates").type(NUMBER)
-                                                .description("그룹 참여자 수 / Integer"),
-                                        fieldWithPath("data[].confirmPlace").type(STRING)
-                                                .description("그룹 확정 장소 / 미확정 : 'none' "),
-                                        fieldWithPath("data[].participantNames[]").type(ARRAY)
-                                                .description("그룹 참여자 이름 리스트"),
-                                        fieldWithPath("data[].bestPlaceNames[]").type(ARRAY)
-                                                .description("그룹 추천장소 현황 리스트"))
-                                .build())));
+                .andDo(document);
     }
 
     @DisplayName("모임 장소 추천 조회 리스트 API")
@@ -600,66 +616,69 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         given(groupService.keywordCentralizedMeetingSpot(anyDouble(), anyDouble(), anyString(), anyString()))
                 .willReturn(List.of(place1, place2, place3));
 
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/group/best-region/place")
+                .param("x", "127.232943")
+                .param("y", "37.6823811")
+                .param("local", "성신여대입구역")
+                .param("keyword", "식당");
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("스페이스 역(랜드마크)주변 추천 장소 조회 API")
+                .queryParameters(
+                        parameterWithName("x").description("역(또는 지역) x좌표"),
+                        parameterWithName("y").description("역(또는 지역) y좌표"),
+                        parameterWithName("local").description("역(또는 지역)이름"),
+                        parameterWithName("keyword").description("카페 / 스터디카페 / 식당 / 도서관 / 스터디룸"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER)
+                                .description("상태 코드"),
+                        fieldWithPath("message").type(STRING)
+                                .description("상태 메세지"),
+                        fieldWithPath("data[].title").type(STRING)
+                                .description("가게 이름"),
+                        fieldWithPath("data[].thumUrl").type(STRING)
+                                .description("썸네일 이미지 URL"),
+                        fieldWithPath("data[].distance").type(STRING)
+                                .description("거리"),
+                        fieldWithPath("data[].openTime").type(STRING)
+                                .description("영업 시간"),
+                        fieldWithPath("data[].tel").type(STRING)
+                                .description("전화번호"),
+                        fieldWithPath("data[].detail.local").type(STRING)
+                                .description("지역"),
+                        fieldWithPath("data[].detail.title").type(STRING)
+                                .description("가게 이름"),
+                        fieldWithPath("data[].detail.address").type(STRING)
+                                .description("주소"),
+                        fieldWithPath("data[].detail.status").type(STRING)
+                                .description("영업 상태"),
+                        fieldWithPath("data[].detail.openTime").type(STRING)
+                                .description("영업 시간"),
+                        fieldWithPath("data[].detail.homePageUrl").type(STRING)
+                                .description("홈페이지 URL"),
+                        fieldWithPath("data[].detail.tel").type(STRING)
+                                .description("전화번호"),
+                        fieldWithPath("data[].detail.category[]").type(ARRAY)
+                                .description("카테고리 목록 / List<String>"),
+                        fieldWithPath("data[].detail.x").type(STRING)
+                                .description("위도"),
+                        fieldWithPath("data[].detail.y").type(STRING)
+                                .description("경도"),
+                        fieldWithPath("data[].detail.thumUrls[]").type(ARRAY)
+                                .description("상세 이미지 URL 목록 / List<String>"),
+                        fieldWithPath("data[].detail.menuInfo[]").type(ARRAY)
+                                .description("메뉴 정보 목록 / List<String>"))
+                .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("read-bestPlace-keyword", prettyPrint(), parameters);
+
         // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/group/best-region/place")
-                                .param("x", "127.232943")
-                                .param("y", "37.6823811")
-                                .param("local", "성신여대입구역")
-                                .param("keyword", "식당")
-                )
+        mockMvc.perform(httpRequest)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("read-bestPlace-keyword",
-                        preprocessResponse(prettyPrint()),
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("스페이스 API")
-                                .summary("스페이스 역(랜드마크)주변 추천 장소 조회 API")
-                                .queryParameters(
-                                        parameterWithName("x").description("역(또는 지역) x좌표"),
-                                        parameterWithName("y").description("역(또는 지역) y좌표"),
-                                        parameterWithName("local").description("역(또는 지역)이름"),
-                                        parameterWithName("keyword").description("카페 / 스터디카페 / 식당 / 도서관 / 스터디룸"))
-                                .responseFields(
-                                        fieldWithPath("code").type(NUMBER)
-                                                .description("상태 코드"),
-                                        fieldWithPath("message").type(STRING)
-                                                .description("상태 메세지"),
-                                        fieldWithPath("data[].title").type(STRING)
-                                                .description("가게 이름"),
-                                        fieldWithPath("data[].thumUrl").type(STRING)
-                                                .description("썸네일 이미지 URL"),
-                                        fieldWithPath("data[].distance").type(STRING)
-                                                .description("거리"),
-                                        fieldWithPath("data[].openTime").type(STRING)
-                                                .description("영업 시간"),
-                                        fieldWithPath("data[].tel").type(STRING)
-                                                .description("전화번호"),
-                                        fieldWithPath("data[].detail.local").type(STRING)
-                                                .description("지역"),
-                                        fieldWithPath("data[].detail.title").type(STRING)
-                                                .description("가게 이름"),
-                                        fieldWithPath("data[].detail.address").type(STRING)
-                                                .description("주소"),
-                                        fieldWithPath("data[].detail.status").type(STRING)
-                                                .description("영업 상태"),
-                                        fieldWithPath("data[].detail.openTime").type(STRING)
-                                                .description("영업 시간"),
-                                        fieldWithPath("data[].detail.homePageUrl").type(STRING)
-                                                .description("홈페이지 URL"),
-                                        fieldWithPath("data[].detail.tel").type(STRING)
-                                                .description("전화번호"),
-                                        fieldWithPath("data[].detail.category[]").type(ARRAY)
-                                                .description("카테고리 목록 / List<String>"),
-                                        fieldWithPath("data[].detail.x").type(STRING)
-                                                .description("위도"),
-                                        fieldWithPath("data[].detail.y").type(STRING)
-                                                .description("경도"),
-                                        fieldWithPath("data[].detail.thumUrls[]").type(ARRAY)
-                                                .description("상세 이미지 URL 목록 / List<String>"),
-                                        fieldWithPath("data[].detail.menuInfo[]").type(ARRAY)
-                                                .description("메뉴 정보 목록 / List<String>"))
-                                .build())));
+                .andDo(document);
     }
 
     @DisplayName("모임 참여자 정보 리스트 조회 API")
@@ -697,6 +716,9 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         String participationsByRegion = "data.participantsByRegion[]";
         String participations = participationsByRegion + ".participations[]";
 
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/group")
+                .param("groupId", "1");
+
         ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
                 .tag("스페이스 API")
                 .summary("스페이스 전체 참여자 조회 API")
@@ -718,29 +740,14 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         fieldWithPath(participations + ".locationName").type(STRING).description("유저 출발지 이름"),
                         fieldWithPath(participations + ".transportation").type(STRING).description("유저 교통수단"))
                 .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("read-participate-region", prettyPrint(), parameters);
+
         // when // then
-        mockMvc.perform(
-                        RestDocumentationRequestBuilders.get("/group")
-                                .param("groupId", "1")
-                )
+        mockMvc.perform(httpRequest)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("read-participate-region",
-                        preprocessResponse(prettyPrint()),
-                        resource(parameters)));
-    }
-
-    // method
-    public static RestDocumentationResultHandler documentHandler(
-            String identifier, OperationPreprocessor request,
-            OperationPreprocessor response, ResourceSnippetParameters parameters
-    ) {
-        return document(identifier, preprocessRequest(request), preprocessResponse(response), resource(parameters));
-    }
-
-    public static RestDocumentationResultHandler documentHandler(
-            String identifier, OperationPreprocessor response, ResourceSnippetParameters parameters
-    ) {
-        return document(identifier, preprocessResponse(response), resource(parameters));
+                .andDo(document);
     }
 }
