@@ -1,12 +1,14 @@
 package com.moim.backend.domain.space.response;
 
-import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
+import com.moim.backend.domain.user.entity.Users;
 import lombok.*;
 
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GroupResponse {
@@ -49,17 +51,21 @@ public class GroupResponse {
     @Builder
     public static class Detail {
         private Long groupId;
-        private Long adminId;
+        private String adminEmail;
         private String name;
         private String date;
         private List<Region> participantsByRegion;
 
-        public static Detail response(Groups group, List<Region> participantsByRegion) {
+        public static Detail response(Groups group, Users admin, List<Region> participantsByRegion) {
+            String date = Optional.ofNullable(group.getDate())
+                    .map(d -> d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .orElse(null);
+
             return Detail.builder()
                     .groupId(group.getGroupId())
                     .name(group.getName())
-                    .adminId(group.getAdminId())
-                    .date(group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .adminEmail(admin.getEmail())
+                    .date(date)
                     .participantsByRegion(participantsByRegion)
                     .build();
         }
@@ -89,15 +95,15 @@ public class GroupResponse {
     @Builder
     public static class Participations {
         private Long participationId;
-        private Long userId;
+        private String userEmail;
         private String userName;
         private String locationName;
         private String transportation;
 
-        public static GroupResponse.Participations toParticipateEntity(Participation participation) {
+        public static GroupResponse.Participations toParticipateEntity(Participation participation, Users user) {
             return Participations.builder()
                     .participationId(participation.getParticipationId())
-                    .userId(participation.getUserId())
+                    .userEmail(user.getEmail())
                     .userName(participation.getUserName())
                     .locationName(participation.getLocationName())
                     .transportation(participation.getTransportation().name())

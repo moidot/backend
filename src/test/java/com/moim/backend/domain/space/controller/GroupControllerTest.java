@@ -1,8 +1,6 @@
 package com.moim.backend.domain.space.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.moim.backend.domain.ControllerTestSupport;
-import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.request.GroupRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +8,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;

@@ -30,7 +30,9 @@ public class GroupController {
 
     // 모임 참여자 정보 리스트 조회 API
     @GetMapping("")
-    public CustomResponseEntity<GroupResponse.Detail> readParticipateGroupByRegion(@RequestParam Long groupId) {
+    public CustomResponseEntity<GroupResponse.Detail> readParticipateGroupByRegion(
+            @RequestParam Long groupId
+    ) {
         return CustomResponseEntity.success(groupService.readParticipateGroupByRegion(groupId));
     }
 
@@ -74,7 +76,7 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.participateRemoval(participateId, user));
     }
 
-    // 모임 추천 지역 조회하기 API
+    // 모임 추천 역(랜드마크) 조회하기 API
     @GetMapping("/best-region")
     public CustomResponseEntity<List<PlaceRouteResponse>> getBestRegion(
             @RequestParam Long groupId
