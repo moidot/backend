@@ -310,9 +310,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         fieldWithPath("code").type(NUMBER)
                                 .description("상태 코드"),
                         fieldWithPath("message").type(STRING)
-                                .description("상태 메세지"),
-                        fieldWithPath("data").type(NULL)
-                                .description("Always NULL"))
+                                .description("상태 메세지"))
                 .build();
 
         RestDocumentationResultHandler document =
@@ -347,9 +345,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         fieldWithPath("code").type(NUMBER)
                                 .description("상태 코드"),
                         fieldWithPath("message").type(STRING)
-                                .description("상태 메세지"),
-                        fieldWithPath("data").type(NULL)
-                                .description("Always NULL"))
+                                .description("상태 메세지"))
                 .build();
 
         RestDocumentationResultHandler document =
