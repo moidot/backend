@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 import static com.moim.backend.global.common.Result.INVALID_ACCESS_INFO;
 import static com.moim.backend.global.common.Result.NOT_AUTHENTICATE_NAVER_TOKEN_INFO;
 
@@ -45,9 +48,11 @@ public class GoogleLoginService implements OAuth2LoginService{
     // Google AccessToken 응답
     private String toRequestAccessToken(String code) {
         // 발급받은 code -> POST 요청
+        String decode = URLDecoder.decode(code, StandardCharsets.UTF_8);
+
         ResponseEntity<GoogleTokenResponse> response = restTemplate.postForEntity(
                 googleProperties.getRequestTokenUri(),
-                googleProperties.getRequestParameter(code),
+                googleProperties.getRequestParameter(decode),
                 GoogleTokenResponse.class
         );
 
