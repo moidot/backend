@@ -35,10 +35,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -196,9 +193,11 @@ public class GroupService {
     // 내 모임 확인하기
     public List<GroupResponse.MyParticipate> getMyParticipate(Users user) {
         List<Groups> groups = groupRepository.findByGroupsFetch(user.getUserId());
+
         if (groups.isEmpty()) {
-            throw new CustomException(Result.NO_PARTICIPATION_INFO_AVAILABLE);
+            return Collections.emptyList(); // 또는 new ArrayList<>();
         }
+
         return groups.stream()
                 .map(group -> GroupResponse.MyParticipate.response(
                         group,

@@ -27,7 +27,6 @@ public enum Result {
     NOT_ADMIN_USER(-1005,"해당 유저는 그룹의 어드민이 아닙니다."),
     DUPLICATE_PARTICIPATION(-1006, "동일한 유저가 이미 스페이스에 참여하고 있습니다."),
     NOT_REQUEST_NAVER(-1007, "네이버 API 요청에 실패하였습니다."),
-    NO_PARTICIPATION_INFO_AVAILABLE(-1008, "현재 참여하고 있는 모임이 존재하지 않습니다."),
     INCORRECT_LOCATION_NAME(-1009, "잘못된 지역 이름 입니다."),
 
     // Vote
