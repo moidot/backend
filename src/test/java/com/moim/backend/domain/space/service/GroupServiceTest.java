@@ -506,10 +506,11 @@ class GroupServiceTest {
         em.flush();
         em.clear();
 
-        // when // then
-        assertThatThrownBy(() -> groupService.getMyParticipate(admin1))
-                .extracting("result.code", "result.message")
-                .contains(-1008, "현재 참여하고 있는 모임이 존재하지 않습니다.");
+        // when
+        List<GroupResponse.MyParticipate> response = groupService.getMyParticipate(admin1);
+
+        // then
+        assertThat(response).isEmpty();
     }
 
     @DisplayName("동일한 유저가 동일한 그룹에 중복으로 참여할 수 없다.")
