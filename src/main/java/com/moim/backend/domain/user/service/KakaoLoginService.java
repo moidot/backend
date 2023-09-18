@@ -45,8 +45,8 @@ public class KakaoLoginService implements OAuth2LoginService {
     // Kakao AccessToken 응답
     private String getKakaoAccessToken(String code) {
         try {
-            HttpHeaders headers = createHttpEntity();
-            return toRequestKakaoAccessToken(code, headers).getAccessToken();
+            HttpEntity<?> httpEntity = createHttpEntityWithCode(code);
+            return toRequestKakaoAccessToken(httpEntity).getAccessToken();
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             handleHttpExceptions(e);
         } catch (ResourceAccessException e) {
@@ -57,27 +57,28 @@ public class KakaoLoginService implements OAuth2LoginService {
         throw new CustomException(INVALID_ACCESS_INFO);
     }
 
-    private KakaoTokenResponse toRequestKakaoAccessToken(String code, HttpHeaders headers) {
+    private KakaoTokenResponse toRequestKakaoAccessToken(HttpEntity<?> httpEntity) {
         ResponseEntity<KakaoTokenResponse> response = restTemplate.postForEntity(
                 kakaoProperties.getTokenUri(),
-                new HttpEntity<>(kakaoProperties.getRequestParameter(code), headers),
+                httpEntity,
                 KakaoTokenResponse.class
         );
+
         return Optional.ofNullable(response.getBody())
                 .orElseThrow(() -> new CustomException(UNEXPECTED_EXCEPTION));
 
     }
 
-    private static HttpHeaders createHttpEntity() {
+    private HttpEntity<?> createHttpEntityWithCode(String code) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        return headers;
+        return new HttpEntity<>(kakaoProperties.getRequestParameter(code), headers);
     }
 
     // 유저 정보 응답
     private KakaoUserResponse getKakaoUser(String accessToken) {
         try {
-            HttpEntity<?> httpEntity = createHttpEntity(accessToken);
+            HttpEntity<?> httpEntity = createHttpEntityWithToken(accessToken);
             return toRequestKakaoUser(httpEntity);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             handleHttpExceptions(e);
@@ -98,7 +99,7 @@ public class KakaoLoginService implements OAuth2LoginService {
         return response.getBody();
     }
 
-    private static HttpEntity<?> createHttpEntity(String accessToken) {
+    private static HttpEntity<?> createHttpEntityWithToken(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
         headers.setBearerAuth(accessToken);
