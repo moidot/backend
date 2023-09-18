@@ -1,5 +1,6 @@
 package com.moim.backend.domain.space.response;
 
+import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.subway.response.BestPlaceInterface;
@@ -34,6 +35,7 @@ public class PlaceRouteResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MoveUserInfo {
+        private Boolean isAdmin;
         private Long userId;
         private String userName;
         private TransportationType transportationType;
@@ -43,10 +45,12 @@ public class PlaceRouteResponse {
         private List<PathDto> path;
 
         public MoveUserInfo(
+                Groups group,
                 Participation participation,
                 BusGraphicDataResponse busGraphicDataResponse,
                 BusPathResponse busPathResponse
         ) {
+            this.isAdmin = (participation.getUserId() == group.getAdminId()) ? true : false;
             this.userId = participation.getUserId();
             this.userName = participation.getUserName();
             this.transportationType = participation.getTransportation();
@@ -57,9 +61,11 @@ public class PlaceRouteResponse {
         }
 
         public MoveUserInfo(
+                Groups group,
                 Participation participation,
                 CarMoveInfo carMoveInfo
         ) {
+            this.isAdmin = (participation.getUserId() == group.getAdminId()) ? true : false;
             this.userId = participation.getUserId();
             this.userName = participation.getUserName();
             this.transportationType = participation.getTransportation();
