@@ -250,44 +250,54 @@ public class GroupService {
     public GroupResponse.Detail readParticipateGroupByRegion(Long groupId) {
         Groups group = getGroupByFetchParticipation(groupId);
         Users admin = getUser(group.getAdminId());
-
         List<GroupResponse.Region> regions = new ArrayList<>();
-        group.getParticipations().forEach(participation -> {
-            // 내 그룹화 지역 이름 생성
-            String regionName = getRegionName(participation);
 
-            // 내 참여 정보 응답 객체 변환
-            Users user = getUser(participation.getUserId());
-            GroupResponse.Participations participateEntity = toParticipateEntity(participation, user);
-
-            // 내 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 확인
-            Optional<GroupResponse.Region> optionalRegion = regions.stream()
-                    .filter(local -> local.getRegionName().equals(regionName))
-                    .findFirst();
-
-            // 존재하지 않는다면
-            if (optionalRegion.isEmpty()) {
-                regions.add(toLocalEntity(regionName, participateEntity));
-            }
-            // 존재한다면
-            else {
-                GroupResponse.Region region = optionalRegion.get();
-                List<GroupResponse.Participations> participations = new ArrayList<>(region.getParticipations());
-                participations.add(participateEntity);
-                region.setParticipations(participations);
-            }
-        });
+        group.getParticipations().forEach(participation -> toRegionsResponse(regions, participation));
 
         return GroupResponse.Detail.response(group, admin, regions);
     }
 
-    private Users getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(
-                () -> new CustomException(NOT_FOUND_PARTICIPATE)
-        );
+    private void toRegionsResponse(List<GroupResponse.Region> regions, Participation participation) {
+        // 그룹화 지역 이름 생성
+        String regionName = getRegionName(participation);
+
+        // 참여 정보 응답 객체 변환
+        Users user = getUser(participation.getUserId());
+        GroupResponse.Participations participateEntity = toParticipateEntity(participation, user);
+
+        // 생성된 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 Optional 검증
+        Optional<GroupResponse.Region> optionalRegion = findRegionByName(regions, regionName);
+
+        // 검증에 맞추어 Region 업데이트
+        toUpdateRegion(regions, regionName, participateEntity, optionalRegion);
+    }
+
+    private static void toUpdateRegion(List<GroupResponse.Region> regions, String regionName, GroupResponse.Participations participateEntity, Optional<GroupResponse.Region> optionalRegion) {
+        if (optionalRegion.isEmpty()) { // 존재하지 않는다면
+            addNewRegion(regions, regionName, participateEntity);
+        } else { // 존재한다면
+            addParticipationToExistingRegion(participateEntity, optionalRegion.get());
+        }
+    }
+
+    private static void addParticipationToExistingRegion(GroupResponse.Participations participateEntity, GroupResponse.Region region) {
+        List<GroupResponse.Participations> participations = new ArrayList<>(region.getParticipations());
+        participations.add(participateEntity);
+        region.setParticipations(participations);
+    }
+
+    private static void addNewRegion(List<GroupResponse.Region> regions, String regionName, GroupResponse.Participations participateEntity) {
+        regions.add(toLocalEntity(regionName, participateEntity));
+    }
+
+    private static Optional<GroupResponse.Region> findRegionByName(List<GroupResponse.Region> regions, String regionName) {
+        return regions.stream()
+                .filter(local -> local.getRegionName().equals(regionName))
+                .findFirst();
     }
 
     // validate
+
     private static URI createNaverRequestUri(String local, String keyword) {
         return UriComponentsBuilder.fromHttpUrl("https://map.naver.com/v5/api/search")
                 .queryParam("caller", "pcweb")
@@ -334,6 +344,7 @@ public class GroupService {
 
 
     // method
+
     private static String getRegionName(Participation participation) {
         validateLocationName(participation.getLocationName());
         StringTokenizer st = new StringTokenizer(participation.getLocationName());
@@ -494,4 +505,10 @@ public class GroupService {
         return maxDistance / 2;
     }
 
+
+    private Users getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(NOT_FOUND_PARTICIPATE)
+        );
+    }
 }
