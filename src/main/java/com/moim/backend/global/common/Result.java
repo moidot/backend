@@ -13,6 +13,9 @@ public enum Result {
     NOT_FOUND_NAVER_LOGIN(-901, "네이버 로그인을 위한 접근 URL이 잘못되었습니다."),
     NOT_AUTHENTICATE_NAVER_TOKEN_INFO(-902, "토큰 정보 접근을 위한 권한이 잘못되었습니다."),
     FAIL_SOCIAL_LOGIN(-903, "인가 코드 또는 플랫폼이 올바르지 않습니다."),
+    FAIL_REQUEST_ACCESS_TOKEN(-904, "소셜 서버의 accessToken 요청하는 응답에 실패하였습니다."),
+    FAIL_REQUEST_TIME_OUT(-905, "소셜 서버에 응답을 요청하는 도중 네트워크 문제가 발생하였습니다."),
+    NOT_MATCH_RESPONSE(-906, "소셜 서버의 응답과 현재 서버의 응답이 일치하지 않습니다. (서버에 문제 발생 / 문의 부탁드립니다.)"),
 
     // Space
     UNEXPECTED_EXCEPTION(-500,"예상치 못한 예외가 발생했습니다."),
