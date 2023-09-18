@@ -7,15 +7,20 @@ import com.moim.backend.domain.user.response.KakaoTokenResponse;
 import com.moim.backend.domain.user.response.KakaoUserResponse;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.*;
+
+import java.util.Optional;
 
 import static com.moim.backend.global.common.Result.*;
 
 @Service
 @RequiredArgsConstructor
-public class KakaoLoginService implements OAuth2LoginService{
+@Slf4j
+public class KakaoLoginService implements OAuth2LoginService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final KakaoProperties kakaoProperties;
@@ -27,7 +32,7 @@ public class KakaoLoginService implements OAuth2LoginService{
 
     @Override
     public Users toEntityUser(String code, Platform platform) {
-        String accessToken = toRequestAccessToken(code);
+        String accessToken = getKakaoAccessToken(code);
         KakaoUserResponse profile = toRequestProfile(accessToken);
 
         return Users.builder()
@@ -37,22 +42,35 @@ public class KakaoLoginService implements OAuth2LoginService{
     }
 
     // Kakao AccessToken 응답
-    private String toRequestAccessToken(String code) {
-        // 발급받은 code -> POST 요청
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    private String getKakaoAccessToken(String code) {
+        try {
+            HttpHeaders headers = createHttpEntity();
+            return toRequestKakaoAccessToken(code, headers).getAccessToken();
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            handleHttpExceptions(e);
+        } catch (ResourceAccessException e) {
+            handleNetworkExceptions(e);
+        } catch (HttpMessageNotReadableException e) {
+            handleResponseParseExceptions(e);
+        }
+        throw new CustomException(INVALID_ACCESS_INFO);
+    }
 
+    private KakaoTokenResponse toRequestKakaoAccessToken(String code, HttpHeaders headers) {
         ResponseEntity<KakaoTokenResponse> response = restTemplate.postForEntity(
                 kakaoProperties.getTokenUri(),
                 new HttpEntity<>(kakaoProperties.getRequestParameter(code), headers),
                 KakaoTokenResponse.class
         );
+        return Optional.ofNullable(response.getBody())
+                .orElseThrow(() -> new CustomException(UNEXPECTED_EXCEPTION));
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new CustomException(NOT_AUTHENTICATE_NAVER_TOKEN_INFO);
-        }
+    }
 
-        return response.getBody().getAccessToken();
+    private static HttpHeaders createHttpEntity() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        return headers;
     }
 
     // 유저 정보 응답
@@ -72,5 +90,20 @@ public class KakaoLoginService implements OAuth2LoginService{
         }
 
         return response.getBody();
+    }
+
+    private void handleHttpExceptions(HttpStatusCodeException e) {
+        log.error("HTTP error occurred: {}", e.getStatusCode(), e);
+        throw new CustomException(FAIL_REQUEST_ACCESS_TOKEN);
+    }
+
+    private void handleNetworkExceptions(ResourceAccessException e) {
+        log.error("Network issue: {}", e.getMessage(), e);
+        throw new CustomException(FAIL_REQUEST_TIME_OUT);
+    }
+
+    private void handleResponseParseExceptions(HttpMessageNotReadableException e) {
+        log.error("Unparseable response body: {}", e.getMessage(), e);
+        throw new CustomException(NOT_MATCH_RESPONSE);
     }
 }
