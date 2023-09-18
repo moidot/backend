@@ -12,16 +12,15 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import static com.moim.backend.domain.user.config.Platform.GOOGLE;
-import static com.moim.backend.global.common.Result.*;
+import static com.moim.backend.global.common.Result.UNEXPECTED_EXCEPTION;
 
 @Service
 @RequiredArgsConstructor
@@ -50,35 +49,10 @@ public class GoogleLoginService implements OAuth2LoginService {
 
     // Google AccessToken 반환
     private String getGoogleAccessToken(String decodedCode) {
-        try {
-            return toRequestGoogleServer(decodedCode).getAccessToken();
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            handleHttpExceptions(e);
-        } catch (ResourceAccessException e) {
-            handleNetworkExceptions(e);
-        } catch (HttpMessageNotReadableException e) {
-            handleResponseParseExceptions(e);
-        }
-        throw new CustomException(UNEXPECTED_EXCEPTION);
+        return toRequestGoogleToken(decodedCode).getAccessToken();
     }
 
-    // 유저 정보 반환
-    private GoogleUserResponse getGoogleUser(String accessToken) {
-        try {
-            HttpEntity<?> httpEntity = createHttpEntity(accessToken);
-            return toRequestGoogleServer(httpEntity).getBody();
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            handleHttpExceptions(e);
-        } catch (ResourceAccessException e) {
-            handleNetworkExceptions(e);
-        } catch (HttpMessageNotReadableException e) {
-            handleResponseParseExceptions(e);
-        }
-        throw new CustomException(INVALID_ACCESS_INFO);
-    }
-
-    // Google 서버에 Token 응답 요청
-    private GoogleTokenResponse toRequestGoogleServer(String decode) {
+    private GoogleTokenResponse toRequestGoogleToken(String decode) {
         ResponseEntity<GoogleTokenResponse> response = restTemplate.postForEntity(
                 googleProperties.getRequestTokenUri(),
                 googleProperties.getRequestParameter(decode),
@@ -88,8 +62,13 @@ public class GoogleLoginService implements OAuth2LoginService {
                 .orElseThrow(() -> new CustomException(UNEXPECTED_EXCEPTION));
     }
 
-    // Google 서버에 유저 응답 요청
-    private ResponseEntity<GoogleUserResponse> toRequestGoogleServer(HttpEntity<?> request) {
+    // 유저 정보 반환
+    private GoogleUserResponse getGoogleUser(String accessToken) {
+        HttpEntity<?> httpEntity = createHttpEntity(accessToken);
+        return toRequestGoogleUser(httpEntity).getBody();
+    }
+
+    private ResponseEntity<GoogleUserResponse> toRequestGoogleUser(HttpEntity<?> request) {
         return restTemplate.exchange(
                 GOOGLE_REQUEST_USER_INFO_URL,
                 HttpMethod.GET,
@@ -98,25 +77,10 @@ public class GoogleLoginService implements OAuth2LoginService {
         );
     }
 
-    // accessToken 헤더 등록
     private static HttpEntity<?> createHttpEntity(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
         return new HttpEntity<>(headers);
     }
 
-    private void handleHttpExceptions(HttpStatusCodeException e) {
-        log.error("HTTP error occurred: {}", e.getStatusCode(), e);
-        throw new CustomException(FAIL_REQUEST_ACCESS_TOKEN);
-    }
-
-    private void handleNetworkExceptions(ResourceAccessException e) {
-        log.error("Network issue: {}", e.getMessage(), e);
-        throw new CustomException(FAIL_REQUEST_TIME_OUT);
-    }
-
-    private void handleResponseParseExceptions(HttpMessageNotReadableException e) {
-        log.error("Unparseable response body: {}", e.getMessage(), e);
-        throw new CustomException(NOT_MATCH_RESPONSE);
-    }
 }

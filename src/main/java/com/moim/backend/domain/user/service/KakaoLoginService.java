@@ -8,15 +8,16 @@ import com.moim.backend.domain.user.response.KakaoUserResponse;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
-import static com.moim.backend.global.common.Result.*;
-import static org.springframework.http.MediaType.*;
+import static com.moim.backend.global.common.Result.UNEXPECTED_EXCEPTION;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
 @Service
 @RequiredArgsConstructor
@@ -44,17 +45,8 @@ public class KakaoLoginService implements OAuth2LoginService {
 
     // Kakao AccessToken 응답
     private String getKakaoAccessToken(String code) {
-        try {
-            HttpEntity<?> httpEntity = createHttpEntityWithCode(code);
-            return toRequestKakaoAccessToken(httpEntity).getAccessToken();
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            handleHttpExceptions(e);
-        } catch (ResourceAccessException e) {
-            handleNetworkExceptions(e);
-        } catch (HttpMessageNotReadableException e) {
-            handleResponseParseExceptions(e);
-        }
-        throw new CustomException(INVALID_ACCESS_INFO);
+        HttpEntity<?> httpEntity = createHttpEntityWithCode(code);
+        return toRequestKakaoAccessToken(httpEntity).getAccessToken();
     }
 
     private KakaoTokenResponse toRequestKakaoAccessToken(HttpEntity<?> httpEntity) {
@@ -77,17 +69,8 @@ public class KakaoLoginService implements OAuth2LoginService {
 
     // 유저 정보 응답
     private KakaoUserResponse getKakaoUser(String accessToken) {
-        try {
-            HttpEntity<?> httpEntity = createHttpEntityWithToken(accessToken);
-            return toRequestKakaoUser(httpEntity);
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            handleHttpExceptions(e);
-        } catch (ResourceAccessException e) {
-            handleNetworkExceptions(e);
-        } catch (HttpMessageNotReadableException e) {
-            handleResponseParseExceptions(e);
-        }
-        throw new CustomException(INVALID_ACCESS_INFO);
+        HttpEntity<?> httpEntity = createHttpEntityWithToken(accessToken);
+        return toRequestKakaoUser(httpEntity);
     }
 
     private KakaoUserResponse toRequestKakaoUser(HttpEntity<?> httpEntity) {
@@ -104,20 +87,5 @@ public class KakaoLoginService implements OAuth2LoginService {
         headers.setContentType(APPLICATION_FORM_URLENCODED);
         headers.setBearerAuth(accessToken);
         return new HttpEntity<>(headers);
-    }
-
-    private void handleHttpExceptions(HttpStatusCodeException e) {
-        log.error("HTTP error occurred: {}", e.getStatusCode(), e);
-        throw new CustomException(FAIL_REQUEST_ACCESS_TOKEN);
-    }
-
-    private void handleNetworkExceptions(ResourceAccessException e) {
-        log.error("Network issue: {}", e.getMessage(), e);
-        throw new CustomException(FAIL_REQUEST_TIME_OUT);
-    }
-
-    private void handleResponseParseExceptions(HttpMessageNotReadableException e) {
-        log.error("Unparseable response body: {}", e.getMessage(), e);
-        throw new CustomException(NOT_MATCH_RESPONSE);
     }
 }
