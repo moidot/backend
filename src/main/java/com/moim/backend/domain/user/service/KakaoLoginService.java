@@ -16,6 +16,7 @@ import org.springframework.web.client.*;
 import java.util.Optional;
 
 import static com.moim.backend.global.common.Result.*;
+import static org.springframework.http.MediaType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class KakaoLoginService implements OAuth2LoginService {
     @Override
     public Users toEntityUser(String code, Platform platform) {
         String accessToken = getKakaoAccessToken(code);
-        KakaoUserResponse profile = toRequestProfile(accessToken);
+        KakaoUserResponse profile = getKakaoUser(accessToken);
 
         return Users.builder()
                 .email(profile.getKakaoAccount().getEmail())
@@ -69,27 +70,39 @@ public class KakaoLoginService implements OAuth2LoginService {
 
     private static HttpHeaders createHttpEntity() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setContentType(APPLICATION_FORM_URLENCODED);
         return headers;
     }
 
     // 유저 정보 응답
-    private KakaoUserResponse toRequestProfile(String accessToken) {
-        // accessToken 헤더 등록
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.setBearerAuth(accessToken);
-
-        // GET 요청으로 유저정보 응답 시도
-        ResponseEntity<KakaoUserResponse> response = restTemplate.postForEntity(
-                kakaoProperties.getUserInfoUri(), new HttpEntity<>(headers), KakaoUserResponse.class
-        );
-
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new CustomException(INVALID_ACCESS_INFO);
+    private KakaoUserResponse getKakaoUser(String accessToken) {
+        try {
+            HttpEntity<?> httpEntity = createHttpEntity(accessToken);
+            return toRequestKakaoUser(httpEntity);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            handleHttpExceptions(e);
+        } catch (ResourceAccessException e) {
+            handleNetworkExceptions(e);
+        } catch (HttpMessageNotReadableException e) {
+            handleResponseParseExceptions(e);
         }
+        throw new CustomException(INVALID_ACCESS_INFO);
+    }
 
+    private KakaoUserResponse toRequestKakaoUser(HttpEntity<?> httpEntity) {
+        ResponseEntity<KakaoUserResponse> response = restTemplate.postForEntity(
+                kakaoProperties.getUserInfoUri(),
+                httpEntity,
+                KakaoUserResponse.class
+        );
         return response.getBody();
+    }
+
+    private static HttpEntity<?> createHttpEntity(String accessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(APPLICATION_FORM_URLENCODED);
+        headers.setBearerAuth(accessToken);
+        return new HttpEntity<>(headers);
     }
 
     private void handleHttpExceptions(HttpStatusCodeException e) {
