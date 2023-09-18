@@ -211,21 +211,21 @@ public class GroupService {
     public List<GroupResponse.MyParticipate> getMyParticipate(Users user) {
         List<Groups> groups = groupRepository.findByGroupsFetch(user.getUserId());
 
-        if (groups.isEmpty()) {
-            return Collections.emptyList(); // 또는 new ArrayList<>();
-        }
-
         return groups.stream()
-                .map(group -> GroupResponse.MyParticipate.response(
-                        group,
-                        group.getParticipations().stream()
-                                .filter(participation -> participation.getUserId().equals(group.getAdminId()))
-                                .map(Participation::getUserName).findFirst().orElseThrow(
-                                        () -> new CustomException(NOT_FOUND_PARTICIPATE)
-                                ),
-                        group.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
-                        group.getParticipations().stream().map(Participation::getUserName).toList()))
+                .map(GroupService::toMyParticiPateResponse)
                 .toList();
+    }
+
+    private static GroupResponse.MyParticipate toMyParticiPateResponse(Groups group) {
+        return GroupResponse.MyParticipate.response(
+                group,
+                group.getParticipations().stream()
+                        .filter(participation -> participation.getUserId().equals(group.getAdminId()))
+                        .map(Participation::getUserName).findFirst().orElseThrow(
+                                () -> new CustomException(NOT_FOUND_PARTICIPATE)
+                        ),
+                group.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
+                group.getParticipations().stream().map(Participation::getUserName).toList());
     }
 
     // 모임 장소 추천 조회 리스트 API
