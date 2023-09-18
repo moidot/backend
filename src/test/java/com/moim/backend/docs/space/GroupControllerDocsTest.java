@@ -374,8 +374,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // given
         List<PlaceRouteResponse.MoveUserInfo> moveUserInfoList = List.of(
-                new PlaceRouteResponse.MoveUserInfo(1L, "김유정", PUBLIC, 2, 68, 15928.0, path),
-                new PlaceRouteResponse.MoveUserInfo(2L, "천현우", PUBLIC, 2, 96, 27725.0, path)
+                new PlaceRouteResponse.MoveUserInfo(true, 1L, "김유정", PUBLIC, 2, 68, 15928.0, path),
+                new PlaceRouteResponse.MoveUserInfo(false, 2L, "천현우", PUBLIC, 2, 96, 27725.0, path)
         );
         List<PlaceRouteResponse> placeRouteResponseList = List.of(
                 new PlaceRouteResponse("안국", 37.576477, 126.985443, moveUserInfoList),
