@@ -63,35 +63,46 @@ public class VoteService {
 
     // 투표 참여 API
     @Transactional
-    public VoteResponse.SelectResult selectVote(Long groupId, List<Long> bestPlaceIds, Users user, LocalDateTime now) {
-        // 투표 개설 및 투표에 대한 유효성 검증
+    public VoteResponse.SelectResult selectVote(
+            Long groupId, List<Long> selectPlaceIds, Users user, LocalDateTime now
+    ) {
         Groups group = getGroups(groupId);
         Vote vote = getVote(groupId);
-        validateVote(bestPlaceIds, now, vote);
+        validateVote(selectPlaceIds, now, vote);
 
         // 이미 투표를 했다면, 현재 유저가 투표한 목록을 가져온 후 제거
-        List<Long> selectPlaceIds =
-                selectPlaceRepository.findSelectPlaceByUserIdAndVoteId(user.getUserId(), vote.getVoteId());
-        if (!bestPlaceIds.isEmpty()) {
-            selectPlaceRepository.deleteAllById(selectPlaceIds);
-        }
+        removeUserVotesIfExist(selectPlaceIds, user, vote);
 
-        // 요청받은 bestPlaceId 값을 이용해 for 문을 돌면서 save
-        List<BestPlace> BestPlaces = bestPlaceRepository.findAllById(bestPlaceIds);
-        for (BestPlace bestPlace : BestPlaces) {
+        // 요청받은 bestPlaceId 값을 이용해 for 문을 돌면서 투표 save
+        saveUserVotesForSelectPlaces(selectPlaceIds, user, vote);
+
+        return VoteResponse.SelectResult.response(group, vote, toVoteStatusResponse(user, vote));
+    }
+
+    private List<VoteResponse.VoteStatus> toVoteStatusResponse(Users user, Vote vote) {
+        List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
+        return getVoteStatuses(user, bestPlaces);
+    }
+
+    private void saveUserVotesForSelectPlaces(List<Long> selectPlaceIds, Users user, Vote vote) {
+        List<BestPlace> selectPlaces = bestPlaceRepository.findAllById(selectPlaceIds);
+        for (BestPlace selectPlace : selectPlaces) {
             selectPlaceRepository.save(
                     SelectPlace.builder()
-                            .bestPlace(bestPlace)
+                            .bestPlace(selectPlace)
                             .vote(vote)
                             .userId(user.getUserId())
                             .build()
             );
         }
+    }
 
-        // 투표 이후 현재 추천된 장소들의 현황을 조회
-        List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
-        List<VoteResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
-        return VoteResponse.SelectResult.response(group, vote, voteStatuses);
+    private void removeUserVotesIfExist(List<Long> bestPlaceIds, Users user, Vote vote) {
+        List<Long> selectPlaceIds =
+                selectPlaceRepository.findSelectPlaceByUserIdAndVoteId(user.getUserId(), vote.getVoteId());
+        if (!bestPlaceIds.isEmpty()) {
+            selectPlaceRepository.deleteAllById(selectPlaceIds);
+        }
     }
 
     // 투표 읽기 API
