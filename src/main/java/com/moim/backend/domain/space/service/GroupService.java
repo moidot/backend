@@ -71,35 +71,52 @@ public class GroupService {
     // 모임 참여
     @Transactional
     public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request, Users user) {
-        validateLocationName(request.getLocationName());
         Groups group = getGroup(request.getGroupId());
-
-        checkDuplicateParticipation(group, user);
-        validateTransportation(request.getTransportationType());
+        participateGroupValidate(request, user, group);
 
         // 어드민이 참여하는 경우 (즉, 모임이 생성된 직후)
         if (group.getAdminId().equals(user.getUserId())) {
-            List<Subway> nearestStationsList =
-                    subwayRepository.getNearestStationsList(request.getLatitude(), request.getLongitude());
-
-            for (Subway subway : nearestStationsList) {
-                bestPlaceRepository.save(
-                        BestPlace.builder()
-                                .group(group)
-                                .placeName(subway.getName())
-                                .latitude(subway.getLatitude().doubleValue())
-                                .longitude(subway.getLongitude().doubleValue())
-                                .build()
-                );
-            }
+            saveNearestStationList(request, group);
         }
 
-        String encryptedPassword = encrypt(request.getPassword());
-        Participation participation = participationRepository.save(
-                toParticipationEntity(request, group, user.getUserId(), encryptedPassword)
-        );
+        Participation participation = saveParticipation(request, user, group);
 
         return GroupResponse.Participate.response(participation);
+    }
+
+    private Participation saveParticipation(GroupServiceRequest.Participate request, Users user, Groups group) {
+        return participationRepository.save(Participation.builder()
+                .group(group)
+                .userId(user.getUserId())
+                .userName(request.getUserName())
+                .locationName(request.getLocationName())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .transportation(request.getTransportationType())
+                .password(encrypt(request.getPassword()))
+                .build());
+    }
+
+    private void participateGroupValidate(GroupServiceRequest.Participate request, Users user, Groups group) {
+        validateLocationName(request.getLocationName());
+        checkDuplicateParticipation(group, user);
+        validateTransportation(request.getTransportationType());
+    }
+
+    private void saveNearestStationList(GroupServiceRequest.Participate request, Groups group) {
+        List<Subway> nearestStationsList =
+                subwayRepository.getNearestStationsList(request.getLatitude(), request.getLongitude());
+
+        for (Subway subway : nearestStationsList) {
+            bestPlaceRepository.save(
+                    BestPlace.builder()
+                            .group(group)
+                            .placeName(subway.getName())
+                            .latitude(subway.getLatitude().doubleValue())
+                            .longitude(subway.getLongitude().doubleValue())
+                            .build()
+            );
+        }
     }
 
     // 내 참여 정보 수정
@@ -367,21 +384,6 @@ public class GroupService {
                 .adminId(user.getUserId())
                 .name(request.getName())
                 .date(request.getDate())
-                .build();
-    }
-
-    private Participation toParticipationEntity(
-            GroupServiceRequest.Participate request, Groups group, long userId, String encryptedPassword
-    ) {
-        return Participation.builder()
-                .group(group)
-                .userId(userId)
-                .userName(request.getUserName())
-                .locationName(request.getLocationName())
-                .latitude(request.getLatitude())
-                .longitude(request.getLongitude())
-                .transportation(request.getTransportationType())
-                .password(encryptedPassword)
                 .build();
     }
 
