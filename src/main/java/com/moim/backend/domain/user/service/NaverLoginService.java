@@ -7,17 +7,24 @@ import com.moim.backend.domain.user.response.NaverTokenResponse;
 import com.moim.backend.domain.user.response.NaverUserResponse;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.*;
+
+import java.util.Optional;
 
 import static com.moim.backend.global.common.Result.*;
+import static org.springframework.http.HttpMethod.*;
 
 @Service
 @RequiredArgsConstructor
-public class NaverLoginService implements OAuth2LoginService{
+@Slf4j
+public class NaverLoginService implements OAuth2LoginService {
 
+    private static final String REQUEST_NAVER_USER_URL = "https://openapi.naver.com/v1/nid/me";
     private final RestTemplate restTemplate = new RestTemplate();
     private final NaverProperties naverProperties;
 
@@ -28,7 +35,7 @@ public class NaverLoginService implements OAuth2LoginService{
 
     @Override
     public Users toEntityUser(String code, Platform platform) {
-        String accessToken = toRequestAccessToken(code);
+        String accessToken = getNaverAccessToken(code);
         NaverUserResponse.NaverUserDetail profile = toRequestProfile(accessToken);
 
         return Users.builder()
@@ -38,36 +45,79 @@ public class NaverLoginService implements OAuth2LoginService{
     }
 
     // Naver AccessToken 응답
-    private String toRequestAccessToken(String code) {
-        // 발급받은 code -> GET 요청
+    private String getNaverAccessToken(String code) {
+        try {
+            NaverTokenResponse response = toRequestTokenNaverAccessToken(code);
+            handleNaverErrorExceptions(response);
+            return response.getAccessToken();
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            handleHttpExceptions(e);
+        } catch (ResourceAccessException e) {
+            handleNetworkExceptions(e);
+        } catch (HttpMessageNotReadableException e) {
+            handleResponseParseExceptions(e);
+        }
+        throw new CustomException(INVALID_ACCESS_INFO);
+    }
+
+    private NaverTokenResponse toRequestTokenNaverAccessToken(String code) {
         ResponseEntity<NaverTokenResponse> response =
-                restTemplate.exchange(naverProperties.getRequestURL(code), HttpMethod.GET, null, NaverTokenResponse.class);
-
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new CustomException(NOT_FOUND_NAVER_LOGIN);
-        }
-        if (response.getBody().getError() != null) {
-            throw new CustomException(NOT_AUTHENTICATE_NAVER_TOKEN_INFO);
-        }
-
-        return response.getBody().getAccessToken();
+                restTemplate.exchange(naverProperties.getRequestURL(code), GET, null, NaverTokenResponse.class);
+        return response.getBody();
     }
 
     // 유저 정보 응답
     private NaverUserResponse.NaverUserDetail toRequestProfile(String accessToken) {
-        // accessToken 헤더 등록
+        try {
+            HttpEntity<?> request = createHttpEntity(accessToken);
+            return toRequestNaverUser(request).getNaverUserDetail();
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            handleHttpExceptions(e);
+        } catch (ResourceAccessException e) {
+            handleNetworkExceptions(e);
+        } catch (HttpMessageNotReadableException e) {
+            handleResponseParseExceptions(e);
+        }
+        throw new CustomException(INVALID_ACCESS_INFO);
+    }
+
+    private NaverUserResponse toRequestNaverUser(HttpEntity<?> request) {
+        ResponseEntity<NaverUserResponse> response =
+                restTemplate.exchange(
+                        REQUEST_NAVER_USER_URL,
+                        GET,
+                        request,
+                        NaverUserResponse.class);
+
+        return Optional.ofNullable(response.getBody()).orElseThrow(
+                () -> new CustomException(UNEXPECTED_EXCEPTION)
+        );
+    }
+
+    private static HttpEntity<?> createHttpEntity(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(headers);
+        return new HttpEntity<>(headers);
+    }
 
-        // GET 요청으로 유저정보 응답 시도
-        ResponseEntity<NaverUserResponse> response =
-                restTemplate.exchange("https://openapi.naver.com/v1/nid/me", HttpMethod.GET, request, NaverUserResponse.class);
+    private void handleHttpExceptions(HttpStatusCodeException e) {
+        log.error("HTTP error occurred: {}", e.getStatusCode(), e);
+        throw new CustomException(FAIL_REQUEST_ACCESS_TOKEN);
+    }
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new CustomException(INVALID_ACCESS_INFO);
+    private void handleNetworkExceptions(ResourceAccessException e) {
+        log.error("Network issue: {}", e.getMessage(), e);
+        throw new CustomException(FAIL_REQUEST_TIME_OUT);
+    }
+
+    private void handleResponseParseExceptions(HttpMessageNotReadableException e) {
+        log.error("Unparseable response body: {}", e.getMessage(), e);
+        throw new CustomException(NOT_MATCH_RESPONSE);
+    }
+
+    private static void handleNaverErrorExceptions(NaverTokenResponse response) {
+        if (response.getError() != null) {
+            throw new CustomException(NOT_AUTHENTICATE_NAVER_TOKEN_INFO);
         }
-
-        return response.getBody().getNaverUserDetail();
     }
 }
