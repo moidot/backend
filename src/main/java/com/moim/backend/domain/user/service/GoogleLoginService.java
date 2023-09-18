@@ -14,7 +14,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.*;
 
 import java.net.URLDecoder;
@@ -29,9 +28,9 @@ import static com.moim.backend.global.common.Result.*;
 @Slf4j
 public class GoogleLoginService implements OAuth2LoginService {
 
+    public static final String GOOGLE_REQUEST_USER_INFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo";
     private final GoogleProperties googleProperties;
     private final RestTemplate restTemplate = new RestTemplate();
-
 
     @Override
     public Platform supports() {
@@ -41,7 +40,7 @@ public class GoogleLoginService implements OAuth2LoginService {
     @Override
     public Users toEntityUser(String code, Platform platform) {
         String accessToken = getGoogleAccessToken(URLDecoder.decode(code, StandardCharsets.UTF_8));
-        GoogleUserResponse profile = toRequestProfile(accessToken);
+        GoogleUserResponse profile = getGoogleUser(accessToken);
 
         return Users.builder()
                 .email(profile.getEmail())
@@ -63,6 +62,21 @@ public class GoogleLoginService implements OAuth2LoginService {
         throw new CustomException(UNEXPECTED_EXCEPTION);
     }
 
+    // 유저 정보 반환
+    private GoogleUserResponse getGoogleUser(String accessToken) {
+        try {
+            HttpEntity<?> httpEntity = createHttpEntity(accessToken);
+            return toRequestGoogleServer(httpEntity).getBody();
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            handleHttpExceptions(e);
+        } catch (ResourceAccessException e) {
+            handleNetworkExceptions(e);
+        } catch (HttpMessageNotReadableException e) {
+            handleResponseParseExceptions(e);
+        }
+        throw new CustomException(INVALID_ACCESS_INFO);
+    }
+
     // Google 서버에 Token 응답 요청
     private GoogleTokenResponse toRequestGoogleServer(String decode) {
         ResponseEntity<GoogleTokenResponse> response = restTemplate.postForEntity(
@@ -74,22 +88,21 @@ public class GoogleLoginService implements OAuth2LoginService {
                 .orElseThrow(() -> new CustomException(UNEXPECTED_EXCEPTION));
     }
 
-    // 유저 정보 응답
-    private GoogleUserResponse toRequestProfile(String accessToken) {
-        // accessToken 헤더 등록
+    // Google 서버에 유저 응답 요청
+    private ResponseEntity<GoogleUserResponse> toRequestGoogleServer(HttpEntity<?> request) {
+        return restTemplate.exchange(
+                GOOGLE_REQUEST_USER_INFO_URL,
+                HttpMethod.GET,
+                request,
+                GoogleUserResponse.class
+        );
+    }
+
+    // accessToken 헤더 등록
+    private static HttpEntity<?> createHttpEntity(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(headers);
-
-        // GET 요청으로 유저정보 응답 시도
-        ResponseEntity<GoogleUserResponse> response =
-                restTemplate.exchange("https://www.googleapis.com/oauth2/v1/userinfo", HttpMethod.GET, request, GoogleUserResponse.class);
-
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new CustomException(INVALID_ACCESS_INFO);
-        }
-
-        return response.getBody();
+        return new HttpEntity<>(headers);
     }
 
     private void handleHttpExceptions(HttpStatusCodeException e) {
