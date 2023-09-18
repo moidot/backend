@@ -406,6 +406,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .description("추천 지역 위도"),
                         fieldWithPath("data[].longitude").type(NUMBER)
                                 .description("추천 지역 경도"),
+                        fieldWithPath("data[].moveUserInfo[].isAdmin").type(BOOLEAN)
+                                .description("모임장 여부(true: 모임장, false: 모임원)"),
                         fieldWithPath("data[].moveUserInfo[].userId").type(NUMBER)
                                 .description("유저 아이디"),
                         fieldWithPath("data[].moveUserInfo[].userName").type(STRING)
