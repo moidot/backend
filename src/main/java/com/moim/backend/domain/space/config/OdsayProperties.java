@@ -19,6 +19,17 @@ public class OdsayProperties {
     private String searchPathUri;
     private String graphicDataUri;
 
+    public URI getSearchPathUriWithParams(double startX, double startY, double destinationX, double destinationY) {
+        return UriComponentsBuilder.fromHttpUrl(searchPathUri)
+                .queryParam("apiKey", apiKey)
+                .queryParam("SX", startX)
+                .queryParam("SY", startY)
+                .queryParam("EX", destinationX)
+                .queryParam("EY", destinationY)
+                .build()
+                .toUri();
+    }
+
     public URI getSearchPathUriWithParams(BestPlaceInterface bestSubway, Participation participation) {
         return UriComponentsBuilder.fromHttpUrl(searchPathUri)
                 .queryParam("apiKey", apiKey)

@@ -14,6 +14,7 @@ public class BusPathResponse {
 
     private Result result;
     private Info bestPathInfo;
+    private List<SubPath> bestSubPath;
 
     public String getPathInfoMapObj() {
         return "0:0@" + searchBestPathInfo().mapObj;
@@ -31,13 +32,26 @@ public class BusPathResponse {
         return searchBestPathInfo().totalDistance;
     }
 
-    private Info searchBestPathInfo() {
+    private Path searchBestPath() {
+        return result.path.get(0);
+    }
+
+    public Info searchBestPathInfo() {
         if (bestPathInfo == null) {
             Collections.sort(this.result.path);
-            this.bestPathInfo = result.path.get(0).info;
+            this.bestPathInfo = searchBestPath().info;
         }
 
         return bestPathInfo;
+    }
+
+    public List<SubPath> searchBestSubPath() {
+        if (bestSubPath == null) {
+            Collections.sort(this.result.path);
+            this.bestSubPath = searchBestPath().subPath;
+        }
+
+        return bestSubPath;
     }
 
     @Getter
@@ -56,8 +70,10 @@ public class BusPathResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Path implements Comparable<Path>{
+
         private int pathType;
         private Info info;
+        private List<SubPath> subPath;
 
         @Override
         public int compareTo(Path o) {
@@ -88,6 +104,18 @@ public class BusPathResponse {
         private int getScore() {
             return busTransitCount + subwayTransitCount + totalTime;
         }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SubPath {
+        private int trafficType;
+        private int distance;
+        private int sectionTime;
+        private int stationCount;
+        private String startName;
+        private String endName;
     }
 
 }

@@ -193,6 +193,16 @@ public class GroupService {
         return placeRouteResponseList;
     }
 
+    // 이동 정보 상세
+    public List<BusPathResponse.SubPath> getDetailMoveInfo(double startX, double startY, double destinationX, double destinationY) {
+        BusPathResponse busPathResponse = restTemplate.getForObject(
+                odsayProperties.getSearchPathUriWithParams(startX, startY, destinationX, destinationY),
+                BusPathResponse.class
+        );
+
+        return busPathResponse.searchBestSubPath();
+    }
+
     // 내 모임 확인하기
     public List<GroupResponse.MyParticipate> getMyParticipate(Users user) {
         List<Groups> groups = groupRepository.findByGroupsFetch(user.getUserId());

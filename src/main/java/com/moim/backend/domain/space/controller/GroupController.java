@@ -1,6 +1,7 @@
 package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.space.request.GroupRequest;
+import com.moim.backend.domain.space.response.BusPathResponse;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.PlaceRouteResponse;
 import com.moim.backend.domain.space.service.GroupService;
@@ -82,6 +83,16 @@ public class GroupController {
             @RequestParam Long groupId
     ) {
         return CustomResponseEntity.success(groupService.getBestRegion(groupId));
+    }
+
+    @GetMapping("/move-info")
+    public CustomResponseEntity<List<BusPathResponse.SubPath>> getDetailMoveInfo(
+            @RequestParam double startX,
+            @RequestParam double startY,
+            @RequestParam double destinationX,
+            @RequestParam double destinationY
+    ) {
+        return CustomResponseEntity.success(groupService.getDetailMoveInfo(startX, startY, destinationX, destinationY));
     }
 
     // 내 모임 확인하기 API
