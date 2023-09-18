@@ -8,10 +8,11 @@ public enum Result {
     OK(0, "성공"),
     FAIL(-1, "실패"),
 
-    // 소셜로그인 (네이버)
+    // 소셜로그인
     INVALID_ACCESS_INFO(-900, "프로필을 요청하기위한 액세스 정보가 유효하지 않습니다."),
     NOT_FOUND_NAVER_LOGIN(-901, "네이버 로그인을 위한 접근 URL이 잘못되었습니다."),
     NOT_AUTHENTICATE_NAVER_TOKEN_INFO(-902, "토큰 정보 접근을 위한 권한이 잘못되었습니다."),
+    FAIL_SOCIAL_LOGIN(-903, "인가 코드 또는 플랫폼이 올바르지 않습니다."),
 
     // Space
     UNEXPECTED_EXCEPTION(-500,"예상치 못한 예외가 발생했습니다."),

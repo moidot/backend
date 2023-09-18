@@ -3,7 +3,6 @@ package com.moim.backend.domain.user.service;
 import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
-import com.moim.backend.domain.user.request.UserRequest;
 import com.moim.backend.domain.user.response.UserResponse;
 import com.moim.backend.global.auth.jwt.JwtService;
 import com.moim.backend.global.common.exception.CustomException;
@@ -12,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
+import static com.moim.backend.global.common.Result.FAIL_SOCIAL_LOGIN;
 import static com.moim.backend.global.common.Result.UNEXPECTED_EXCEPTION;
 
 @Service
@@ -41,21 +42,18 @@ public class UserService {
 
 
     // method
-
     private Users oauthLoginProcess(String code, Platform platform) {
-        Users userEntity = null;
+        return getOptionalSocialUserEntity(code, platform)
+                .orElseThrow(() -> new CustomException(FAIL_SOCIAL_LOGIN));
+    }
 
+    private Optional<Users> getOptionalSocialUserEntity(String code, Platform platform) {
         for (OAuth2LoginService oAuth2LoginService : oAuth2LoginServices) {
             if (oAuth2LoginService.supports().equals(platform)) {
-                userEntity = oAuth2LoginService.toEntityUser(code, platform);
-                break;
+                return Optional.of(oAuth2LoginService.toEntityUser(code, platform));
             }
         }
-
-        if (userEntity == null) {
-            throw new CustomException(UNEXPECTED_EXCEPTION);
-        }
-        return userEntity;
+        return Optional.empty();
     }
 
     private Users saveOrUpdate(Users userEntity) {
