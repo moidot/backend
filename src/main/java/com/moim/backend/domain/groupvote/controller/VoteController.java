@@ -36,7 +36,6 @@ public class VoteController {
         return CustomResponseEntity.success(voteService.readVote(groupId, user));
     }
 
-    // TODO: 동시성 문제가 발생할 것 같다
     // 투표 참여 API
     @PostMapping("/{groupId}/vote/select")
     public CustomResponseEntity<VoteResponse.SelectResult> selectVote(

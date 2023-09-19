@@ -15,6 +15,7 @@ import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,17 +67,21 @@ public class VoteService {
     public VoteResponse.SelectResult selectVote(
             Long groupId, List<Long> selectPlaceIds, Users user, LocalDateTime now
     ) {
-        Groups group = getGroups(groupId);
-        Vote vote = getVote(groupId);
-        validateVote(selectPlaceIds, now, vote);
+        try{
+            Groups group = getGroups(groupId);
+            Vote vote = getVote(groupId);
+            validateVote(selectPlaceIds, now, vote);
 
-        // 이미 투표를 했다면, 현재 유저가 투표한 목록을 가져온 후 제거
-        removeUserVotesIfExist(selectPlaceIds, user, vote);
+            // 이미 투표를 했다면, 현재 유저가 투표한 목록을 가져온 후 제거
+            removeUserVotesIfExist(selectPlaceIds, user, vote);
 
-        // 요청받은 bestPlaceId 값을 이용해 for 문을 돌면서 투표 save
-        saveUserVotesForSelectPlaces(selectPlaceIds, user, vote);
+            // 요청받은 bestPlaceId 값을 이용해 for 문을 돌면서 투표 save
+            saveUserVotesForSelectPlaces(selectPlaceIds, user, vote);
 
-        return VoteResponse.SelectResult.response(group, vote, toVoteStatusResponse(user, vote));
+            return VoteResponse.SelectResult.response(group, vote, toVoteStatusResponse(user, vote));
+        } catch (OptimisticLockException ole) {
+            throw new CustomException(CONCURRENCY_ISSUE_DETECTED);
+        }
     }
 
     private List<VoteResponse.VoteStatus> toVoteStatusResponse(Users user, Vote vote) {

@@ -7,6 +7,7 @@ public enum Result {
     // 공통
     OK(0, "성공"),
     FAIL(-1, "실패"),
+    CONCURRENCY_ISSUE_DETECTED(-2, "동시성 문제가 발생하였습니다. 재시도해주세요"),
 
     // 소셜로그인
     INVALID_ACCESS_INFO(-900, "프로필을 요청하기위한 액세스 정보가 유효하지 않습니다."),

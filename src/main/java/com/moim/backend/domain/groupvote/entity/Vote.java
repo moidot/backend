@@ -1,9 +1,6 @@
 package com.moim.backend.domain.groupvote.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -35,6 +32,9 @@ public class Vote {
     private Boolean isEnabledMultipleChoice;
 
     private LocalDateTime endAt;
+
+    @Version
+    private Long version;
 
     public void conclusionVote() {
         this.isClosed = TRUE;
