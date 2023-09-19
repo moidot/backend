@@ -16,13 +16,13 @@ public class LoggingAspect {
     public void beforeController(JoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName();
-        System.out.println("Entering method [" + className + "." + methodName + "]");
+        log.info("Entering method [" + className + "." + methodName + "]");
     }
 
     @After("execution(* com.moim.backend.domain..controller.*.*(..))")
     public void afterController(JoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName();
-        System.out.println("Exiting method [" + className + "." + methodName + "]");
+        log.info("Exiting method [" + className + "." + methodName + "]");
     }
 }

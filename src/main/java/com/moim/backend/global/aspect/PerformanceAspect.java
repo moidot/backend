@@ -18,7 +18,7 @@ public class PerformanceAspect {
 
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName();
-        System.out.println("[" + className + "." + methodName + "] took " + totalTime + " ms.");
+        log.info("[" + className + "." + methodName + "] took " + totalTime + " ms.");
 
         return returnValue;
     }
