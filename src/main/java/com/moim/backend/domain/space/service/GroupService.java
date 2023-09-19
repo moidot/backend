@@ -199,7 +199,7 @@ public class GroupService {
 
         // 경로 찾기
         List<PlaceRouteResponse> placeRouteResponseList = bestPlaceList.stream().map(bestPlace ->
-                new PlaceRouteResponse(bestPlace, getMoveUserInfoList(bestPlace, participationList))
+                new PlaceRouteResponse(bestPlace, getMoveUserInfoList(bestPlace, group, participationList))
         ).collect(Collectors.toList());
 
         Instant end = Instant.now();
@@ -406,16 +406,17 @@ public class GroupService {
 
     private List<PlaceRouteResponse.MoveUserInfo> getMoveUserInfoList(
             BestPlaceInterface bestPlace,
+            Groups group,
             List<Participation> participationList
     ) {
         List<PlaceRouteResponse.MoveUserInfo> moveUserInfoList = new ArrayList<>();
 
         participationList.forEach(participation -> {
             if ((participation.getTransportation() == TransportationType.PUBLIC)) {
-                getBusRouteToResponse(bestPlace, participation)
+                getBusRouteToResponse(bestPlace, group, participation)
                         .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
             } else if (participation.getTransportation() == TransportationType.PERSONAL) {
-                getCarRouteToResponse(bestPlace, participation)
+                getCarRouteToResponse(bestPlace, group, participation)
                         .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
             }
         });
@@ -424,7 +425,7 @@ public class GroupService {
     }
 
     private Optional<PlaceRouteResponse.MoveUserInfo> getBusRouteToResponse(
-            BestPlaceInterface bestPlace, Participation participation
+            BestPlaceInterface bestPlace, Groups group, Participation participation
     ) {
         Instant start = Instant.now();
 
@@ -452,7 +453,7 @@ public class GroupService {
                 log.debug("[ 버스 그래픽 데이터 조회 성공 ] ========================================");
                 log.debug("지역: {}, url: {}", bestPlace.getName(), odsayProperties.getSearchPathUriWithParams(bestPlace, participation));
 
-                moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(participation, busGraphicDataResponse, busPathResponse));
+                moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(group, participation, busGraphicDataResponse, busPathResponse));
             }
         }
 
@@ -462,7 +463,7 @@ public class GroupService {
     }
 
     private Optional<PlaceRouteResponse.MoveUserInfo> getCarRouteToResponse(
-            BestPlaceInterface bestPlace, Participation participation
+            BestPlaceInterface bestPlace, Groups group, Participation participation
     ) {
         Instant start = Instant.now();
 
@@ -484,7 +485,7 @@ public class GroupService {
             log.debug("[ 차 길찾기 조회 성공 ] ========================================");
             log.debug("지역: {}, url: {}", bestPlace.getName(), kakaoProperties.getSearchCarPathUriWithParams(bestPlace, participation));
 
-            moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(participation, carMoveInfo));
+            moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(group, participation, carMoveInfo));
         }
 
         Instant end = Instant.now();
