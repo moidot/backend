@@ -64,6 +64,13 @@ public class GroupService {
     @Transactional
     public GroupResponse.Create createGroup(GroupServiceRequest.Create request, Users user) {
         Groups group = groupRepository.save(toGroupEntity(request, user));
+        Participation participation = saveParticipation(
+                user, group, request.getUserName(),
+                request.getLocationName(), request.getLatitude(), request.getLongitude(),
+                request.getTransportationType(), request.getPassword()
+        );
+
+        saveNearestStationList(group, request.getLatitude(), request.getLongitude());
 
         return GroupResponse.Create.response(group);
     }
@@ -74,26 +81,29 @@ public class GroupService {
         Groups group = getGroup(request.getGroupId());
         participateGroupValidate(request, user, group);
 
-        // 어드민이 참여하는 경우 (즉, 모임이 생성된 직후)
-        if (group.getAdminId().equals(user.getUserId())) {
-            saveNearestStationList(request, group);
-        }
-
-        Participation participation = saveParticipation(request, user, group);
+        Participation participation = saveParticipation(
+                user, group, request.getUserName(),
+                request.getLocationName(), request.getLatitude(), request.getLongitude(),
+                request.getTransportationType(), request.getPassword()
+        );
 
         return GroupResponse.Participate.response(participation);
     }
 
-    private Participation saveParticipation(GroupServiceRequest.Participate request, Users user, Groups group) {
+    private Participation saveParticipation(
+            Users user, Groups group, String userName,
+            String locationName, Double latitude, Double longitude,
+            TransportationType transportation, String password
+    ) {
         return participationRepository.save(Participation.builder()
                 .group(group)
                 .userId(user.getUserId())
-                .userName(request.getUserName())
-                .locationName(request.getLocationName())
-                .latitude(request.getLatitude())
-                .longitude(request.getLongitude())
-                .transportation(request.getTransportationType())
-                .password(encrypt(request.getPassword()))
+                .userName(userName)
+                .locationName(locationName)
+                .latitude(latitude)
+                .longitude(longitude)
+                .transportation(transportation)
+                .password(encrypt(password))
                 .build());
     }
 
@@ -103,9 +113,9 @@ public class GroupService {
         validateTransportation(request.getTransportationType());
     }
 
-    private void saveNearestStationList(GroupServiceRequest.Participate request, Groups group) {
+    private void saveNearestStationList(Groups group, Double latitude, Double longitude) {
         List<Subway> nearestStationsList =
-                subwayRepository.getNearestStationsList(request.getLatitude(), request.getLongitude());
+                subwayRepository.getNearestStationsList(latitude, longitude);
 
         for (Subway subway : nearestStationsList) {
             bestPlaceRepository.save(

@@ -9,15 +9,17 @@ public class GroupServiceRequest {
 
     @Getter
     @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class Create {
         private String name;
         private LocalDate date;
-
-        @Builder
-        private Create(String name, LocalDate date) {
-            this.name = name;
-            this.date = date;
-        }
+        private String userName;
+        private String locationName;
+        private Double latitude;
+        private Double longitude;
+        private TransportationType transportationType;
+        private String password;
     }
 
     @Getter
