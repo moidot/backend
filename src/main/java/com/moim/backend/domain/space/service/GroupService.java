@@ -145,24 +145,35 @@ public class GroupService {
     public GroupResponse.Exit participateExit(Long participateId, Users user) {
         Participation myParticipate = getParticipate(participateId);
         validateParticipationMyInfo(user, myParticipate);
-        // TODO : fetchJoin 적용여부 판단
+
         Groups group = myParticipate.getGroup();
         Optional<Vote> optionalVote = voteRepository.findByGroupId(group.getGroupId());
 
         // 투표 시작시 모임 나가기 불가
-        if (optionalVote.isPresent() && optionalVote.get().getIsClosed().equals(true)) {
-            throw new CustomException(Result.ALREADY_CREATED_VOTE);
-        }
+        checkIfVoteStartedBeforeLeaving(optionalVote);
 
         // 모임장이 나가는 경우 스페이스 삭제
-        if (group.getAdminId().equals(user.getUserId())) {
-            groupRepository.delete(group);
-            voteRepository.deleteByGroupId(group.getGroupId());
+        if (deleteGroupIfAdminLeaves(user, group)) {
             return GroupResponse.Exit.response(true, "모임이 삭제되었습니다.");
         }
 
         participationRepository.delete(myParticipate);
         return GroupResponse.Exit.response(false, "모임에서 나갔습니다.");
+    }
+
+    private boolean deleteGroupIfAdminLeaves(Users user, Groups group) {
+        if (group.getAdminId().equals(user.getUserId())) {
+            groupRepository.delete(group);
+            voteRepository.deleteByGroupId(group.getGroupId());
+            return true;
+        }
+        return false;
+    }
+
+    private static void checkIfVoteStartedBeforeLeaving(Optional<Vote> optionalVote) {
+        if (optionalVote.isPresent() && optionalVote.get().getIsClosed().equals(false)) {
+            throw new CustomException(Result.ALREADY_CREATED_VOTE);
+        }
     }
 
     // 모임원 내보내기
