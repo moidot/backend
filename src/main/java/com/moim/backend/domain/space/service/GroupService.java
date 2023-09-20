@@ -187,7 +187,6 @@ public class GroupService {
 
     // 모임 추천 지역 조회하기
     public List<PlaceRouteResponse> getBestRegion(Long groupId) {
-        Instant start = Instant.now();
         Groups group = getGroup(groupId);
         // 중간 좌표 구하기
         MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
@@ -209,13 +208,9 @@ public class GroupService {
         }
 
         // 경로 찾기
-        List<PlaceRouteResponse> placeRouteResponseList = bestPlaceList.stream().map(bestPlace ->
-                new PlaceRouteResponse(bestPlace, getMoveUserInfoList(bestPlace, group, participationList))
-        ).collect(Collectors.toList());
-
-        Instant end = Instant.now();
-        log.info("[ 추천 지역 조회 시간: {}ms ] ========================================", Duration.between(start, end).toMillis());
-        return placeRouteResponseList;
+        return bestPlaceList.stream().map(bestPlace -> new PlaceRouteResponse(
+                bestPlace, getMoveUserInfoList(bestPlace, group, participationList)
+        )).collect(Collectors.toList());
     }
 
     // 내 모임 확인하기
