@@ -230,13 +230,17 @@ public class GroupService {
     private static GroupResponse.MyParticipate toMyParticiPateResponse(Groups group) {
         return GroupResponse.MyParticipate.response(
                 group,
-                group.getParticipations().stream()
-                        .filter(participation -> participation.getUserId().equals(group.getAdminId()))
-                        .map(Participation::getUserName).findFirst().orElseThrow(
-                                () -> new CustomException(NOT_FOUND_PARTICIPATE)
-                        ),
+                getGroupAdminName(group),
                 group.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
                 group.getParticipations().stream().map(Participation::getUserName).toList());
+    }
+
+    private static String getGroupAdminName(Groups group) {
+        return group.getParticipations().stream()
+                .filter(participation -> participation.getUserId().equals(group.getAdminId()))
+                .map(Participation::getUserName).findFirst().orElseThrow(
+                        () -> new CustomException(NOT_FOUND_PARTICIPATE)
+                );
     }
 
     // 모임 장소 추천 조회 리스트 API
