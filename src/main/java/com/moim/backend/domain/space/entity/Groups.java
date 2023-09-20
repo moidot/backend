@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Table(name = "my_groups")
@@ -37,5 +38,9 @@ public class Groups {
 
     public void confirmPlace(String place) {
         this.place = place;
+    }
+
+    public Optional<LocalDate> getDate() {
+        return Optional.ofNullable(date);
     }
 }

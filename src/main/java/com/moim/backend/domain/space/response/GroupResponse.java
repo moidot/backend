@@ -32,14 +32,12 @@ public class GroupResponse {
         }
 
         public static GroupResponse.Create response(Groups group) {
-            String date;
-            if (group.getDate() != null) date = group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            else date = "none";
             return Create.builder()
                     .groupId(group.getGroupId())
                     .adminId(group.getAdminId())
                     .name(group.getName())
-                    .date(date)
+                    .date(group.getDate().map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                            .orElse("none"))
                     .fixedPlace(group.getPlace())
                     .build();
         }
@@ -57,9 +55,9 @@ public class GroupResponse {
         private List<Region> participantsByRegion;
 
         public static Detail response(Groups group, Users admin, List<Region> participantsByRegion) {
-            String date = Optional.ofNullable(group.getDate())
+            String date = group.getDate()
                     .map(d -> d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                    .orElse(null);
+                    .orElse("none");
 
             return Detail.builder()
                     .groupId(group.getGroupId())
@@ -192,7 +190,9 @@ public class GroupResponse {
                     .groupId(group.getGroupId())
                     .groupName(group.getName())
                     .groupAdminName(groupAdminName)
-                    .groupDate(group.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .groupDate(group.getDate()
+                            .map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                            .orElse("none"))
                     .groupParticipates(group.getParticipations().size())
                     .confirmPlace(group.getPlace())
                     .bestPlaceNames(bestPlaceNames)

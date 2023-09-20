@@ -68,7 +68,7 @@ public class VoteResponse {
                 Groups group, Vote vote, List<VoteStatus> voteStatuses
         ) {
 
-            String groupDate = Optional.ofNullable(group.getDate())
+            String groupDate = group.getDate()
                     .map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                     .orElse("none");
 
