@@ -102,7 +102,7 @@ class GroupRepositoryTest {
 
         assertThat(groups.get(0))
                 .extracting("groupId", "name", "date", "place")
-                .contains(group1.getGroupId(), "그룹1", LocalDate.of(2023, 7, 10), "none");
+                .contains(group1.getGroupId(), "그룹1", Optional.of(LocalDate.of(2023, 7, 10)), "none");
 
         assertThat(groups.get(0).getBestPlaces())
                 .extracting("placeName", "longitude", "latitude")

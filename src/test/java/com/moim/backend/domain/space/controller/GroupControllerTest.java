@@ -20,7 +20,11 @@ class GroupControllerTest extends ControllerTestSupport {
     void createGroup() throws Exception {
         // given
         GroupRequest.Create request =
-                new GroupRequest.Create("테스트 그룹", LocalDate.of(2023, 7, 13));
+                new GroupRequest.Create(
+                        "테스트 그룹", LocalDate.of(2023, 7, 15), "천이닷",
+                        "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
+                        PUBLIC, null
+                );
 
         // when // then
         mockMvc.perform(
@@ -38,7 +42,11 @@ class GroupControllerTest extends ControllerTestSupport {
     void createGroupBlankGroupNameException() throws Exception {
         // given
         GroupRequest.Create request =
-                new GroupRequest.Create(" ", LocalDate.of(2023, 7, 13));
+                new GroupRequest.Create(
+                        " ", LocalDate.of(2023, 7, 15), "천이닷",
+                        "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
+                        PUBLIC, null
+                );
 
         // when // then
         mockMvc.perform(

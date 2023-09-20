@@ -73,16 +73,26 @@ class GroupServiceTest {
         Users user = savedUser("test@test.com", "테스트 이름");
 
         GroupRequest.Create request = new GroupRequest.Create(
-                "테스트 그룹", LocalDate.of(2023, 7, 15)
+                "테스트 그룹", LocalDate.of(2023, 7, 15), "천이닷",
+                "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
+                PUBLIC, null
         );
 
         // when
         GroupResponse.Create response = groupService.createGroup(request.toServiceRequest(), user);
+        em.flush();
+        em.clear();
 
         // then
         assertThat(response)
                 .extracting("adminId", "name", "date", "fixedPlace")
                 .contains(user.getUserId(), "테스트 그룹", "2023-07-15", null);
+
+        Groups group = groupRepository.findById(response.getGroupId()).get();
+        assertThat(group.getBestPlaces())
+                .hasSize(3)
+                .extracting("placeName")
+                .contains("성신여대입구(돈암)", "보문", "안암(고대병원앞)");
     }
 
     @DisplayName("하나의 유저가 새로운 모임을 생성할때 날짜는 입력하지 않는다.")
@@ -91,7 +101,11 @@ class GroupServiceTest {
         // given
         Users user = savedUser("test@test.com", "테스트 이름");
 
-        GroupRequest.Create request = new GroupRequest.Create("테스트 그룹", null);
+        GroupRequest.Create request = new GroupRequest.Create(
+                "테스트 그룹", null, "천이닷",
+                "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
+                PUBLIC, null
+        );
 
         // when
         GroupResponse.Create response = groupService.createGroup(request.toServiceRequest(), user);
@@ -101,47 +115,6 @@ class GroupServiceTest {
         assertThat(response)
                 .extracting("adminId", "name", "date", "fixedPlace")
                 .contains(user.getUserId(), "테스트 그룹", "none", "none");
-    }
-
-    @DisplayName("그룹이 생성된 후 어드민이 모임에 참여하게되면, 추천장소는 어드민 위치 중심으로 3개의 역이 추천된다.")
-    @Test
-    void participateAdmin() {
-        // given
-        Users admin = savedUser("admin@test.com", "어드민");
-        Users participateUser = savedUser("test2@test.com", "테스트 이름2");
-        Groups saveGroup = savedGroup(admin.getUserId(), "테스트 그룹");
-        GroupRequest.Participate request = new GroupRequest.Participate(
-                saveGroup.getGroupId(), "어드민", "서울 성북구 보문로34다길 2", 37.591043, 127.019721, PUBLIC, "2345"
-        );
-
-        em.flush();
-        em.clear();
-        // when
-        GroupResponse.Participate response =
-                groupService.participateGroup(request.toServiceRequest(), admin);
-
-        // then
-        Participation participation = participationRepository.findById(response.getParticipationId()).get();
-        Groups group = groupRepository.findById(saveGroup.getGroupId()).get();
-
-        assertThat(response.getParticipationId()).isNotNull();
-        assertThat(response)
-                .extracting(
-                        "groupId", "userId", "locationName",
-                        "userName", "latitude", "longitude",
-                        "transportation"
-                )
-                .contains(
-                        saveGroup.getGroupId(), admin.getUserId(), "서울 성북구 보문로34다길 2",
-                        "어드민", 37.591043, 127.019721, "PUBLIC"
-                );
-
-        assertThat(participation.getPassword()).isEqualTo(encrypt("2345"));
-        assertThat(group.getBestPlaces())
-                .hasSize(3)
-                .extracting("placeName")
-                .contains("성신여대입구(돈암)", "보문", "안암(고대병원앞)");
-
     }
 
     @DisplayName("하나의 유저가 하나의 그룹에 참가한다.")
@@ -437,7 +410,7 @@ class GroupServiceTest {
                         .isClosed(false)
                         .isAnonymous(false)
                         .isEnabledMultipleChoice(true)
-                        .endAt(LocalDateTime.of(2023,9,23,15,0))
+                        .endAt(LocalDateTime.of(2023, 9, 23, 15, 0))
                         .build()
         );
 

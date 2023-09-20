@@ -15,6 +15,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
@@ -23,6 +24,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.MediaType.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.JsonFieldType.*;
@@ -45,7 +47,11 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     void createGroup() throws Exception {
         // given
         GroupRequest.Create request =
-                new GroupRequest.Create("테스트 그룹", null);
+                new GroupRequest.Create(
+                        "테스트 그룹", null, "천이닷",
+                        "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
+                        PUBLIC, null
+                );
 
         given(groupService.createGroup(any(), any()))
                 .willReturn(
@@ -61,7 +67,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.post("/group")
                 .header(AUTHORIZATION, "Bearer {token}")
                 .content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON);
+                .contentType(APPLICATION_JSON);
 
         ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
                 .tag("스페이스 API")
@@ -71,26 +77,23 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
                                         "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
                 .requestFields(
-                        fieldWithPath("name").type(STRING)
-                                .description("모임 이름"),
-                        fieldWithPath("date").type(STRING)
-                                .description("모임 날짜 / 'yyyy-dd-mm'")
-                                .optional())
+                        fieldWithPath("name").type(STRING).description("모임 이름"),
+                        fieldWithPath("date").type(STRING).description("모임 날짜 / 'yyyy-dd-mm'").optional(),
+                        fieldWithPath("userName").type(STRING).description("모임에서 사용할 별명"),
+                        fieldWithPath("locationName").type(STRING).description("출발 위치"),
+                        fieldWithPath("latitude").type(NUMBER).description("위도 / Double"),
+                        fieldWithPath("longitude").type(NUMBER).description("경도 / Double"),
+                        fieldWithPath("transportationType").type(STRING).description("대중교통 : 'PUBLIC' / 자동차 : 'PERSONAL'"),
+                        fieldWithPath("password").type(STRING).description("비밀번호").optional())
                 .responseFields(
-                        fieldWithPath("code").type(NUMBER)
-                                .description("상태 코드"),
-                        fieldWithPath("message").type(STRING)
-                                .description("상태 메세지"),
-                        fieldWithPath("data.groupId").type(NUMBER)
-                                .description("모임 ID / Long"),
-                        fieldWithPath("data.adminId").type(NUMBER)
-                                .description("모임장 ID / Long"),
-                        fieldWithPath("data.name").type(STRING)
-                                .description("모임 이름"),
-                        fieldWithPath("data.date").type(STRING)
-                                .description("모임 날짜"),
-                        fieldWithPath("data.fixedPlace").type(STRING)
-                                .description("확정 장소"))
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"),
+                        fieldWithPath("data.groupId").type(NUMBER).description("모임 ID / Long"),
+                        fieldWithPath("data.adminId").type(NUMBER).description("모임장 ID / Long"),
+                        fieldWithPath("data.name").type(STRING).description("모임 이름"),
+                        fieldWithPath("data.date").type(STRING).description("모임 날짜"),
+                        fieldWithPath("data.fixedPlace").type(STRING).description("확정 장소")
+                )
                 .build();
 
         RestDocumentationResultHandler document =
@@ -130,7 +133,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.post("/group/participate")
                 .header(AUTHORIZATION, "Bearer {token}")
                 .content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON);
+                .contentType(APPLICATION_JSON);
 
         ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
                 .tag("스페이스 API")
@@ -198,7 +201,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.patch("/group/participate")
                 .header(AUTHORIZATION, "Bearer {token}")
                 .content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON);
+                .contentType(APPLICATION_JSON);
 
         ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
                 .tag("스페이스 API")
