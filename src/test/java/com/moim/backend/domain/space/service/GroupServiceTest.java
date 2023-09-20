@@ -1,5 +1,9 @@
 package com.moim.backend.domain.space.service;
 
+import com.moim.backend.domain.groupvote.entity.SelectPlace;
+import com.moim.backend.domain.groupvote.entity.Vote;
+import com.moim.backend.domain.groupvote.repository.SelectPlaceRepository;
+import com.moim.backend.domain.groupvote.repository.VoteRepository;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
@@ -26,6 +30,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,6 +59,12 @@ class GroupServiceTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private SelectPlaceRepository selectPlaceRepository;
+
+    @Autowired
+    private VoteRepository voteRepository;
 
     @DisplayName("하나의 유저가 새로운 모임을 생성한다.")
     @Test
@@ -412,10 +423,25 @@ class GroupServiceTest {
         Users admin = savedUser("admin@test.com", "테스트 어드민");
         Users user = savedUser("test@test.com", "테스트 이름");
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
+
         Participation participationAdmin =
                 savedParticipation(admin, group, "어드민", "어딘가", 37.5660, 126.1234, PUBLIC);
         Participation participationUser =
                 savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
+
+        BestPlace bestPlace1 = saveBestPlace(group, "성신여대입구역", 1.0, 1.0);
+
+        Vote vote = voteRepository.save(
+                Vote.builder()
+                        .groupId(group.getGroupId())
+                        .isClosed(false)
+                        .isAnonymous(false)
+                        .isEnabledMultipleChoice(true)
+                        .endAt(LocalDateTime.of(2023,9,23,15,0))
+                        .build()
+        );
+
+        SelectPlace selectPlace1 = saveSelectPlace(admin.getUserId(), bestPlace1, vote);
 
         em.flush();
         em.clear();
@@ -427,9 +453,28 @@ class GroupServiceTest {
         Optional<Groups> optionalGroup = groupRepository.findById(group.getGroupId());
         Optional<Participation> optionalParticipation =
                 participationRepository.findById(participationUser.getParticipationId());
+        Optional<BestPlace> optionalBestPlace =
+                bestPlaceRepository.findById(bestPlace1.getBestPlaceId());
+        Optional<SelectPlace> optionalSelectPlace =
+                selectPlaceRepository.findById(selectPlace1.getSelectPlaceId());
+        Optional<Vote> optionalVote =
+                voteRepository.findById(vote.getVoteId());
 
         assertThat(optionalGroup.isEmpty()).isTrue();
         assertThat(optionalParticipation.isEmpty()).isTrue();
+        assertThat(optionalBestPlace.isEmpty()).isTrue();
+        assertThat(optionalSelectPlace.isEmpty()).isTrue();
+        assertThat(optionalVote.isEmpty()).isTrue();
+    }
+
+    private SelectPlace saveSelectPlace(Long userId, BestPlace bestPlace, Vote vote) {
+        return selectPlaceRepository.save(
+                SelectPlace.builder()
+                        .vote(vote)
+                        .bestPlace(bestPlace)
+                        .userId(userId)
+                        .build()
+        );
     }
 
     @DisplayName("모임장이 모임을 삭제한다")
@@ -612,8 +657,8 @@ class GroupServiceTest {
 
     // method
 
-    private void saveBestPlace(Groups group, String placeName, double longitude, double latitude) {
-        bestPlaceRepository.save(
+    private BestPlace saveBestPlace(Groups group, String placeName, double longitude, double latitude) {
+        return bestPlaceRepository.save(
                 BestPlace.builder()
                         .group(group)
                         .placeName(placeName)

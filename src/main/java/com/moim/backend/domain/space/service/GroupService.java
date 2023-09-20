@@ -144,10 +144,10 @@ public class GroupService {
             throw new CustomException(Result.ALREADY_CREATED_VOTE);
         }
 
-        // TODO : 추후 투표도 같이 삭제해야함
         // 모임장이 나가는 경우 스페이스 삭제
         if (group.getAdminId().equals(user.getUserId())) {
             groupRepository.delete(group);
+            voteRepository.deleteByGroupId(group.getGroupId());
             return GroupResponse.Exit.response(true, "모임이 삭제되었습니다.");
         }
 
@@ -171,6 +171,7 @@ public class GroupService {
         Groups group = getGroup(groupId);
         validateAdminStatus(user.getUserId(), group.getAdminId());
         groupRepository.delete(group);
+        voteRepository.deleteByGroupId(groupId);
         return null;
     }
 

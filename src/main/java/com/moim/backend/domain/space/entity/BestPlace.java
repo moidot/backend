@@ -7,9 +7,11 @@ import lombok.*;
 
 import java.util.List;
 
+import static lombok.AccessLevel.*;
+
 @Entity
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = PRIVATE)
+@NoArgsConstructor(access = PROTECTED)
 @Getter
 @Builder
 public class BestPlace {
@@ -31,7 +33,7 @@ public class BestPlace {
     @NotNull
     private Double longitude;
 
-    @OneToMany(mappedBy = "bestPlace")
+    @OneToMany(mappedBy = "bestPlace", orphanRemoval = true)
     private List<SelectPlace> selectPlaces;
 
 }

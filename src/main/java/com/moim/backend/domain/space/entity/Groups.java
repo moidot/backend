@@ -32,7 +32,7 @@ public class Groups {
     @OneToMany(mappedBy = "group", orphanRemoval = true)
     private List<Participation> participations;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group", orphanRemoval = true)
     private List<BestPlace> bestPlaces;
 
     public void confirmPlace(String place) {
