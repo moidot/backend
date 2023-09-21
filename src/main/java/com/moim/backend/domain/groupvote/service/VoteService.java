@@ -13,7 +13,6 @@ import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.user.entity.Users;
-import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.moim.backend.global.common.Result.*;
-import static java.lang.Boolean.*;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 @Service
 @RequiredArgsConstructor
@@ -43,23 +43,28 @@ public class VoteService {
     // 투표 생성 API
     @Transactional
     public VoteResponse.Create createVote(VoteServiceRequest.Create request, Long groupId, Users user) {
-        Groups group = getGroups(groupId);
+        Groups group = getGroup(groupId);
+        validateUserIsAdmin(user, group);
 
+        return VoteResponse.Create.response(
+                voteRepository.save(toVoteEntity(request, groupId))
+        );
+    }
+
+    private static void validateUserIsAdmin(Users user, Groups group) {
         if (!group.getAdminId().equals(user.getUserId())) {
             throw new CustomException(NOT_ADMIN_USER);
         }
+    }
 
-        Vote vote = voteRepository.save(
-                Vote.builder()
-                        .groupId(groupId)
-                        .isAnonymous(request.getIsAnonymous())
-                        .isEnabledMultipleChoice(request.getIsEnabledMultipleChoice())
-                        .isClosed(false)
-                        .endAt(request.getEndAt().orElse(null))
-                        .build()
-        );
-
-        return VoteResponse.Create.response(vote);
+    private static Vote toVoteEntity(VoteServiceRequest.Create request, Long groupId) {
+        return Vote.builder()
+                .groupId(groupId)
+                .isAnonymous(request.getIsAnonymous())
+                .isEnabledMultipleChoice(request.getIsEnabledMultipleChoice())
+                .isClosed(false)
+                .endAt(request.getEndAt().orElse(null))
+                .build();
     }
 
     // 투표 참여 API
@@ -67,8 +72,8 @@ public class VoteService {
     public VoteResponse.SelectResult selectVote(
             Long groupId, List<Long> selectPlaceIds, Users user, LocalDateTime now
     ) {
-        try{
-            Groups group = getGroups(groupId);
+        try {
+            Groups group = getGroup(groupId);
             Vote vote = getVote(groupId);
             validateVote(selectPlaceIds, now, vote);
 
@@ -112,7 +117,7 @@ public class VoteService {
 
     // 투표 읽기 API
     public VoteResponse.SelectResult readVote(Long groupId, Users user) {
-        Groups group = getGroups(groupId);
+        Groups group = getGroup(groupId);
         Vote vote = getVote(groupId);
 
         // 투표 이후 현재 추천된 장소들의 현황을 조회
@@ -151,10 +156,8 @@ public class VoteService {
     // 투표 종료하기 API
     @Transactional
     public VoteResponse.SelectResult conclusionVote(Long groupId, Users user) {
-        Groups group = getGroups(groupId);
-        if (!group.getAdminId().equals(user.getUserId())) {
-            throw new CustomException(NOT_ADMIN_USER);
-        }
+        Groups group = getGroup(groupId);
+        validateUserIsAdmin(user, group);
         Vote vote = getVote(groupId);
 
         // 투표 종료
@@ -189,7 +192,7 @@ public class VoteService {
                 );
     }
 
-    private Groups getGroups(Long groupId) {
+    private Groups getGroup(Long groupId) {
         return groupRepository.findById(groupId)
                 .orElseThrow(
                         () -> new CustomException(NOT_FOUND_GROUP)
