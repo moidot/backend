@@ -72,21 +72,20 @@ public class VoteService {
     public VoteResponse.SelectResult selectVote(
             Long groupId, List<Long> selectPlaceIds, Users user, LocalDateTime now
     ) {
+        Groups group = getGroup(groupId);
+        Vote vote = getVote(groupId);
+        validateVote(selectPlaceIds, now, vote);
         try {
-            Groups group = getGroup(groupId);
-            Vote vote = getVote(groupId);
-            validateVote(selectPlaceIds, now, vote);
-
-            // 이미 투표를 했다면, 현재 유저가 투표한 목록을 가져온 후 제거
-            removeUserVotesIfExist(selectPlaceIds, user, vote);
-
-            // 요청받은 bestPlaceId 값을 이용해 for 문을 돌면서 투표 save
-            saveUserVotesForSelectPlaces(selectPlaceIds, user, vote);
-
+            processUserVotes(selectPlaceIds, user, vote);
             return VoteResponse.SelectResult.response(group, vote, toVoteStatusResponse(user, vote));
         } catch (OptimisticLockException ole) {
             throw new CustomException(CONCURRENCY_ISSUE_DETECTED);
         }
+    }
+
+    private void processUserVotes(List<Long> selectPlaceIds, Users user, Vote vote) {
+        removeUserVotesIfExist(selectPlaceIds, user, vote);
+        saveUserVotesForSelectPlaces(selectPlaceIds, user, vote);
     }
 
     private List<VoteResponse.VoteStatus> toVoteStatusResponse(Users user, Vote vote) {
