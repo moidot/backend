@@ -75,6 +75,22 @@ public class GroupService {
         return GroupResponse.Create.response(group);
     }
 
+    private void saveNearestStationList(Groups group, Double latitude, Double longitude) {
+        List<Subway> nearestStationsList =
+                subwayRepository.getNearestStationsList(latitude, longitude);
+
+        for (Subway subway : nearestStationsList) {
+            bestPlaceRepository.save(
+                    BestPlace.builder()
+                            .group(group)
+                            .placeName(subway.getName())
+                            .latitude(subway.getLatitude().doubleValue())
+                            .longitude(subway.getLongitude().doubleValue())
+                            .build()
+            );
+        }
+    }
+
     // 모임 참여
     @Transactional
     public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request, Users user) {
@@ -111,22 +127,6 @@ public class GroupService {
         validateLocationName(request.getLocationName());
         checkDuplicateParticipation(group, user);
         validateTransportation(request.getTransportationType());
-    }
-
-    private void saveNearestStationList(Groups group, Double latitude, Double longitude) {
-        List<Subway> nearestStationsList =
-                subwayRepository.getNearestStationsList(latitude, longitude);
-
-        for (Subway subway : nearestStationsList) {
-            bestPlaceRepository.save(
-                    BestPlace.builder()
-                            .group(group)
-                            .placeName(subway.getName())
-                            .latitude(subway.getLatitude().doubleValue())
-                            .longitude(subway.getLongitude().doubleValue())
-                            .build()
-            );
-        }
     }
 
     // 내 참여 정보 수정
