@@ -22,16 +22,6 @@ public class GroupRepositoryImpl implements GroupCustomRepository {
     }
 
     @Override
-    public Optional<Groups> findByIdToFetchJoinBestPlace(Long groupId) {
-        return Optional.ofNullable(queryFactory
-                .selectFrom(groups)
-                .leftJoin(groups.bestPlaces, bestPlace)
-                .where(groups.groupId.eq(groupId))
-                .fetchJoin()
-                .fetchOne());
-    }
-
-    @Override
     public List<Groups> findByGroupsFetch(Long userId) {
         return queryFactory
                 .selectFrom(groups)
