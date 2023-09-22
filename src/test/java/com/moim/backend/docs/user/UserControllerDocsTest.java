@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import static com.moim.backend.domain.user.config.Platform.NAVER;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.JsonFieldType.NUMBER;
 import static org.springframework.restdocs.payload.JsonFieldType.STRING;
@@ -25,7 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerDocsTest extends RestDocsSupport {
 
     private final UserService userService = mock(UserService.class);
-    private final String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5dS1qdW5nMzE0NzZAbmF2ZXIuY29tIiwiZXhwIjoxNjg5MjYwODM2fQ.cgZ8eFDU_Gz7Z3EghXxoa3v-iXUeQmBZ1AfKCBQZnnqFJ6mqMqGdiTS5uVCF1lIKBarXeD6nEmRZj9Ng94pnHw";
+    private final String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5dS1qdW5nMzE0NzZAbmF2ZXIuY29tIiwiZXhwIjoxNjg5MjYwODM2fQ.cgZ8eFDU_Gz7Z3EghXxoa3v-iXUeQmBZ1AfKCBQZnnqFJ6mqMqGdiTS5uVCF1lIKBarXeD6nEmRZj9Ng94pnHw";
+    private final String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5dS1qdW5nMzE0NzZAbmF2ZXIuY29tIiwiZXhwIjoxNjg5MjYwODM2fQ.cgZ8eFDU_Gz7Z3EghXxoa3v-iXUeQmBZ1AfKCBQZnnqFJ6mqMqGdiTS5uVCF1lIKBarXeD6nEmRZj9Ng94pnHw";
 
     @Override
     protected Object initController() {
@@ -41,7 +43,8 @@ public class UserControllerDocsTest extends RestDocsSupport {
                         UserResponse.Login.builder()
                                 .email("moidots@gmail.com")
                                 .name("모이닷")
-                                .token(token)
+                                .accessToken(accessToken)
+                                .refreshToken(refreshToken)
                                 .build()
                 );
 
@@ -60,7 +63,8 @@ public class UserControllerDocsTest extends RestDocsSupport {
                         fieldWithPath("message").type(STRING).description("상태 메세지"),
                         fieldWithPath("data.email").type(STRING).description("유저 이메일"),
                         fieldWithPath("data.name").type(STRING).description("유저 이름"),
-                        fieldWithPath("data.token").type(STRING).description("발급된 JWT 토큰"))
+                        fieldWithPath("data.accessToken").type(STRING).description("엑세스 토큰"),
+                        fieldWithPath("data.refreshToken").type(STRING).description("리프레쉬 토큰"))
                 .build();
 
         RestDocumentationResultHandler document =
@@ -72,4 +76,39 @@ public class UserControllerDocsTest extends RestDocsSupport {
                 .andExpect(status().isOk())
                 .andDo(document);
     }
+
+    @DisplayName("엑세스 토큰 재발급")
+    @Test
+    void reissueAccessToken() throws Exception {
+        // given
+        given(userService.reissueAccessToken(accessToken))
+                .willReturn(new UserResponse.NewAccessToken(accessToken));
+
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/auth/refresh")
+                .header("refreshToken", refreshToken);
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("엑세스토큰 재발급 API")
+                .summary("엑세스토큰 재발급 API")
+                .requestHeaders(
+                        headerWithName("refreshToken")
+                                .description("로그인 후 리프레쉬 토큰")
+                )
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"),
+                        fieldWithPath("data.accessToken").type(STRING).description("엑세스 토큰")
+                )
+                .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("social-login", prettyPrint(), parameters);
+
+        // when // then
+        mockMvc.perform(httpRequest)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
+
 }

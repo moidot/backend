@@ -6,19 +6,14 @@ import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.domain.user.response.UserResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 import static com.moim.backend.domain.user.config.Platform.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -56,7 +51,7 @@ class UserServiceTest {
         );
 
         // then
-        assertThat(response.getToken()).isNotNull();
+        assertThat(response.getAccessToken()).isNotNull();
 
         assertThat(response)
                 .extracting("email", "name")

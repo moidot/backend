@@ -1,6 +1,5 @@
 package com.moim.backend.global.auth.jwt;
 
-import com.moim.backend.TestQueryDSLConfig;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import org.junit.jupiter.api.DisplayName;
@@ -8,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 import java.util.Optional;
 
@@ -29,7 +27,7 @@ public class JwtServiceTest {
         String mail = "test@gmail.com";
 
         // when
-        String token = jwtService.createToken(mail);
+        String token = jwtService.createAccessToken(mail);
         String tokenPattern = ".+\\..+\\..+";
 
         // then
@@ -51,12 +49,12 @@ public class JwtServiceTest {
     protected void invalidSignatureTest() {
         // given
         String mail = "test@gmail.com";
-        String token = jwtService.createToken(mail);
+        String token = jwtService.createAccessToken(mail);
 
         // when // then
         assertThrows(
                 SignatureException.class,
-                () -> jwtService.isValidated(token.substring(0, token.length() - 2))
+                () -> jwtService.validateToken(token.substring(0, token.length() - 2))
         );
     }
 
@@ -65,12 +63,12 @@ public class JwtServiceTest {
     protected void invalidHeaderTest() {
         // given
         String mail = "test@gmail.com";
-        String token = jwtService.createToken(mail);
+        String token = jwtService.createAccessToken(mail);
 
         // when // then
         assertThrows(
                 MalformedJwtException.class,
-                () -> jwtService.isValidated(token.substring(1))
+                () -> jwtService.validateToken(token.substring(1))
         );
     }
 
