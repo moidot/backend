@@ -102,7 +102,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
                 .build();
 
         RestDocumentationResultHandler document =
-                documentHandler("social-login", prettyPrint(), parameters);
+                documentHandler("reissue-access-token", prettyPrint(), parameters);
 
         // when // then
         mockMvc.perform(httpRequest)

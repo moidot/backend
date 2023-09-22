@@ -42,7 +42,7 @@ public class UserController {
 
     // 엑세스 토큰 재발급
     @GetMapping("/refresh")
-    public CustomResponseEntity<UserResponse.NewAccessToken> reissueAccessToken(
+    public CustomResponseEntity<UserResponse.NewAccessToken> refreshAccessToken(
             @RequestHeader(name = "refreshToken") String refreshToken
     ) {
         return CustomResponseEntity.success(userService.reissueAccessToken(refreshToken));
