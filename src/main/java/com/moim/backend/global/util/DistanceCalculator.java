@@ -1,6 +1,6 @@
 package com.moim.backend.global.util;
 
-public final class DistanceCalculator {
+public class DistanceCalculator {
 
     private static final int EARTH_RADIUS = 6371;
     private static final int KM_TO_M = 1000;

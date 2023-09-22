@@ -118,10 +118,9 @@ public class CommonRestExceptionHandler extends RuntimeException {
     public CustomResponseEntity<String> expiredJwtExceptionHandler(
             ExpiredJwtException e, HttpServletRequest request
     ) {
-        String errorMessage = "만료된 JWT 토큰입니다.";
-        log.error("url: \"{}\", message: {}", request.getRequestURI(), errorMessage);
+        log.error("url: \"{}\", message: {}", request.getRequestURI(), e.getMessage());
 
-        return CustomResponseEntity.fail(errorMessage);
+        return CustomResponseEntity.fail(e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
