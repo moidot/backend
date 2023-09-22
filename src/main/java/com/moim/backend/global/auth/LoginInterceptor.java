@@ -27,7 +27,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authorization != null) {
             String token = jwtService.getToken(Optional.of(authorization));
-            return jwtService.isValidated(token);
+            jwtService.validateToken(token);
         }
 
         return true;
