@@ -4,6 +4,7 @@ import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.domain.user.response.UserResponse;
+import com.moim.backend.global.auth.jwt.JwtService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,18 +33,30 @@ class UserServiceTest {
     @MockBean(value = {GoogleLoginService.class})
     private OAuth2LoginService oAuth2LoginService;
 
+    @MockBean
+    private JwtService jwtService;
+
+    private final String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5dS1qdW5nMzE0NzZAbmF2ZXIuY29tIiwiZXhwIjoxNjg5MjYwODM2fQ.cgZ8eFDU_Gz7Z3EghXxoa3v-iXUeQmBZ1AfKCBQZnnqFJ6mqMqGdiTS5uVCF1lIKBarXeD6nEmRZj9Ng94pnHw";
+    private final String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5dS1qdW5nMzE0NzZAbmF2ZXIuY29tIiwiZXhwIjoxNjg5MjYwODM2fQ.cgZ8eFDU_Gz7Z3EghXxoa3v-iXUeQmBZ1AfKCBQZnnqFJ6mqMqGdiTS5uVCF1lIKBarXeD6nEmRZj9Ng94pnHw";
+
+
     @DisplayName("유저가 소셜 로그인을 진행한다.")
     @Test
     void loginByOAuth() {
         // given
+        String email = "test@test.com";
         given(oAuth2LoginService.supports()).willReturn(GOOGLE);
         given(oAuth2LoginService.toEntityUser(anyString(), any(Platform.class)))
                 .willReturn(
                         Users.builder()
-                                .email("test@test.com")
+                                .email(email)
                                 .name("소셜테스트")
                                 .build()
                 );
+        given(jwtService.createAccessToken(email))
+                .willReturn(accessToken);
+        given(jwtService.createRefreshToken(email))
+                .willReturn(refreshToken);
 
         // when
         UserResponse.Login response = userService.loginByOAuth(
