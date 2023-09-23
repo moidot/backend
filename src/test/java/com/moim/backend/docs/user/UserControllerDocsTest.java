@@ -10,10 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static com.moim.backend.domain.user.config.Platform.NAVER;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.JsonFieldType.NUMBER;
@@ -111,4 +113,31 @@ public class UserControllerDocsTest extends RestDocsSupport {
                 .andDo(document);
     }
 
+    @DisplayName("로그아웃 API")
+    @Test
+    void logout() throws Exception {
+        // given
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("로그아웃 API")
+                .summary("로그아웃 API")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"))
+                .build();
+
+        RestDocumentationResultHandler document = documentHandler("logout", prettyPrint(), parameters);
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.delete("/auth/logout")
+                                .header(AUTHORIZATION, "Bearer {token}")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
 }
