@@ -5,6 +5,7 @@ import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.domain.user.response.UserResponse;
 import com.moim.backend.global.auth.jwt.JwtService;
+import com.moim.backend.global.common.RedisService;
 import com.moim.backend.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class UserService {
     private final List<OAuth2LoginService> oAuth2LoginServices;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final RedisService redisService;
 
     // 소셜 로그인
     @Transactional
@@ -42,6 +44,14 @@ public class UserService {
 
     public UserResponse.NewAccessToken reissueAccessToken(String refreshToken) {
         return new UserResponse.NewAccessToken(jwtService.reissueAccessToken(refreshToken));
+    }
+
+    // 로그아웃
+    public Void logout(Users user, String atk) {
+        String decodeAtk = atk.substring(7);
+        Long expiration = jwtService.getExpiration(decodeAtk);
+
+        return redisService.logoutFromRedis(user.getEmail(), decodeAtk, expiration);
     }
 
     // method
@@ -73,5 +83,4 @@ public class UserService {
                 .name(request.getName())
                 .build();
     }
-
 }

@@ -17,6 +17,7 @@ public enum Result {
     FAIL_REQUEST_ACCESS_TOKEN(-904, "소셜 서버의 accessToken 요청하는 응답에 실패하였습니다."),
     FAIL_REQUEST_TIME_OUT(-905, "소셜 서버에 응답을 요청하는 도중 네트워크 문제가 발생하였습니다."),
     NOT_MATCH_RESPONSE(-906, "소셜 서버의 응답과 현재 서버의 응답이 일치하지 않습니다. (서버에 문제 발생 / 문의 부탁드립니다.)"),
+    IS_TOKEN_LOGOUT(-907, "해당 토큰은 로그아웃된 토큰입니다."),
 
     // Space
     UNEXPECTED_EXCEPTION(-500,"예상치 못한 예외가 발생했습니다."),

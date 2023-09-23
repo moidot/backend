@@ -9,13 +9,7 @@ import com.moim.backend.global.auth.Login;
 import com.moim.backend.global.common.CustomResponseEntity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.moim.backend.domain.user.config.Platform.*;
 
@@ -48,4 +42,12 @@ public class UserController {
         return CustomResponseEntity.success(userService.reissueAccessToken(refreshToken));
     }
 
+    // 로그아웃 API
+    @DeleteMapping("/logout")
+    public CustomResponseEntity<Void> logout(
+            @Login Users user,
+            @RequestHeader(value = "Authorization") String atk
+    ) {
+        return CustomResponseEntity.success(userService.logout(user, atk));
+    }
 }
