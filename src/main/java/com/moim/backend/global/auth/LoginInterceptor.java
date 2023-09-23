@@ -11,6 +11,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.util.Optional;
 
+import static org.springframework.http.HttpHeaders.*;
+
 @Component
 @RequiredArgsConstructor
 public class LoginInterceptor implements HandlerInterceptor {
@@ -24,7 +26,7 @@ public class LoginInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String authorization = request.getHeader(AUTHORIZATION);
         if (authorization != null) {
             String token = jwtService.getToken(Optional.of(authorization));
             jwtService.validateToken(token);
