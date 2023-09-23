@@ -90,7 +90,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
                 .header("refreshToken", refreshToken);
 
         ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
-                .tag("엑세스토큰 재발급 API")
+                .tag("유저 API")
                 .summary("엑세스토큰 재발급 API")
                 .requestHeaders(
                         headerWithName("refreshToken")
@@ -118,7 +118,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
     void logout() throws Exception {
         // given
         ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
-                .tag("로그아웃 API")
+                .tag("유저 API")
                 .summary("로그아웃 API")
                 .requestHeaders(
                         headerWithName("Authorization")
