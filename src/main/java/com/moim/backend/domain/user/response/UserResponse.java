@@ -15,15 +15,25 @@ public class UserResponse {
     public static class Login {
         private String email;
         private String name;
-        private String token;
+        private String accessToken;
+        private String refreshToken;
 
-        public static Login response(Users user, String token) {
+        public static Login response(Users user, String token, String refreshToken) {
             return Login.builder()
                     .email(user.getEmail())
                     .name(user.getName())
-                    .token(token)
+                    .accessToken(token)
+                    .refreshToken(refreshToken)
                     .build();
         }
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NewAccessToken {
+        private String accessToken;
     }
 
 }

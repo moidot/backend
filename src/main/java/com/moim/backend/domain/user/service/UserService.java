@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.moim.backend.global.common.Result.FAIL_SOCIAL_LOGIN;
-import static com.moim.backend.global.common.Result.UNEXPECTED_EXCEPTION;
 
 @Service
 @RequiredArgsConstructor
@@ -35,11 +34,15 @@ public class UserService {
         Users user = saveOrUpdate(userEntity);
 
         // 서비스 JWT 토큰 발급
-        String accessToken = jwtService.createToken(user.getEmail());
+        String accessToken = jwtService.createAccessToken(user.getEmail());
+        String refreshToken = jwtService.createRefreshToken(user.getEmail());
 
-        return UserResponse.Login.response(user, accessToken);
+        return UserResponse.Login.response(user, accessToken, refreshToken);
     }
 
+    public UserResponse.NewAccessToken reissueAccessToken(String refreshToken) {
+        return new UserResponse.NewAccessToken(jwtService.reissueAccessToken(refreshToken));
+    }
 
     // method
     private Users oauthLoginProcess(String code, Platform platform) {
