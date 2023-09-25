@@ -68,6 +68,15 @@ public class VoteResponse {
                 Groups group, Vote vote, List<VoteStatus> voteStatuses
         ) {
 
+            if (Optional.ofNullable(vote).isEmpty()) {
+                vote = Vote.builder()
+                        .voteId(-1L)
+                        .isClosed(false)
+                        .isAnonymous(false)
+                        .isEnabledMultipleChoice(false)
+                        .build();
+            }
+
             String groupDate = group.getDate()
                     .map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                     .orElse("none");

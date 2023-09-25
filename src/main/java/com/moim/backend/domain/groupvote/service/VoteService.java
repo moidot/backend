@@ -117,12 +117,16 @@ public class VoteService {
     // 투표 읽기 API
     public VoteResponse.SelectResult readVote(Long groupId, Users user) {
         Groups group = getGroup(groupId);
-        Vote vote = getVote(groupId);
-
-        // 투표 이후 현재 추천된 장소들의 현황을 조회
-        List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
-        List<VoteResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
-        return VoteResponse.SelectResult.response(group, vote, voteStatuses);
+        Optional<Vote> optionalVote = voteRepository.findByGroupId(groupId);
+        if (optionalVote.isEmpty()) {
+            return VoteResponse.SelectResult.response(group, null, new ArrayList<>());
+        } else {
+            // 투표 이후 현재 추천된 장소들의 현황을 조회
+            Vote vote = optionalVote.get();
+            List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
+            List<VoteResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
+            return VoteResponse.SelectResult.response(group, vote, voteStatuses);
+        }
     }
 
     // 해당 장소 투표한 인원 리스트 조회하기 API

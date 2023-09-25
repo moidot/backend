@@ -252,6 +252,34 @@ class VoteServiceTest {
                 );
     }
 
+    @DisplayName("유저가 자신의 그룹의 투표현황을 개설되지 않은채 확인한다.")
+    @Test
+    void readVoteWithNotCreateVote() {
+        // given
+        Users user = savedUser("test@test.com", "테스트");
+        Users admin = savedUser("admin@admin.com", "어드민");
+
+        Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
+
+        BestPlace bestPlace1 = saveBestPlace(group, "강남역", 123.123456, 123.123456);
+        BestPlace bestPlace2 = saveBestPlace(group, "역삼역", 123.123456, 123.123456);
+        BestPlace bestPlace3 = saveBestPlace(group, "신논현역", 123.123456, 123.123456);
+
+        em.flush();
+        em.clear();
+
+        // when
+        VoteResponse.SelectResult response = voteService.readVote(group.getGroupId(), admin);
+
+        // then
+
+        assertThat(response)
+                .extracting("groupId", "voteId", "groupName", "groupDate")
+                .contains(group.getGroupId(), -1L, group.getName(), "2023-07-10");
+
+        assertThat(response.getVoteStatuses()).isEmpty();
+    }
+
 
     @DisplayName("유저가 해당 장소에 투표한 사람들의 목록을 조회한다.")
     @Test
