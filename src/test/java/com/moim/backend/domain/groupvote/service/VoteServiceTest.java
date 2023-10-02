@@ -7,6 +7,7 @@ import com.moim.backend.domain.groupvote.repository.VoteRepository;
 import com.moim.backend.domain.groupvote.request.controller.VoteCreateRequest;
 import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
 import com.moim.backend.domain.groupvote.response.VoteResponse;
+import com.moim.backend.domain.groupvote.response.VoteSelectResultResponse;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
@@ -132,7 +133,7 @@ class VoteServiceTest {
         em.clear();
 
         // when
-        VoteResponse.SelectResult response =
+        VoteSelectResultResponse response =
                 voteService.selectVote(group.getGroupId(), List.of(bestPlace1.getBestPlaceId()), user, LocalDateTime.now());
 
         // then
@@ -166,7 +167,7 @@ class VoteServiceTest {
         em.clear();
 
         // when
-        VoteResponse.SelectResult response =
+        VoteSelectResultResponse response =
                 voteService.selectVote(
                         group.getGroupId(),
                         List.of(bestPlace1.getBestPlaceId(), bestPlace3.getBestPlaceId()),
@@ -238,7 +239,7 @@ class VoteServiceTest {
         em.clear();
 
         // when
-        VoteResponse.SelectResult response = voteService.readVote(group.getGroupId(), admin);
+        VoteSelectResultResponse response = voteService.readVote(group.getGroupId(), admin);
 
         // then
 
@@ -272,7 +273,7 @@ class VoteServiceTest {
         em.clear();
 
         // when
-        VoteResponse.SelectResult response = voteService.readVote(group.getGroupId(), admin);
+        VoteSelectResultResponse response = voteService.readVote(group.getGroupId(), admin);
 
         // then
 
@@ -380,7 +381,7 @@ class VoteServiceTest {
         em.clear();
 
         // when
-        VoteResponse.SelectResult response = voteService.conclusionVote(group.getGroupId(), admin);
+        VoteSelectResultResponse response = voteService.conclusionVote(group.getGroupId(), admin);
 
         // then
         assertThat(response)

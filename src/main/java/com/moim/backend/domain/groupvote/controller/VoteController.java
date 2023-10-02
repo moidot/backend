@@ -3,6 +3,7 @@ package com.moim.backend.domain.groupvote.controller;
 import com.moim.backend.domain.groupvote.request.controller.VoteCreateRequest;
 import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
 import com.moim.backend.domain.groupvote.response.VoteResponse;
+import com.moim.backend.domain.groupvote.response.VoteSelectResultResponse;
 import com.moim.backend.domain.groupvote.service.VoteService;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.global.auth.Login;
@@ -31,7 +32,7 @@ public class VoteController {
 
     // 투표 읽기 API
     @GetMapping("/{groupId}/vote")
-    public CustomResponseEntity<VoteResponse.SelectResult> readVote(
+    public CustomResponseEntity<VoteSelectResultResponse> readVote(
             @PathVariable Long groupId, @Login Users user
     ) {
         return CustomResponseEntity.success(voteService.readVote(groupId, user));
@@ -39,7 +40,7 @@ public class VoteController {
 
     // 투표 참여 API
     @PostMapping("/{groupId}/vote/select")
-    public CustomResponseEntity<VoteResponse.SelectResult> selectVote(
+    public CustomResponseEntity<VoteSelectResultResponse> selectVote(
             @PathVariable Long groupId, @RequestParam List<Long> bestPlaceIds, @Login Users user
     ) {
         return CustomResponseEntity.success(
@@ -59,7 +60,7 @@ public class VoteController {
 
     // 투표 종료하기 API
     @PatchMapping("/{groupId}/vote")
-    public CustomResponseEntity<VoteResponse.SelectResult> conclusionVote(
+    public CustomResponseEntity<VoteSelectResultResponse> conclusionVote(
             @PathVariable Long groupId, @Login Users user
     ) {
         return CustomResponseEntity.success(voteService.conclusionVote(groupId, user));

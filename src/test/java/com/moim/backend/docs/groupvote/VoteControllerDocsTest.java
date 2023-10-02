@@ -7,6 +7,7 @@ import com.moim.backend.domain.groupvote.request.controller.VoteCreateRequest;
 import com.moim.backend.domain.groupvote.request.service.VoteCreateServiceRequest;
 import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
 import com.moim.backend.domain.groupvote.response.VoteResponse;
+import com.moim.backend.domain.groupvote.response.VoteSelectResultResponse;
 import com.moim.backend.domain.groupvote.service.VoteService;
 import com.moim.backend.domain.user.entity.Users;
 import org.junit.jupiter.api.DisplayName;
@@ -114,7 +115,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
     @Test
     void selectVote() throws Exception {
         // given
-        VoteResponse.SelectResult mockResult = VoteResponse.SelectResult.builder()
+        VoteSelectResultResponse mockResult = VoteSelectResultResponse.builder()
                 .groupId(1L)
                 .groupName("모이닷 모임")
                 .groupDate("2023-08-04")
@@ -196,7 +197,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
     @DisplayName("투표 현황 조회 API")
     @Test
     void readVote() throws Exception {
-        VoteResponse.SelectResult mockResult = VoteResponse.SelectResult.builder()
+        VoteSelectResultResponse mockResult = VoteSelectResultResponse.builder()
                 .groupId(1L)
                 .groupName("모이닷 모임")
                 .groupDate("2023-08-04")
@@ -325,7 +326,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
     @Test
     void conclusionVote() throws Exception {
         // given
-        VoteResponse.SelectResult mockResult = VoteResponse.SelectResult.builder()
+        VoteSelectResultResponse mockResult = VoteSelectResultResponse.builder()
                 .groupId(1L)
                 .groupName("모이닷 모임")
                 .groupDate("2023-08-04")
@@ -403,9 +404,9 @@ public class VoteControllerDocsTest extends RestDocsSupport {
     }
 
     // method
-    private List<VoteResponse.VoteStatus> createMockVoteStatuses() {
-        List<VoteResponse.VoteStatus> voteStatuses = new ArrayList<>();
-        voteStatuses.add(VoteResponse.VoteStatus.builder()
+    private List<VoteSelectResultResponse.VoteStatus> createMockVoteStatuses() {
+        List<VoteSelectResultResponse.VoteStatus> voteStatuses = new ArrayList<>();
+        voteStatuses.add(VoteSelectResultResponse.VoteStatus.builder()
                 .bestPlaceId(4L)
                 .votes(4)
                 .placeName("강남역")
@@ -413,7 +414,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .longitude(127.027621)
                 .isVoted(true)
                 .build());
-        voteStatuses.add(VoteResponse.VoteStatus.builder()
+        voteStatuses.add(VoteSelectResultResponse.VoteStatus.builder()
                 .bestPlaceId(5L)
                 .votes(1)
                 .placeName("역삼역")
@@ -421,7 +422,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .longitude(127.036585)
                 .isVoted(false)
                 .build());
-        voteStatuses.add(VoteResponse.VoteStatus.builder()
+        voteStatuses.add(VoteSelectResultResponse.VoteStatus.builder()
                 .bestPlaceId(6L)
                 .votes(3)
                 .placeName("신논현역")

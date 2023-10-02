@@ -1,6 +1,5 @@
 package com.moim.backend.domain.groupvote.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.moim.backend.domain.groupvote.entity.Vote;
 import com.moim.backend.domain.space.entity.BestPlace;
@@ -18,83 +17,6 @@ import java.util.Optional;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 public class VoteResponse {
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter
-    @Builder
-    public static class SelectResult {
-        private Long groupId;
-        private String groupName;
-        private String groupDate;
-        @JsonInclude(value = NON_NULL)
-        private String confirmPlace;
-        private Long voteId;
-        private Boolean isClosed;
-        private Boolean isAnonymous;
-        private Boolean isEnabledMultipleChoice;
-        private String endAt;
-        private List<VoteStatus> voteStatuses;
-
-        public static VoteResponse.SelectResult response(
-                Groups group, Vote vote, List<VoteStatus> voteStatuses
-        ) {
-
-            if (Optional.ofNullable(vote).isEmpty()) {
-                vote = Vote.builder()
-                        .voteId(-1L)
-                        .isClosed(false)
-                        .isAnonymous(false)
-                        .isEnabledMultipleChoice(false)
-                        .build();
-            }
-
-            String groupDate = group.getDate()
-                    .map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                    .orElse("none");
-
-            String endAt = Optional.ofNullable(vote.getEndAt())
-                    .map(time -> time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                    .orElse("none");
-
-            return SelectResult.builder()
-                    .groupId(group.getGroupId())
-                    .groupName(group.getName())
-                    .groupDate(groupDate)
-                    .confirmPlace(group.getPlace())
-                    .voteId(vote.getVoteId())
-                    .isClosed(vote.getIsClosed())
-                    .isAnonymous(vote.getIsAnonymous())
-                    .isEnabledMultipleChoice(vote.getIsEnabledMultipleChoice())
-                    .endAt(endAt)
-                    .voteStatuses(voteStatuses)
-                    .build();
-        }
-    }
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter
-    @Builder
-    public static class VoteStatus {
-        private Long bestPlaceId;
-        private Integer votes;
-        private String placeName;
-        private Double latitude;
-        private Double longitude;
-        private Boolean isVoted;
-
-        public static VoteResponse.VoteStatus toStatusDto(BestPlace bestPlace, Boolean isVoted) {
-            return VoteStatus.builder()
-                    .bestPlaceId(bestPlace.getBestPlaceId())
-                    .votes(bestPlace.getSelectPlaces().size())
-                    .placeName(bestPlace.getPlaceName())
-                    .latitude(bestPlace.getLatitude())
-                    .longitude(bestPlace.getLongitude())
-                    .isVoted(isVoted)
-                    .build();
-        }
-    }
 
     @AllArgsConstructor
     @NoArgsConstructor
