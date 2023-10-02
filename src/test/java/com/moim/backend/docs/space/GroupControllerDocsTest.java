@@ -7,6 +7,7 @@ import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import com.moim.backend.domain.space.response.*;
+import com.moim.backend.domain.space.response.group.*;
 import com.moim.backend.domain.space.service.GroupService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -522,14 +523,14 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void keywordCentralizedMeetingSpot() throws Exception {
         // given
-        GroupResponse.Place place1 = GroupResponse.Place.builder()
+        GroupPlaceResponse place1 = GroupPlaceResponse.builder()
                 .title("멘야하나비 성신여대점")
                 .thumUrl("https://ldb-phinf.pstatic.net/20230804_174/16911100078193yaWQ_JPEG/IMG_4118.JPEG")
                 .distance("성신여대입구역(으)로부터 220m")
                 .openTime("21:00에 라스트오더")
                 .tel("02-6397-3020")
                 .detail(
-                        GroupResponse.Place.Detail.builder()
+                        GroupPlaceResponse.Detail.builder()
                                 .local("성신여대입구역")
                                 .title("멘야하나비 성신여대점")
                                 .address("서울특별시 성북구 동소문로22길 39-5 2층")
@@ -557,14 +558,14 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 )
                 .build();
 
-        GroupResponse.Place place2 = GroupResponse.Place.builder()
+        GroupPlaceResponse place2 = GroupPlaceResponse.builder()
                 .title("치치 성신여대점")
                 .thumUrl("https://ldb-phinf.pstatic.net/20230704_152/1688449596232YkYod_JPEG/3.jpg")
                 .distance("성신여대입구역(으)로부터 213m")
                 .openTime("17:30에 영업시작")
                 .tel("02-921-8520")
                 .detail(
-                        GroupResponse.Place.Detail.builder()
+                        GroupPlaceResponse.Detail.builder()
                                 .local("성신여대입구역")
                                 .title("치치 성신여대점")
                                 .address("서울특별시 성북구 동소문로20길 37-12 1층")
@@ -587,14 +588,14 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .build())
                 .build();
 
-        GroupResponse.Place place3 = GroupResponse.Place.builder()
+        GroupPlaceResponse place3 = GroupPlaceResponse.builder()
                 .title("동경산책 성신여대점")
                 .thumUrl("https://ldb-phinf.pstatic.net/20220106_294/1641437440289J8dYW_JPEG/1635122589184-10.jpg")
                 .distance("성신여대입구역(으)로부터 236m")
                 .openTime("21:00에 영업종료")
                 .tel("02-923-2666")
                 .detail(
-                        GroupResponse.Place.Detail.builder()
+                        GroupPlaceResponse.Detail.builder()
                                 .local("성신여대입구역")
                                 .title("동경산책 성신여대점")
                                 .address("서울특별시 성북구 보문로34길 45")
@@ -674,7 +675,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .description("상세 이미지 URL 목록 / List<String>"),
                         fieldWithPath("data[].detail.menuInfo[]").type(ARRAY)
                                 .description("메뉴 정보 목록 / List<String>"))
-                .responseSchema(schema("GroupMyParticipateResponse"))
+                .responseSchema(schema("GroupPlaceResponse"))
                 .build();
 
         RestDocumentationResultHandler document =

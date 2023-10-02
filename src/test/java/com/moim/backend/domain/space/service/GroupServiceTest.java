@@ -15,7 +15,7 @@ import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequest;
-import com.moim.backend.domain.space.response.*;
+import com.moim.backend.domain.space.response.group.*;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.global.common.Result;
@@ -561,7 +561,7 @@ class GroupServiceTest {
         // given
 
         // when
-        List<GroupResponse.Place> response = groupService.keywordCentralizedMeetingSpot(
+        List<GroupPlaceResponse> response = groupService.keywordCentralizedMeetingSpot(
                 127.01674669413555, 37.59276455965626, "성신여대입구역", "카페"
         );
 

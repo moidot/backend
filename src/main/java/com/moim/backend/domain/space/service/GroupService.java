@@ -15,6 +15,7 @@ import com.moim.backend.domain.space.request.service.GroupCreateServiceRequest;
 import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequest;
 import com.moim.backend.domain.space.request.service.GroupParticipateUpdateServiceRequest;
 import com.moim.backend.domain.space.response.*;
+import com.moim.backend.domain.space.response.group.*;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestPlaceInterface;
@@ -44,8 +45,8 @@ import java.util.StringTokenizer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.moim.backend.domain.space.response.GroupParticipationsResponse.toParticipateEntity;
-import static com.moim.backend.domain.space.response.GroupRegionResponse.toLocalEntity;
+import static com.moim.backend.domain.space.response.group.GroupParticipationsResponse.toParticipateEntity;
+import static com.moim.backend.domain.space.response.group.GroupRegionResponse.toLocalEntity;
 import static com.moim.backend.global.common.Result.*;
 
 @Service
@@ -255,7 +256,7 @@ public class GroupService {
     }
 
     // 모임 장소 추천 조회 리스트 API
-    public List<GroupResponse.Place> keywordCentralizedMeetingSpot(Double x, Double y, String local, String keyword) {
+    public List<GroupPlaceResponse> keywordCentralizedMeetingSpot(Double x, Double y, String local, String keyword) {
         // 네이버 API 요청
         URI uri = createNaverRequestUri(local, keyword);
         ResponseEntity<NaverMapListDto> naverResponse = restTemplate.getForEntity(uri.toString(), NaverMapListDto.class);
@@ -377,9 +378,9 @@ public class GroupService {
         return String.format("%s %s", st.nextToken(), st.nextToken());
     }
 
-    private static Function<NaverMapListDto.placeList, GroupResponse.Place> toPlaceEntity(Double x, Double y, String local) {
+    private static Function<NaverMapListDto.placeList, GroupPlaceResponse> toPlaceEntity(Double x, Double y, String local) {
         return naver -> {
-            GroupResponse.Place response = GroupResponse.Place.response(naver, local);
+            GroupPlaceResponse response = GroupPlaceResponse.response(naver, local);
             double placeX = Double.parseDouble(naver.getX());
             double placeY = Double.parseDouble(naver.getY());
             String distance = String.format("%s(으)로부터 %sm", local, (int) DistanceCalculator.getDistance(y, x, placeY, placeX));

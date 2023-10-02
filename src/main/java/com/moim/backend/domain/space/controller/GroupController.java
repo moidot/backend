@@ -4,6 +4,7 @@ import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import com.moim.backend.domain.space.response.*;
+import com.moim.backend.domain.space.response.group.*;
 import com.moim.backend.domain.space.service.GroupService;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.global.auth.Login;
@@ -95,7 +96,7 @@ public class GroupController {
 
     // 모임 장소 추천 조회 리스트 API
     @GetMapping("/best-region/place")
-    public CustomResponseEntity<List<GroupResponse.Place>> keywordCentralizedMeetingSpot(
+    public CustomResponseEntity<List<GroupPlaceResponse>> keywordCentralizedMeetingSpot(
             @RequestParam Double x,
             @RequestParam Double y,
             @RequestParam String local,

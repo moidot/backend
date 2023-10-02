@@ -1,4 +1,4 @@
-package com.moim.backend.domain.space.response;
+package com.moim.backend.domain.space.response.group;
 
 import lombok.*;
 
