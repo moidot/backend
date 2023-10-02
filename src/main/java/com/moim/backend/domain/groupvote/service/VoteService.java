@@ -6,7 +6,7 @@ import com.moim.backend.domain.groupvote.repository.SelectPlaceRepository;
 import com.moim.backend.domain.groupvote.repository.VoteRepository;
 import com.moim.backend.domain.groupvote.request.service.VoteCreateServiceRequest;
 import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
-import com.moim.backend.domain.groupvote.response.VoteResponse;
+import com.moim.backend.domain.groupvote.response.VoteSelectPlaceUserResponse;
 import com.moim.backend.domain.groupvote.response.VoteSelectResultResponse;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
@@ -132,14 +132,14 @@ public class VoteService {
     }
 
     // 해당 장소 투표한 인원 리스트 조회하기 API
-    public List<VoteResponse.SelectPlaceUser> readSelectPlaceUsers(Long groupId, Long bestPlaceId, Users user) {
+    public List<VoteSelectPlaceUserResponse> readSelectPlaceUsers(Long groupId, Long bestPlaceId, Users user) {
         List<SelectPlace> selectPlaceList = getSelectPlaceList(bestPlaceId);
 
         List<Long> userIds = extractUserIdsFromSelectPlaces(selectPlaceList);
         List<Participation> participations = participationRepository.findAllByGroupGroupIdAndUserIdIn(groupId, userIds);
 
         Groups group = getGroup(groupId);
-        return participations.stream().map(participation -> VoteResponse.SelectPlaceUser.response(
+        return participations.stream().map(participation -> VoteSelectPlaceUserResponse.response(
                 participation, isAdmin(group, participation))
         ).toList();
     }

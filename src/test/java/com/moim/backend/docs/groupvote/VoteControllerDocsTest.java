@@ -6,7 +6,7 @@ import com.moim.backend.domain.groupvote.controller.VoteController;
 import com.moim.backend.domain.groupvote.request.controller.VoteCreateRequest;
 import com.moim.backend.domain.groupvote.request.service.VoteCreateServiceRequest;
 import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
-import com.moim.backend.domain.groupvote.response.VoteResponse;
+import com.moim.backend.domain.groupvote.response.VoteSelectPlaceUserResponse;
 import com.moim.backend.domain.groupvote.response.VoteSelectResultResponse;
 import com.moim.backend.domain.groupvote.service.VoteService;
 import com.moim.backend.domain.user.entity.Users;
@@ -259,19 +259,19 @@ public class VoteControllerDocsTest extends RestDocsSupport {
         // given
         given(voteService.readSelectPlaceUsers(anyLong(), any(), any()))
                 .willReturn(List.of(
-                                VoteResponse.SelectPlaceUser.builder()
+                                VoteSelectPlaceUserResponse.builder()
                                         .participationId(1L)
                                         .userId(1L)
                                         .nickName("모이닷 모임장")
                                         .isAdmin(true)
                                         .build(),
-                                VoteResponse.SelectPlaceUser.builder()
+                                VoteSelectPlaceUserResponse.builder()
                                         .participationId(2L)
                                         .userId(2L)
                                         .nickName("모이닷 인원1")
                                         .isAdmin(false)
                                         .build(),
-                                VoteResponse.SelectPlaceUser.builder()
+                                VoteSelectPlaceUserResponse.builder()
                                         .participationId(3L)
                                         .userId(3L)
                                         .nickName("모이닷 인원2")

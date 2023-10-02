@@ -6,7 +6,7 @@ import com.moim.backend.domain.groupvote.repository.SelectPlaceRepository;
 import com.moim.backend.domain.groupvote.repository.VoteRepository;
 import com.moim.backend.domain.groupvote.request.controller.VoteCreateRequest;
 import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
-import com.moim.backend.domain.groupvote.response.VoteResponse;
+import com.moim.backend.domain.groupvote.response.VoteSelectPlaceUserResponse;
 import com.moim.backend.domain.groupvote.response.VoteSelectResultResponse;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
@@ -312,7 +312,7 @@ class VoteServiceTest {
         em.clear();
 
         // when
-        List<VoteResponse.SelectPlaceUser> response =
+        List<VoteSelectPlaceUserResponse> response =
                 voteService.readSelectPlaceUsers(group.getGroupId(), bestPlace1.getBestPlaceId(), user);
 
         // then
