@@ -2,16 +2,12 @@ package com.moim.backend.domain.user.controller;
 
 import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
-import com.moim.backend.domain.user.request.UserRequest;
 import com.moim.backend.domain.user.response.UserResponse;
 import com.moim.backend.domain.user.service.UserService;
 import com.moim.backend.global.auth.Login;
 import com.moim.backend.global.common.CustomResponseEntity;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import static com.moim.backend.domain.user.config.Platform.*;
 
 @RestController
 @RequiredArgsConstructor
