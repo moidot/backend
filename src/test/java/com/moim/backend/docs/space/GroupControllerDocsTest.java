@@ -254,7 +254,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         // given
         given(groupService.participateExit(any(), any()))
                 .willReturn(
-                        GroupResponse.Exit.builder()
+                        GroupExitResponse.builder()
                                 .isDeletedSpace(false)
                                 .message("모임에서 나갔습니다.")
                                 .build()
@@ -283,6 +283,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .description("모임 삭제 여부 : 어드민이 나간경우 모임이 삭제 / 참가자가 나간경우 모임 나가기"),
                         fieldWithPath("data.message").type(STRING)
                                 .description("모임이 삭제되었습니다. / 모임에서 나갔습니다."))
+                .responseSchema(schema("GroupExitResponse"))
                 .build();
 
         RestDocumentationResultHandler document =

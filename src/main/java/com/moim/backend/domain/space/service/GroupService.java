@@ -147,7 +147,7 @@ public class GroupService {
 
     // 내 모임 나가기
     @Transactional
-    public GroupResponse.Exit participateExit(Long participateId, Users user) {
+    public GroupExitResponse participateExit(Long participateId, Users user) {
         Participation myParticipate = getParticipate(participateId);
         validateParticipationMyInfo(user, myParticipate);
 
@@ -159,11 +159,11 @@ public class GroupService {
 
         // 모임장이 나가는 경우 스페이스 삭제
         if (deleteGroupIfAdminLeaves(user, group)) {
-            return GroupResponse.Exit.response(true, "모임이 삭제되었습니다.");
+            return GroupExitResponse.response(true, "모임이 삭제되었습니다.");
         }
 
         participationRepository.delete(myParticipate);
-        return GroupResponse.Exit.response(false, "모임에서 나갔습니다.");
+        return GroupExitResponse.response(false, "모임에서 나갔습니다.");
     }
 
     private boolean deleteGroupIfAdminLeaves(Users user, Groups group) {

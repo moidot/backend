@@ -302,7 +302,7 @@ class GroupServiceTest {
                 savedParticipation(user, group, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
 
         // when
-        GroupResponse.Exit response =
+        GroupExitResponse response =
                 groupService.participateExit(participationUser.getParticipationId(), user);
 
         // then
@@ -333,7 +333,7 @@ class GroupServiceTest {
         em.clear();
 
         // when
-        GroupResponse.Exit response =
+        GroupExitResponse response =
                 groupService.participateExit(participationAdmin.getParticipationId(), admin);
 
         // then

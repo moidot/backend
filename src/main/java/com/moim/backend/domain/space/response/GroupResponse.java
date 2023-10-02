@@ -19,22 +19,6 @@ public class GroupResponse {
     @NoArgsConstructor
     @AllArgsConstructor(access = PRIVATE)
     @Builder
-    public static class Exit {
-        private Boolean isDeletedSpace;
-        private String message;
-
-        public static GroupResponse.Exit response(Boolean isDeletedSpace, String message) {
-            return Exit.builder()
-                    .isDeletedSpace(isDeletedSpace)
-                    .message(message)
-                    .build();
-        }
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor(access = PRIVATE)
-    @Builder
     public static class MyParticipate {
         private Long groupId;
         private String groupName;

@@ -63,7 +63,7 @@ public class GroupController {
 
     // 모임 나가기 API
     @DeleteMapping("/participate")
-    public CustomResponseEntity<GroupResponse.Exit> participateExit(
+    public CustomResponseEntity<GroupExitResponse> participateExit(
             @RequestParam Long participateId, @Login Users user
     ) {
         return CustomResponseEntity.success(groupService.participateExit(participateId, user));
