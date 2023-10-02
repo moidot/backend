@@ -23,34 +23,6 @@ public class VoteResponse {
     @NoArgsConstructor
     @Getter
     @Builder
-    public static class Create {
-        private Long voteId;
-        private Long groupId;
-        private Boolean isClosed;
-        private Boolean isAnonymous;
-        private Boolean isEnabledMultipleChoice;
-        private String endAt;
-
-        public static VoteResponse.Create response(Vote vote) {
-            String endAt = Optional.ofNullable(vote.getEndAt())
-                    .map(time -> time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                    .orElse("none");
-
-            return Create.builder()
-                    .voteId(vote.getVoteId())
-                    .groupId(vote.getGroupId())
-                    .isClosed(vote.getIsClosed())
-                    .isAnonymous(vote.getIsAnonymous())
-                    .isEnabledMultipleChoice(vote.getIsEnabledMultipleChoice())
-                    .endAt(endAt)
-                    .build();
-        }
-    }
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter
-    @Builder
     public static class SelectResult {
         private Long groupId;
         private String groupName;

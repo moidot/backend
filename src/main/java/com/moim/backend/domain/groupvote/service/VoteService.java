@@ -4,7 +4,8 @@ import com.moim.backend.domain.groupvote.entity.SelectPlace;
 import com.moim.backend.domain.groupvote.entity.Vote;
 import com.moim.backend.domain.groupvote.repository.SelectPlaceRepository;
 import com.moim.backend.domain.groupvote.repository.VoteRepository;
-import com.moim.backend.domain.groupvote.request.VoteServiceRequest;
+import com.moim.backend.domain.groupvote.request.service.VoteCreateServiceRequest;
+import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
 import com.moim.backend.domain.groupvote.response.VoteResponse;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
@@ -42,11 +43,11 @@ public class VoteService {
 
     // 투표 생성 API
     @Transactional
-    public VoteResponse.Create createVote(VoteServiceRequest.Create request, Long groupId, Users user) {
+    public VoteCreateResponse createVote(VoteCreateServiceRequest request, Long groupId, Users user) {
         Groups group = getGroup(groupId);
         validateUserIsAdmin(user, group);
 
-        return VoteResponse.Create.response(
+        return VoteCreateResponse.response(
                 voteRepository.save(toVoteEntity(request, groupId))
         );
     }
@@ -57,7 +58,7 @@ public class VoteService {
         }
     }
 
-    private static Vote toVoteEntity(VoteServiceRequest.Create request, Long groupId) {
+    private static Vote toVoteEntity(VoteCreateServiceRequest request, Long groupId) {
         return Vote.builder()
                 .groupId(groupId)
                 .isAnonymous(request.getIsAnonymous())

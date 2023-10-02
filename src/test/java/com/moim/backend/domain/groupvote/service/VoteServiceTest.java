@@ -4,7 +4,8 @@ import com.moim.backend.domain.groupvote.entity.SelectPlace;
 import com.moim.backend.domain.groupvote.entity.Vote;
 import com.moim.backend.domain.groupvote.repository.SelectPlaceRepository;
 import com.moim.backend.domain.groupvote.repository.VoteRepository;
-import com.moim.backend.domain.groupvote.request.VoteRequest;
+import com.moim.backend.domain.groupvote.request.controller.VoteCreateRequest;
+import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
 import com.moim.backend.domain.groupvote.response.VoteResponse;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
@@ -60,10 +61,10 @@ class VoteServiceTest {
         // given
         Users admin = savedUser("admin@admin.com", "어드민");
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
-        VoteRequest.Create request = new VoteRequest.Create(true, true, null);
+        VoteCreateRequest request = VoteCreateRequest.toRequest(true, true, null);
 
         // when
-        VoteResponse.Create response =
+        VoteCreateResponse response =
                 voteService.createVote(request.toServiceRequest(), group.getGroupId(), admin);
 
         // then
@@ -80,11 +81,12 @@ class VoteServiceTest {
         // given
         Users admin = savedUser("admin@admin.com", "어드민");
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
-        VoteRequest.Create request =
-                new VoteRequest.Create(false, false, LocalDateTime.of(2023, 8, 10, 15, 0, 0));
+        VoteCreateRequest request = VoteCreateRequest.toRequest(
+                false, false, LocalDateTime.of(2023, 8, 10, 15, 0, 0)
+        );
 
         // when
-        VoteResponse.Create response =
+        VoteCreateResponse response =
                 voteService.createVote(request.toServiceRequest(), group.getGroupId(), admin);
 
         // then
@@ -102,8 +104,9 @@ class VoteServiceTest {
         Users user = savedUser("test@test.com", "테스트");
         Users admin = savedUser("admin@admin.com", "어드민");
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
-        VoteRequest.Create request =
-                new VoteRequest.Create(false, false, LocalDateTime.of(2023, 8, 10, 15, 0, 0));
+        VoteCreateRequest request = VoteCreateRequest.toRequest(
+                false, false, LocalDateTime.of(2023, 8, 10, 15, 0, 0)
+        );
 
         // when // then
         assertThatThrownBy(() -> voteService.createVote(request.toServiceRequest(), group.getGroupId(), user))

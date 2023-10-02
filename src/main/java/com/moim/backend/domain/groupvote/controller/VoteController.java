@@ -1,6 +1,7 @@
 package com.moim.backend.domain.groupvote.controller;
 
-import com.moim.backend.domain.groupvote.request.VoteRequest;
+import com.moim.backend.domain.groupvote.request.controller.VoteCreateRequest;
+import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
 import com.moim.backend.domain.groupvote.response.VoteResponse;
 import com.moim.backend.domain.groupvote.service.VoteService;
 import com.moim.backend.domain.user.entity.Users;
@@ -21,9 +22,9 @@ public class VoteController {
 
     // 투표 생성 API
     @PostMapping("/{groupId}/vote")
-    public CustomResponseEntity<VoteResponse.Create> createVote(
+    public CustomResponseEntity<VoteCreateResponse> createVote(
             @PathVariable Long groupId,
-            @RequestBody @Valid VoteRequest.Create request, @Login Users user
+            @RequestBody @Valid VoteCreateRequest request, @Login Users user
     ) {
         return CustomResponseEntity.success(voteService.createVote(request.toServiceRequest(), groupId, user));
     }

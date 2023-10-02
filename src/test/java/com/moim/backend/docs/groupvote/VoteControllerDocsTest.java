@@ -3,8 +3,9 @@ package com.moim.backend.docs.groupvote;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.groupvote.controller.VoteController;
-import com.moim.backend.domain.groupvote.request.VoteRequest;
-import com.moim.backend.domain.groupvote.request.VoteServiceRequest;
+import com.moim.backend.domain.groupvote.request.controller.VoteCreateRequest;
+import com.moim.backend.domain.groupvote.request.service.VoteCreateServiceRequest;
+import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
 import com.moim.backend.domain.groupvote.response.VoteResponse;
 import com.moim.backend.domain.groupvote.service.VoteService;
 import com.moim.backend.domain.user.entity.Users;
@@ -44,10 +45,10 @@ public class VoteControllerDocsTest extends RestDocsSupport {
     @Test
     void createVote() throws Exception {
         // given
-        VoteRequest.Create request = new VoteRequest.Create(true, true, null);
-        given(voteService.createVote(any(VoteServiceRequest.Create.class), anyLong(), any(Users.class)))
+        VoteCreateRequest request = VoteCreateRequest.toRequest(true, true, null);
+        given(voteService.createVote(any(VoteCreateServiceRequest.class), anyLong(), any(Users.class)))
                 .willReturn(
-                        VoteResponse.Create.builder()
+                        VoteCreateResponse.builder()
                                 .voteId(1L)
                                 .groupId(1L)
                                 .isClosed(false)
