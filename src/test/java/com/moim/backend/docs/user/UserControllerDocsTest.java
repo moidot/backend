@@ -3,14 +3,14 @@ package com.moim.backend.docs.user;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.user.controller.UserController;
-import com.moim.backend.domain.user.response.UserResponse;
+import com.moim.backend.domain.user.response.UserLoginResponse;
+import com.moim.backend.domain.user.response.UserReissueResponse;
 import com.moim.backend.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static com.moim.backend.domain.user.config.Platform.NAVER;
 import static org.mockito.BDDMockito.given;
@@ -42,7 +42,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
         // given
         given(userService.loginByOAuth("Hx-PXmWuFaGakYCEy8hkUIVOWUSXIOtD7cosKDSIKsiwodR1g35KXQQWX9H4hXlcpZ45eSgo3dGkWWWOSX-z9iQ", NAVER))
                 .willReturn(
-                        UserResponse.Login.builder()
+                        UserLoginResponse.builder()
                                 .email("moidots@gmail.com")
                                 .name("모이닷")
                                 .accessToken(accessToken)
@@ -84,7 +84,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
     void reissueAccessToken() throws Exception {
         // given
         given(userService.reissueAccessToken(accessToken))
-                .willReturn(new UserResponse.NewAccessToken(accessToken));
+                .willReturn(UserReissueResponse.toResponse(accessToken));
 
         MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/auth/refresh")
                 .header("refreshToken", refreshToken);

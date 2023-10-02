@@ -3,7 +3,8 @@ package com.moim.backend.domain.user.service;
 import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
-import com.moim.backend.domain.user.response.UserResponse;
+import com.moim.backend.domain.user.response.UserLoginResponse;
+import com.moim.backend.domain.user.response.UserReissueResponse;
 import com.moim.backend.global.auth.jwt.JwtService;
 import com.moim.backend.global.common.RedisService;
 import com.moim.backend.global.common.exception.CustomException;
@@ -28,7 +29,7 @@ public class UserService {
 
     // 소셜 로그인
     @Transactional
-    public UserResponse.Login loginByOAuth(String code, Platform platform) {
+    public UserLoginResponse loginByOAuth(String code, Platform platform) {
         // 요청된 로그인 플랫폼 확인 후 소셜 로그인 진행
         Users userEntity = oauthLoginProcess(code, platform);
 
@@ -39,11 +40,11 @@ public class UserService {
         String accessToken = jwtService.createAccessToken(user.getEmail());
         String refreshToken = jwtService.createRefreshToken(user.getEmail());
 
-        return UserResponse.Login.response(user, accessToken, refreshToken);
+        return UserLoginResponse.response(user, accessToken, refreshToken);
     }
 
-    public UserResponse.NewAccessToken reissueAccessToken(String refreshToken) {
-        return new UserResponse.NewAccessToken(jwtService.reissueAccessToken(refreshToken));
+    public UserReissueResponse reissueAccessToken(String refreshToken) {
+        return UserReissueResponse.toResponse(jwtService.reissueAccessToken(refreshToken));
     }
 
     // 로그아웃

@@ -3,7 +3,7 @@ package com.moim.backend.domain.user.service;
 import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
-import com.moim.backend.domain.user.response.UserResponse;
+import com.moim.backend.domain.user.response.UserLoginResponse;
 import com.moim.backend.global.auth.jwt.JwtService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,7 @@ class UserServiceTest {
                 .willReturn(refreshToken);
 
         // when
-        UserResponse.Login response = userService.loginByOAuth(
+        UserLoginResponse response = userService.loginByOAuth(
                 "4%2F0AZEOvhX5fdg6aes78aDsv-H_pxySawXSIiwMOqtbOW3kt6tSxtnSd6_PVOpoemsJF9Q", GOOGLE
         );
 

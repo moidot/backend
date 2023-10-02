@@ -2,7 +2,8 @@ package com.moim.backend.domain.user.controller;
 
 import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
-import com.moim.backend.domain.user.response.UserResponse;
+import com.moim.backend.domain.user.response.UserLoginResponse;
+import com.moim.backend.domain.user.response.UserReissueResponse;
 import com.moim.backend.domain.user.service.UserService;
 import com.moim.backend.global.auth.Login;
 import com.moim.backend.global.common.CustomResponseEntity;
@@ -24,7 +25,7 @@ public class UserController {
 
     // 소셜 로그인 API
     @GetMapping("/signin")
-    public CustomResponseEntity<UserResponse.Login> loginByOAuth(
+    public CustomResponseEntity<UserLoginResponse> loginByOAuth(
             @RequestParam(name = "code") String code, @RequestParam Platform platform
     ) {
         return CustomResponseEntity.success(userService.loginByOAuth(code, platform));
@@ -32,7 +33,7 @@ public class UserController {
 
     // 엑세스 토큰 재발급
     @GetMapping("/refresh")
-    public CustomResponseEntity<UserResponse.NewAccessToken> refreshAccessToken(
+    public CustomResponseEntity<UserReissueResponse> refreshAccessToken(
             @RequestHeader(name = "refreshToken") String refreshToken
     ) {
         return CustomResponseEntity.success(userService.reissueAccessToken(refreshToken));
