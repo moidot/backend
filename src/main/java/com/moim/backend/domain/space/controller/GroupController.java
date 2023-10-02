@@ -3,10 +3,7 @@ package com.moim.backend.domain.space.controller;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
-import com.moim.backend.domain.space.response.GroupCreateResponse;
-import com.moim.backend.domain.space.response.GroupParticipateResponse;
-import com.moim.backend.domain.space.response.GroupResponse;
-import com.moim.backend.domain.space.response.PlaceRouteResponse;
+import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.space.service.GroupService;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.global.auth.Login;
@@ -34,7 +31,7 @@ public class GroupController {
 
     // 모임 참여자 정보 리스트 조회 API
     @GetMapping("")
-    public CustomResponseEntity<GroupResponse.Detail> readParticipateGroupByRegion(
+    public CustomResponseEntity<GroupDetailResponse> readParticipateGroupByRegion(
             @RequestParam Long groupId
     ) {
         return CustomResponseEntity.success(groupService.readParticipateGroupByRegion(groupId));

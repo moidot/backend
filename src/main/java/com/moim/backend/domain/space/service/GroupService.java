@@ -273,14 +273,14 @@ public class GroupService {
     }
 
     // 모임 참여자 정보 리스트 조회 API
-    public GroupResponse.Detail readParticipateGroupByRegion(Long groupId) {
+    public GroupDetailResponse readParticipateGroupByRegion(Long groupId) {
         Groups group = getGroupByFetchParticipation(groupId);
         Users admin = getUser(group.getAdminId());
         List<GroupResponse.Region> regions = new ArrayList<>();
 
         group.getParticipations().forEach(participation -> toRegionsResponse(regions, participation));
 
-        return GroupResponse.Detail.response(group, admin, regions);
+        return GroupDetailResponse.response(group, admin, regions);
     }
 
     private void toRegionsResponse(List<GroupResponse.Region> regions, Participation participation) {

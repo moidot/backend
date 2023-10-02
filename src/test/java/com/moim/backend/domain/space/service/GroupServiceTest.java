@@ -17,6 +17,7 @@ import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
 import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequest;
 import com.moim.backend.domain.space.response.GroupCreateResponse;
+import com.moim.backend.domain.space.response.GroupDetailResponse;
 import com.moim.backend.domain.space.response.GroupParticipateResponse;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.user.entity.Users;
@@ -600,7 +601,7 @@ class GroupServiceTest {
         em.clear();
 
         // when
-        GroupResponse.Detail response = groupService.readParticipateGroupByRegion(group.getGroupId());
+        GroupDetailResponse response = groupService.readParticipateGroupByRegion(group.getGroupId());
 
         // then
         assertThat(response)

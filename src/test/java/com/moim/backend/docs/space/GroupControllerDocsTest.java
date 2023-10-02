@@ -707,7 +707,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         // given
         given(groupService.readParticipateGroupByRegion(anyLong()))
                 .willReturn(
-                        GroupResponse.Detail.builder()
+                        GroupDetailResponse.builder()
                                 .groupId(1L)
                                 .adminEmail("kim@naver.com")
                                 .name("모이닷 팀 프로젝트")
@@ -742,6 +742,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         fieldWithPath(participations + ".userName").type(STRING).description("유저 이름"),
                         fieldWithPath(participations + ".locationName").type(STRING).description("유저 출발지 이름"),
                         fieldWithPath(participations + ".transportation").type(STRING).description("유저 교통수단"))
+                .responseSchema(schema("GroupDetailResponse"))
                 .build();
 
         RestDocumentationResultHandler document =

@@ -19,32 +19,6 @@ public class GroupResponse {
     @NoArgsConstructor
     @Getter
     @Builder
-    public static class Detail {
-        private Long groupId;
-        private String adminEmail;
-        private String name;
-        private String date;
-        private List<Region> participantsByRegion;
-
-        public static Detail response(Groups group, Users admin, List<Region> participantsByRegion) {
-            String date = group.getDate()
-                    .map(d -> d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                    .orElse("none");
-
-            return Detail.builder()
-                    .groupId(group.getGroupId())
-                    .name(group.getName())
-                    .adminEmail(admin.getEmail())
-                    .date(date)
-                    .participantsByRegion(participantsByRegion)
-                    .build();
-        }
-    }
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter
-    @Builder
     public static class Region {
         private String regionName;
 
