@@ -2,6 +2,7 @@ package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.response.GroupCreateResponse;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.PlaceRouteResponse;
 import com.moim.backend.domain.space.service.GroupService;
@@ -23,7 +24,7 @@ public class GroupController {
 
     // 모임 생성 API
     @PostMapping("")
-    public CustomResponseEntity<GroupResponse.Create> createGroup(
+    public CustomResponseEntity<GroupCreateResponse> createGroup(
             @RequestBody @Valid GroupCreateRequest request, @Login Users user
     ) {
         return CustomResponseEntity.success(groupService.createGroup(request.toServiceRequest(), user));

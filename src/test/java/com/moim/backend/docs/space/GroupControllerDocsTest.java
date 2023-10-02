@@ -6,6 +6,7 @@ import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.response.GroupCreateResponse;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.PathDto;
 import com.moim.backend.domain.space.response.PlaceRouteResponse;
@@ -56,7 +57,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         given(groupService.createGroup(any(), any()))
                 .willReturn(
-                        GroupResponse.Create.builder()
+                        GroupCreateResponse.builder()
                                 .groupId(1L)
                                 .adminId(1L)
                                 .name("모이닷 모임")

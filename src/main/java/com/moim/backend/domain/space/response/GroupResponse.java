@@ -11,37 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static lombok.AccessLevel.*;
+
 public class GroupResponse {
-
-    @Getter
-    @NoArgsConstructor
-    public static class Create {
-        private Long groupId;
-        private Long adminId;
-        private String name;
-        private String date;
-        private String fixedPlace;
-
-        @Builder
-        private Create(Long groupId, Long adminId, String name, String date, String fixedPlace) {
-            this.groupId = groupId;
-            this.adminId = adminId;
-            this.name = name;
-            this.date = date;
-            this.fixedPlace = fixedPlace;
-        }
-
-        public static GroupResponse.Create response(Groups group) {
-            return Create.builder()
-                    .groupId(group.getGroupId())
-                    .adminId(group.getAdminId())
-                    .name(group.getName())
-                    .date(group.getDate().map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                            .orElse("none"))
-                    .fixedPlace(group.getPlace())
-                    .build();
-        }
-    }
 
     @AllArgsConstructor
     @NoArgsConstructor
@@ -139,7 +111,7 @@ public class GroupResponse {
 
     @Getter
     @NoArgsConstructor
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = PRIVATE)
     @Builder
     public static class ParticipateUpdate {
         private String locationName;
@@ -155,7 +127,7 @@ public class GroupResponse {
 
     @Getter
     @NoArgsConstructor
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = PRIVATE)
     @Builder
     public static class Exit {
         private Boolean isDeletedSpace;
@@ -171,7 +143,7 @@ public class GroupResponse {
 
     @Getter
     @NoArgsConstructor
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = PRIVATE)
     @Builder
     public static class MyParticipate {
         private Long groupId;

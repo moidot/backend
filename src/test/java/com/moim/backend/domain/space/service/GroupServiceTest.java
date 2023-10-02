@@ -14,6 +14,7 @@ import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.response.GroupCreateResponse;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
@@ -80,7 +81,7 @@ class GroupServiceTest {
         );
 
         // when
-        GroupResponse.Create response = groupService.createGroup(request.toServiceRequest(), user);
+        GroupCreateResponse response = groupService.createGroup(request.toServiceRequest(), user);
         em.flush();
         em.clear();
 
@@ -109,7 +110,7 @@ class GroupServiceTest {
         );
 
         // when
-        GroupResponse.Create response = groupService.createGroup(request.toServiceRequest(), user);
+        GroupCreateResponse response = groupService.createGroup(request.toServiceRequest(), user);
 
         // then
         assertThat(response.getGroupId()).isNotNull();

@@ -63,9 +63,9 @@ public class GroupService {
 
     // 모임 생성
     @Transactional
-    public GroupResponse.Create createGroup(GroupCreateServiceRequest request, Users user) {
+    public GroupCreateResponse createGroup(GroupCreateServiceRequest request, Users user) {
         Groups group = groupRepository.save(toGroupEntity(request, user));
-        Participation participation = saveParticipation(
+        saveParticipation(
                 user, group, request.getUserName(),
                 request.getLocationName(), request.getLatitude(), request.getLongitude(),
                 request.getTransportationType(), request.getPassword()
@@ -73,7 +73,7 @@ public class GroupService {
 
         saveNearestStationList(group, request.getLatitude(), request.getLongitude());
 
-        return GroupResponse.Create.response(group);
+        return GroupCreateResponse.response(group);
     }
 
     private void saveNearestStationList(Groups group, Double latitude, Double longitude) {
