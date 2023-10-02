@@ -3,6 +3,7 @@ package com.moim.backend.domain.space.controller;
 import com.moim.backend.domain.ControllerTestSupport;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -64,8 +65,9 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void participationGroup() throws Exception {
         // given
-        GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, "꿀보이스", "쇼파르", 37.5660, 126.9784, PUBLIC, "123456");
+        GroupParticipateRequest request = GroupParticipateRequest.toRequest(
+                1L, "꿀보이스", "쇼파르", 37.5660, 126.9784, PUBLIC, "123456"
+        );
 
         // when // then
         mockMvc.perform(
@@ -82,8 +84,9 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void participationGroupFailsWhenLatitudeNotProvided() throws Exception {
         // given
-        GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, "꿀보이스", "쇼파르", null, 126.9784, PUBLIC, "abc123");
+        GroupParticipateRequest request = GroupParticipateRequest.toRequest(
+                1L, "꿀보이스", "쇼파르", null, 126.9784, PUBLIC, "abc123"
+        );
 
         // when // then
         mockMvc.perform(

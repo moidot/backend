@@ -13,6 +13,7 @@ import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.request.service.GroupCreateServiceRequest;
+import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequest;
 import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
@@ -36,7 +37,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.StringTokenizer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -94,7 +98,7 @@ public class GroupService {
 
     // 모임 참여
     @Transactional
-    public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request, Users user) {
+    public GroupParticipateResponse participateGroup(GroupParticipateServiceRequest request, Users user) {
         Groups group = getGroup(request.getGroupId());
         participateGroupValidate(request, user, group);
 
@@ -104,7 +108,7 @@ public class GroupService {
                 request.getTransportationType(), request.getPassword()
         );
 
-        return GroupResponse.Participate.response(participation);
+        return GroupParticipateResponse.response(participation);
     }
 
     private Participation saveParticipation(
@@ -124,7 +128,7 @@ public class GroupService {
                 .build());
     }
 
-    private void participateGroupValidate(GroupServiceRequest.Participate request, Users user, Groups group) {
+    private void participateGroupValidate(GroupParticipateServiceRequest request, Users user, Groups group) {
         validateLocationName(request.getLocationName());
         checkDuplicateParticipation(group, user);
         validateTransportation(request.getTransportationType());

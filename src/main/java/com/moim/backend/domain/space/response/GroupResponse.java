@@ -82,34 +82,6 @@ public class GroupResponse {
     }
 
     @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
-    public static class Participate {
-        private Long participationId;
-        private Long groupId;
-        private Long userId;
-        private String userName;
-        private String locationName;
-        private Double latitude;
-        private Double longitude;
-        private String transportation;
-
-        public static GroupResponse.Participate response(Participation participation) {
-            return Participate.builder()
-                    .participationId(participation.getParticipationId())
-                    .groupId(participation.getGroup().getGroupId())
-                    .userId(participation.getUserId())
-                    .userName(participation.getUserName())
-                    .locationName(participation.getLocationName())
-                    .latitude(participation.getLatitude())
-                    .longitude(participation.getLongitude())
-                    .transportation(participation.getTransportation().name())
-                    .build();
-        }
-    }
-
-    @Getter
     @NoArgsConstructor
     @AllArgsConstructor(access = PRIVATE)
     @Builder

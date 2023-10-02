@@ -1,15 +1,12 @@
 package com.moim.backend.docs.space;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
-import com.moim.backend.domain.space.response.GroupCreateResponse;
-import com.moim.backend.domain.space.response.GroupResponse;
-import com.moim.backend.domain.space.response.PathDto;
-import com.moim.backend.domain.space.response.PlaceRouteResponse;
+import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
+import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.space.service.GroupService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +16,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.util.List;
 
-import static com.epages.restdocs.apispec.Schema.*;
+import static com.epages.restdocs.apispec.Schema.schema;
 import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
 import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static org.mockito.ArgumentMatchers.*;
@@ -113,7 +110,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void participationGroup() throws Exception {
         // given
-        GroupRequest.Participate request = new GroupRequest.Participate(
+        GroupParticipateRequest request = GroupParticipateRequest.toRequest(
                 1L, "안지영", "서울 성북구 보문로34다길 2",
                 37.209043, 126.329194, PUBLIC,
                 "123456"
@@ -121,7 +118,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         given(groupService.participateGroup(any(), any()))
                 .willReturn(
-                        GroupResponse.Participate.builder()
+                        GroupParticipateResponse.builder()
                                 .participationId(1L)
                                 .groupId(1L)
                                 .userId(1L)
@@ -174,6 +171,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .description("경도 / Long"),
                         fieldWithPath("data.transportation").type(STRING)
                                 .description("내 이동수단"))
+                .responseSchema(schema("GroupParticipateResponse"))
+                .requestSchema(schema("GroupParticipateRequest"))
                 .build();
 
         RestDocumentationResultHandler document =

@@ -14,7 +14,10 @@ import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
+import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequest;
 import com.moim.backend.domain.space.response.GroupCreateResponse;
+import com.moim.backend.domain.space.response.GroupParticipateResponse;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
@@ -129,13 +132,13 @@ class GroupServiceTest {
 
         Groups saveGroup = savedGroup(user.getUserId(), "테스트 그룹");
 
-        GroupRequest.Participate request = new GroupRequest.Participate(
+        GroupParticipateRequest request = GroupParticipateRequest.toRequest(
                 saveGroup.getGroupId(), "경기도불주먹", "서울 성북구 보문로34다길 2", 37.5660, 126.9784,
                 PUBLIC, "2345"
         );
 
         // when
-        GroupResponse.Participate response =
+        GroupParticipateResponse response =
                 groupService.participateGroup(request.toServiceRequest(), participateUser);
 
         // then
@@ -163,7 +166,7 @@ class GroupServiceTest {
         Users participateUser = savedUser("test2@test.com", "테스트 이름2");
         Groups saveGroup = savedGroup(user.getUserId(), "테스트 그룹");
 
-        GroupRequest.Participate request = new GroupRequest.Participate(
+        GroupParticipateRequest request = GroupParticipateRequest.toRequest(
                 saveGroup.getGroupId(), "경기도불주먹", "서울", 37.5660, 126.9784,
                 PUBLIC, "2345"
         );
@@ -184,14 +187,14 @@ class GroupServiceTest {
 
         Groups saveGroup = savedGroup(user.getUserId(), "테스트 그룹");
 
-        GroupRequest.Participate request =
-                new GroupRequest.Participate(
+        GroupParticipateRequest request =
+                GroupParticipateRequest.toRequest(
                         saveGroup.getGroupId(), "경기도불주먹", "서울 성북구 보문로34다길 2",
                         37.5660, 126.9784, PUBLIC, null
                 );
 
         // when
-        GroupResponse.Participate response =
+        GroupParticipateResponse response =
                 groupService.participateGroup(request.toServiceRequest(), participateUser);
 
         // then
@@ -219,8 +222,7 @@ class GroupServiceTest {
 
         Users user = savedUser("test@test.com", "테스트 이름");
 
-        GroupRequest.Participate request =
-                new GroupRequest.Participate(
+        GroupParticipateRequest request = GroupParticipateRequest.toRequest(
                         saveGroup.getGroupId(), "경기도불주먹", "서울 성북구 보문로34다길 2",
                         37.5660, 126.9784, TransportationType.NULL, "2345"
                 );
@@ -539,7 +541,7 @@ class GroupServiceTest {
         //given
         Users user = savedUser("test@gmail.com", "테스터");
         Groups group = savedGroup(user.getUserId(), "테스트 그룹");
-        GroupServiceRequest.Participate request = GroupServiceRequest.Participate.builder()
+        GroupParticipateServiceRequest request = GroupParticipateServiceRequest.builder()
                 .groupId(group.getGroupId())
                 .userName("테스터")
                 .locationName("서울 성북구 보문로34다길 2")

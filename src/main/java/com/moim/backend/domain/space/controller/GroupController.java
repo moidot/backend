@@ -2,7 +2,9 @@ package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
 import com.moim.backend.domain.space.response.GroupCreateResponse;
+import com.moim.backend.domain.space.response.GroupParticipateResponse;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.PlaceRouteResponse;
 import com.moim.backend.domain.space.service.GroupService;
@@ -40,8 +42,8 @@ public class GroupController {
 
     // 모임 참여 API
     @PostMapping("/participate")
-    public CustomResponseEntity<GroupResponse.Participate> participateGroup(
-            @RequestBody @Valid GroupRequest.Participate request, @Login Users user
+    public CustomResponseEntity<GroupParticipateResponse> participateGroup(
+            @RequestBody @Valid GroupParticipateRequest request, @Login Users user
     ) {
         return CustomResponseEntity.success(groupService.participateGroup(request.toServiceRequest(), user));
     }
