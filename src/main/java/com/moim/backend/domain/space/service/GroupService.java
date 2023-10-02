@@ -230,7 +230,7 @@ public class GroupService {
     }
 
     // 내 모임 확인하기
-    public List<GroupResponse.MyParticipate> getMyParticipate(Users user) {
+    public List<GroupMyParticipateResponse> getMyParticipate(Users user) {
         List<Groups> groups = groupRepository.findByGroupsFetch(user.getUserId());
 
         return groups.stream()
@@ -238,8 +238,8 @@ public class GroupService {
                 .toList();
     }
 
-    private static GroupResponse.MyParticipate toMyParticiPateResponse(Groups group) {
-        return GroupResponse.MyParticipate.response(
+    private static GroupMyParticipateResponse toMyParticiPateResponse(Groups group) {
+        return GroupMyParticipateResponse.response(
                 group,
                 getGroupAdminName(group),
                 group.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),

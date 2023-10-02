@@ -87,7 +87,7 @@ public class GroupController {
 
     // 내 모임 확인하기 API
     @GetMapping("/participate")
-    public CustomResponseEntity<List<GroupResponse.MyParticipate>> getMyParticipate(
+    public CustomResponseEntity<List<GroupMyParticipateResponse>> getMyParticipate(
             @Login Users user
     ) {
         return CustomResponseEntity.success(groupService.getMyParticipate(user));

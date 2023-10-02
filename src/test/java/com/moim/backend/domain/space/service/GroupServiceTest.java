@@ -500,7 +500,7 @@ class GroupServiceTest {
         em.clear();
 
         // when
-        List<GroupResponse.MyParticipate> response = groupService.getMyParticipate(user1);
+        List<GroupMyParticipateResponse> response = groupService.getMyParticipate(user1);
 
         // then
         assertThat(response).hasSize(3);
@@ -526,7 +526,7 @@ class GroupServiceTest {
         em.clear();
 
         // when
-        List<GroupResponse.MyParticipate> response = groupService.getMyParticipate(admin1);
+        List<GroupMyParticipateResponse> response = groupService.getMyParticipate(admin1);
 
         // then
         assertThat(response).isEmpty();

@@ -15,38 +15,6 @@ import static lombok.AccessLevel.*;
 
 public class GroupResponse {
 
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor(access = PRIVATE)
-    @Builder
-    public static class MyParticipate {
-        private Long groupId;
-        private String groupName;
-        private String groupAdminName;
-        private String groupDate;
-        private Integer groupParticipates;
-        private String confirmPlace;
-        private List<String> bestPlaceNames;
-        private List<String> participantNames;
-
-        public static GroupResponse.MyParticipate response(
-                Groups group, String groupAdminName, List<String> bestPlaceNames, List<String> participantNames
-        ) {
-            return MyParticipate.builder()
-                    .groupId(group.getGroupId())
-                    .groupName(group.getName())
-                    .groupAdminName(groupAdminName)
-                    .groupDate(group.getDate()
-                            .map(date -> date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                            .orElse("none"))
-                    .groupParticipates(group.getParticipations().size())
-                    .confirmPlace(group.getPlace())
-                    .bestPlaceNames(bestPlaceNames)
-                    .participantNames(participantNames)
-                    .build();
-        }
-    }
-
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter

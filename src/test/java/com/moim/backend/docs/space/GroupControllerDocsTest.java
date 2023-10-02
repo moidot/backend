@@ -450,7 +450,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void getMyParticipate() throws Exception {
         // given
-        GroupResponse.MyParticipate data1 = GroupResponse.MyParticipate.builder()
+        GroupMyParticipateResponse data1 = GroupMyParticipateResponse.builder()
                 .groupId(1L)
                 .groupName("그룹1")
                 .groupAdminName("양파쿵야")
@@ -461,7 +461,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .build();
 
-        GroupResponse.MyParticipate data2 = GroupResponse.MyParticipate.builder()
+        GroupMyParticipateResponse data2 = GroupMyParticipateResponse.builder()
                 .groupId(2L)
                 .groupName("그룹2")
                 .groupAdminName("주먹밥쿵야")
@@ -584,8 +584,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         "버터갈릭감자 변동가격(업주문의)",
                                         "설탕토마토 변동가격(업주문의)"
                                 ))
-                                .build()
-                )
+                                .build())
                 .build();
 
         GroupResponse.Place place3 = GroupResponse.Place.builder()
@@ -675,6 +674,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .description("상세 이미지 URL 목록 / List<String>"),
                         fieldWithPath("data[].detail.menuInfo[]").type(ARRAY)
                                 .description("메뉴 정보 목록 / List<String>"))
+                .responseSchema(schema("GroupMyParticipateResponse"))
                 .build();
 
         RestDocumentationResultHandler document =
