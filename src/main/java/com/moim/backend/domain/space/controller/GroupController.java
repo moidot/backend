@@ -1,8 +1,8 @@
 package com.moim.backend.domain.space.controller;
 
-import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
+import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.space.service.GroupService;
 import com.moim.backend.domain.user.entity.Users;
@@ -55,8 +55,8 @@ public class GroupController {
 
     // 내 참여 정보 수정 API
     @PatchMapping("/participate")
-    public CustomResponseEntity<GroupResponse.ParticipateUpdate> participateUpdate(
-            @RequestBody @Valid GroupRequest.ParticipateUpdate request, @Login Users user
+    public CustomResponseEntity<GroupParticipateUpdateResponse> participateUpdate(
+            @RequestBody @Valid GroupParticipateUpdateRequest request, @Login Users user
     ) {
         return CustomResponseEntity.success(groupService.participateUpdate(request.toServiceRequest(), user));
     }

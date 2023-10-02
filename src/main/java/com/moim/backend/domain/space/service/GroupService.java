@@ -11,9 +11,9 @@ import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
-import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.request.service.GroupCreateServiceRequest;
 import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequest;
+import com.moim.backend.domain.space.request.service.GroupParticipateUpdateServiceRequest;
 import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
@@ -136,13 +136,13 @@ public class GroupService {
 
     // 내 참여 정보 수정
     @Transactional
-    public GroupResponse.ParticipateUpdate participateUpdate(
-            GroupServiceRequest.ParticipateUpdate request, Users user
+    public GroupParticipateUpdateResponse participateUpdate(
+            GroupParticipateUpdateServiceRequest request, Users user
     ) {
         Participation myParticipate = getParticipate(request.getParticipateId());
         validateParticipationMyInfo(user, myParticipate);
         myParticipate.update(request);
-        return GroupResponse.ParticipateUpdate.response(myParticipate);
+        return GroupParticipateUpdateResponse.response(myParticipate);
     }
 
     // 내 모임 나가기

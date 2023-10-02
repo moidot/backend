@@ -1,6 +1,5 @@
 package com.moim.backend.domain.groupvote.request;
 
-import com.moim.backend.domain.space.request.GroupServiceRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

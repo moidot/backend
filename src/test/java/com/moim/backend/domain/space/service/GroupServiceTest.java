@@ -11,15 +11,11 @@ import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
-import com.moim.backend.domain.space.request.GroupRequest;
-import com.moim.backend.domain.space.request.GroupServiceRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
+import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequest;
-import com.moim.backend.domain.space.response.GroupCreateResponse;
-import com.moim.backend.domain.space.response.GroupDetailResponse;
-import com.moim.backend.domain.space.response.GroupParticipateResponse;
-import com.moim.backend.domain.space.response.GroupResponse;
+import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.global.common.Result;
@@ -249,12 +245,12 @@ class GroupServiceTest {
                 "커피나무", 37.5660, 126.9784, PUBLIC
         );
 
-        GroupRequest.ParticipateUpdate request = new GroupRequest.ParticipateUpdate(
+        GroupParticipateUpdateRequest request = GroupParticipateUpdateRequest.toRequest(
                 user1Participation.getParticipationId(), "양파쿵야", "뮬", 37.5700, 126.9790, PERSONAL
         );
 
         // when
-        GroupResponse.ParticipateUpdate response =
+        GroupParticipateUpdateResponse response =
                 groupService.participateUpdate(request.toServiceRequest(), user1);
 
         // then
@@ -283,7 +279,7 @@ class GroupServiceTest {
                 "커피나무", 37.5660, 126.9784, PUBLIC
         );
 
-        GroupRequest.ParticipateUpdate request = new GroupRequest.ParticipateUpdate(
+        GroupParticipateUpdateRequest request = GroupParticipateUpdateRequest.toRequest(
                 user1Participation.getParticipationId(), "양파쿵야", "뮬", 37.5700, 126.9790, PERSONAL
         );
 

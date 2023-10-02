@@ -3,9 +3,9 @@ package com.moim.backend.docs.space;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
-import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
+import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.space.service.GroupService;
 import org.junit.jupiter.api.DisplayName;
@@ -189,12 +189,14 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void participationUpdate() throws Exception {
         // given
-        GroupRequest.ParticipateUpdate request
-                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, PERSONAL);
+        GroupParticipateUpdateRequest request = GroupParticipateUpdateRequest.toRequest(
+                1L, "양파쿵야", "쇼파르",
+                37.5660, 126.9784, PERSONAL
+        );
 
         given(groupService.participateUpdate(any(), any()))
                 .willReturn(
-                        GroupResponse.ParticipateUpdate.builder()
+                        GroupParticipateUpdateResponse.builder()
                                 .locationName("쇼파르")
                                 .transportation("PERSONAL")
                                 .build()

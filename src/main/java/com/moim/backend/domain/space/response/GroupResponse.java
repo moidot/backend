@@ -19,22 +19,6 @@ public class GroupResponse {
     @NoArgsConstructor
     @AllArgsConstructor(access = PRIVATE)
     @Builder
-    public static class ParticipateUpdate {
-        private String locationName;
-        private String transportation;
-
-        public static GroupResponse.ParticipateUpdate response(Participation participation) {
-            return ParticipateUpdate.builder()
-                    .locationName(participation.getLocationName())
-                    .transportation(participation.getTransportation().name())
-                    .build();
-        }
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor(access = PRIVATE)
-    @Builder
     public static class Exit {
         private Boolean isDeletedSpace;
         private String message;

@@ -1,9 +1,9 @@
 package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.ControllerTestSupport;
-import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
+import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -103,8 +103,10 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void participationUpdate() throws Exception {
         // given
-        GroupRequest.ParticipateUpdate request
-                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, PUBLIC);
+        GroupParticipateUpdateRequest request = GroupParticipateUpdateRequest.toRequest(
+                1L, "양파쿵야", "쇼파르",
+                37.5660, 126.9784, PUBLIC
+        );
 
         // when // then
         mockMvc.perform(
@@ -121,8 +123,10 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void participationUpdateFailsWhenUserNameNotProvided() throws Exception {
         // given
-        GroupRequest.ParticipateUpdate request
-                = new GroupRequest.ParticipateUpdate(1L, " ", "쇼파르", 37.5660, 126.9784, PUBLIC);
+        GroupParticipateUpdateRequest request = GroupParticipateUpdateRequest.toRequest(
+                1L, " ", "쇼파르",
+                37.5660, 126.9784, PUBLIC
+        );
 
         // when // then
         mockMvc.perform(
