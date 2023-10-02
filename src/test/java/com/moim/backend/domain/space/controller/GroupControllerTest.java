@@ -1,7 +1,9 @@
 package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.ControllerTestSupport;
-import com.moim.backend.domain.space.request.GroupRequest;
+import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
+import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -19,8 +21,8 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void createGroup() throws Exception {
         // given
-        GroupRequest.Create request =
-                new GroupRequest.Create(
+        GroupCreateRequest request =
+                GroupCreateRequest.toRequest(
                         "테스트 그룹", LocalDate.of(2023, 7, 15), "천이닷",
                         "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
                         PUBLIC, null
@@ -41,8 +43,8 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void createGroupBlankGroupNameException() throws Exception {
         // given
-        GroupRequest.Create request =
-                new GroupRequest.Create(
+        GroupCreateRequest request =
+                GroupCreateRequest.toRequest(
                         " ", LocalDate.of(2023, 7, 15), "천이닷",
                         "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
                         PUBLIC, null
@@ -63,8 +65,9 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void participationGroup() throws Exception {
         // given
-        GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, "꿀보이스", "쇼파르", 37.5660, 126.9784, PUBLIC, "123456");
+        GroupParticipateRequest request = GroupParticipateRequest.toRequest(
+                1L, "꿀보이스", "쇼파르", 37.5660, 126.9784, PUBLIC, "123456"
+        );
 
         // when // then
         mockMvc.perform(
@@ -81,8 +84,9 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void participationGroupFailsWhenLatitudeNotProvided() throws Exception {
         // given
-        GroupRequest.Participate request
-                = new GroupRequest.Participate(1L, "꿀보이스", "쇼파르", null, 126.9784, PUBLIC, "abc123");
+        GroupParticipateRequest request = GroupParticipateRequest.toRequest(
+                1L, "꿀보이스", "쇼파르", null, 126.9784, PUBLIC, "abc123"
+        );
 
         // when // then
         mockMvc.perform(
@@ -99,8 +103,10 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void participationUpdate() throws Exception {
         // given
-        GroupRequest.ParticipateUpdate request
-                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, PUBLIC);
+        GroupParticipateUpdateRequest request = GroupParticipateUpdateRequest.toRequest(
+                1L, "양파쿵야", "쇼파르",
+                37.5660, 126.9784, PUBLIC
+        );
 
         // when // then
         mockMvc.perform(
@@ -117,8 +123,10 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void participationUpdateFailsWhenUserNameNotProvided() throws Exception {
         // given
-        GroupRequest.ParticipateUpdate request
-                = new GroupRequest.ParticipateUpdate(1L, " ", "쇼파르", 37.5660, 126.9784, PUBLIC);
+        GroupParticipateUpdateRequest request = GroupParticipateUpdateRequest.toRequest(
+                1L, " ", "쇼파르",
+                37.5660, 126.9784, PUBLIC
+        );
 
         // when // then
         mockMvc.perform(

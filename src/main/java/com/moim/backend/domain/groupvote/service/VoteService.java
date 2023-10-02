@@ -4,8 +4,10 @@ import com.moim.backend.domain.groupvote.entity.SelectPlace;
 import com.moim.backend.domain.groupvote.entity.Vote;
 import com.moim.backend.domain.groupvote.repository.SelectPlaceRepository;
 import com.moim.backend.domain.groupvote.repository.VoteRepository;
-import com.moim.backend.domain.groupvote.request.VoteServiceRequest;
-import com.moim.backend.domain.groupvote.response.VoteResponse;
+import com.moim.backend.domain.groupvote.request.service.VoteCreateServiceRequest;
+import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
+import com.moim.backend.domain.groupvote.response.VoteSelectPlaceUserResponse;
+import com.moim.backend.domain.groupvote.response.VoteSelectResultResponse;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
@@ -42,11 +44,11 @@ public class VoteService {
 
     // 투표 생성 API
     @Transactional
-    public VoteResponse.Create createVote(VoteServiceRequest.Create request, Long groupId, Users user) {
+    public VoteCreateResponse createVote(VoteCreateServiceRequest request, Long groupId, Users user) {
         Groups group = getGroup(groupId);
         validateUserIsAdmin(user, group);
 
-        return VoteResponse.Create.response(
+        return VoteCreateResponse.response(
                 voteRepository.save(toVoteEntity(request, groupId))
         );
     }
@@ -57,7 +59,7 @@ public class VoteService {
         }
     }
 
-    private static Vote toVoteEntity(VoteServiceRequest.Create request, Long groupId) {
+    private static Vote toVoteEntity(VoteCreateServiceRequest request, Long groupId) {
         return Vote.builder()
                 .groupId(groupId)
                 .isAnonymous(request.getIsAnonymous())
@@ -69,7 +71,7 @@ public class VoteService {
 
     // 투표 참여 API
     @Transactional
-    public VoteResponse.SelectResult selectVote(
+    public VoteSelectResultResponse selectVote(
             Long groupId, List<Long> selectPlaceIds, Users user, LocalDateTime now
     ) {
         Groups group = getGroup(groupId);
@@ -77,7 +79,7 @@ public class VoteService {
         validateVote(selectPlaceIds, now, vote);
         try {
             processUserVotes(selectPlaceIds, user, vote);
-            return VoteResponse.SelectResult.response(group, vote, toVoteStatusResponse(user, vote));
+            return VoteSelectResultResponse.response(group, vote, toVoteStatusResponse(user, vote));
         } catch (OptimisticLockException ole) {
             throw new CustomException(CONCURRENCY_ISSUE_DETECTED);
         }
@@ -88,7 +90,7 @@ public class VoteService {
         saveUserVotesForSelectPlaces(selectPlaceIds, user, vote);
     }
 
-    private List<VoteResponse.VoteStatus> toVoteStatusResponse(Users user, Vote vote) {
+    private List<VoteSelectResultResponse.VoteStatus> toVoteStatusResponse(Users user, Vote vote) {
         List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
         return getVoteStatuses(user, bestPlaces);
     }
@@ -115,29 +117,29 @@ public class VoteService {
     }
 
     // 투표 읽기 API
-    public VoteResponse.SelectResult readVote(Long groupId, Users user) {
+    public VoteSelectResultResponse readVote(Long groupId, Users user) {
         Groups group = getGroup(groupId);
         Optional<Vote> optionalVote = voteRepository.findByGroupId(groupId);
         if (optionalVote.isEmpty()) {
-            return VoteResponse.SelectResult.response(group, null, new ArrayList<>());
+            return VoteSelectResultResponse.response(group, null, new ArrayList<>());
         } else {
             // 투표 이후 현재 추천된 장소들의 현황을 조회
             Vote vote = optionalVote.get();
             List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
-            List<VoteResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
-            return VoteResponse.SelectResult.response(group, vote, voteStatuses);
+            List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
+            return VoteSelectResultResponse.response(group, vote, voteStatuses);
         }
     }
 
     // 해당 장소 투표한 인원 리스트 조회하기 API
-    public List<VoteResponse.SelectPlaceUser> readSelectPlaceUsers(Long groupId, Long bestPlaceId, Users user) {
+    public List<VoteSelectPlaceUserResponse> readSelectPlaceUsers(Long groupId, Long bestPlaceId, Users user) {
         List<SelectPlace> selectPlaceList = getSelectPlaceList(bestPlaceId);
 
         List<Long> userIds = extractUserIdsFromSelectPlaces(selectPlaceList);
         List<Participation> participations = participationRepository.findAllByGroupGroupIdAndUserIdIn(groupId, userIds);
 
         Groups group = getGroup(groupId);
-        return participations.stream().map(participation -> VoteResponse.SelectPlaceUser.response(
+        return participations.stream().map(participation -> VoteSelectPlaceUserResponse.response(
                 participation, isAdmin(group, participation))
         ).toList();
     }
@@ -168,7 +170,7 @@ public class VoteService {
 
     // 투표 종료하기 API
     @Transactional
-    public VoteResponse.SelectResult conclusionVote(Long groupId, Users user) {
+    public VoteSelectResultResponse conclusionVote(Long groupId, Users user) {
         Groups group = getGroup(groupId);
         validateUserIsAdmin(user, group);
         Vote vote = getVote(groupId);
@@ -184,9 +186,9 @@ public class VoteService {
 
         // 종료 이후 현재 추천된 장소들의 현황을 조회
         List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
-        List<VoteResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
+        List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
 
-        return VoteResponse.SelectResult.response(group, vote, voteStatuses);
+        return VoteSelectResultResponse.response(group, vote, voteStatuses);
     }
 
     // method
@@ -218,13 +220,13 @@ public class VoteService {
         }
     }
 
-    private static List<VoteResponse.VoteStatus> getVoteStatuses(Users user, List<BestPlace> bestPlaces) {
+    private static List<VoteSelectResultResponse.VoteStatus> getVoteStatuses(Users user, List<BestPlace> bestPlaces) {
         return bestPlaces.stream().map(bestPlace -> {
             // 내가 투표했는지 여부 확인
             Boolean isVoted = bestPlace.getSelectPlaces().stream()
                     .anyMatch(selectPlace -> selectPlace.getUserId().equals(user.getUserId()));
 
-            return VoteResponse.VoteStatus.toStatusDto(bestPlace, isVoted);
+            return VoteSelectResultResponse.VoteStatus.toStatusDto(bestPlace, isVoted);
         }).toList();
     }
 }

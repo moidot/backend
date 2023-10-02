@@ -1,18 +1,15 @@
 package com.moim.backend.domain.groupvote.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.moim.backend.domain.ControllerTestSupport;
-import com.moim.backend.domain.groupvote.request.VoteRequest;
+import com.moim.backend.domain.groupvote.request.controller.VoteCreateRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,7 +19,7 @@ class VoteControllerTest extends ControllerTestSupport {
     @Test
     void createVote() throws Exception {
         // given
-        VoteRequest.Create request = new VoteRequest.Create(true, true, null);
+        VoteCreateRequest request = VoteCreateRequest.toRequest(true, true, null);
 
         // when // then
         mockMvc.perform(
@@ -40,7 +37,7 @@ class VoteControllerTest extends ControllerTestSupport {
     @Test
     void createVoteWithNotInsertAnonymousThrowException() throws Exception {
         // given
-        VoteRequest.Create request = new VoteRequest.Create(null, true, null);
+        VoteCreateRequest request = VoteCreateRequest.toRequest(null, true, null);
 
         // when // then
         mockMvc.perform(

@@ -1,11 +1,8 @@
 package com.moim.backend.domain.user.controller;
 
 import com.moim.backend.domain.ControllerTestSupport;
-import com.moim.backend.domain.user.request.UserRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.springframework.http.HttpHeaders.*;

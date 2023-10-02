@@ -11,8 +11,11 @@ import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
-import com.moim.backend.domain.space.request.GroupServiceRequest;
+import com.moim.backend.domain.space.request.service.GroupCreateServiceRequest;
+import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequest;
+import com.moim.backend.domain.space.request.service.GroupParticipateUpdateServiceRequest;
 import com.moim.backend.domain.space.response.*;
+import com.moim.backend.domain.space.response.group.*;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestPlaceInterface;
@@ -35,12 +38,15 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.StringTokenizer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.moim.backend.domain.space.response.GroupResponse.Participations.toParticipateEntity;
-import static com.moim.backend.domain.space.response.GroupResponse.Region.toLocalEntity;
+import static com.moim.backend.domain.space.response.group.GroupParticipationsResponse.toParticipateEntity;
+import static com.moim.backend.domain.space.response.group.GroupRegionResponse.toLocalEntity;
 import static com.moim.backend.global.common.Result.*;
 
 @Service
@@ -62,9 +68,9 @@ public class GroupService {
 
     // 모임 생성
     @Transactional
-    public GroupResponse.Create createGroup(GroupServiceRequest.Create request, Users user) {
+    public GroupCreateResponse createGroup(GroupCreateServiceRequest request, Users user) {
         Groups group = groupRepository.save(toGroupEntity(request, user));
-        Participation participation = saveParticipation(
+        saveParticipation(
                 user, group, request.getUserName(),
                 request.getLocationName(), request.getLatitude(), request.getLongitude(),
                 request.getTransportationType(), request.getPassword()
@@ -72,7 +78,7 @@ public class GroupService {
 
         saveNearestStationList(group, request.getLatitude(), request.getLongitude());
 
-        return GroupResponse.Create.response(group);
+        return GroupCreateResponse.response(group);
     }
 
     private void saveNearestStationList(Groups group, Double latitude, Double longitude) {
@@ -93,7 +99,7 @@ public class GroupService {
 
     // 모임 참여
     @Transactional
-    public GroupResponse.Participate participateGroup(GroupServiceRequest.Participate request, Users user) {
+    public GroupParticipateResponse participateGroup(GroupParticipateServiceRequest request, Users user) {
         Groups group = getGroup(request.getGroupId());
         participateGroupValidate(request, user, group);
 
@@ -103,7 +109,7 @@ public class GroupService {
                 request.getTransportationType(), request.getPassword()
         );
 
-        return GroupResponse.Participate.response(participation);
+        return GroupParticipateResponse.response(participation);
     }
 
     private Participation saveParticipation(
@@ -123,7 +129,7 @@ public class GroupService {
                 .build());
     }
 
-    private void participateGroupValidate(GroupServiceRequest.Participate request, Users user, Groups group) {
+    private void participateGroupValidate(GroupParticipateServiceRequest request, Users user, Groups group) {
         validateLocationName(request.getLocationName());
         checkDuplicateParticipation(group, user);
         validateTransportation(request.getTransportationType());
@@ -131,18 +137,18 @@ public class GroupService {
 
     // 내 참여 정보 수정
     @Transactional
-    public GroupResponse.ParticipateUpdate participateUpdate(
-            GroupServiceRequest.ParticipateUpdate request, Users user
+    public GroupParticipateUpdateResponse participateUpdate(
+            GroupParticipateUpdateServiceRequest request, Users user
     ) {
         Participation myParticipate = getParticipate(request.getParticipateId());
         validateParticipationMyInfo(user, myParticipate);
         myParticipate.update(request);
-        return GroupResponse.ParticipateUpdate.response(myParticipate);
+        return GroupParticipateUpdateResponse.response(myParticipate);
     }
 
     // 내 모임 나가기
     @Transactional
-    public GroupResponse.Exit participateExit(Long participateId, Users user) {
+    public GroupExitResponse participateExit(Long participateId, Users user) {
         Participation myParticipate = getParticipate(participateId);
         validateParticipationMyInfo(user, myParticipate);
 
@@ -154,11 +160,11 @@ public class GroupService {
 
         // 모임장이 나가는 경우 스페이스 삭제
         if (deleteGroupIfAdminLeaves(user, group)) {
-            return GroupResponse.Exit.response(true, "모임이 삭제되었습니다.");
+            return GroupExitResponse.response(true, "모임이 삭제되었습니다.");
         }
 
         participationRepository.delete(myParticipate);
-        return GroupResponse.Exit.response(false, "모임에서 나갔습니다.");
+        return GroupExitResponse.response(false, "모임에서 나갔습니다.");
     }
 
     private boolean deleteGroupIfAdminLeaves(Users user, Groups group) {
@@ -225,7 +231,7 @@ public class GroupService {
     }
 
     // 내 모임 확인하기
-    public List<GroupResponse.MyParticipate> getMyParticipate(Users user) {
+    public List<GroupMyParticipateResponse> getMyParticipate(Users user) {
         List<Groups> groups = groupRepository.findByGroupsFetch(user.getUserId());
 
         return groups.stream()
@@ -233,8 +239,8 @@ public class GroupService {
                 .toList();
     }
 
-    private static GroupResponse.MyParticipate toMyParticiPateResponse(Groups group) {
-        return GroupResponse.MyParticipate.response(
+    private static GroupMyParticipateResponse toMyParticiPateResponse(Groups group) {
+        return GroupMyParticipateResponse.response(
                 group,
                 getGroupAdminName(group),
                 group.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
@@ -250,7 +256,7 @@ public class GroupService {
     }
 
     // 모임 장소 추천 조회 리스트 API
-    public List<GroupResponse.Place> keywordCentralizedMeetingSpot(Double x, Double y, String local, String keyword) {
+    public List<GroupPlaceResponse> keywordCentralizedMeetingSpot(Double x, Double y, String local, String keyword) {
         // 네이버 API 요청
         URI uri = createNaverRequestUri(local, keyword);
         ResponseEntity<NaverMapListDto> naverResponse = restTemplate.getForEntity(uri.toString(), NaverMapListDto.class);
@@ -268,32 +274,32 @@ public class GroupService {
     }
 
     // 모임 참여자 정보 리스트 조회 API
-    public GroupResponse.Detail readParticipateGroupByRegion(Long groupId) {
+    public GroupDetailResponse readParticipateGroupByRegion(Long groupId) {
         Groups group = getGroupByFetchParticipation(groupId);
         Users admin = getUser(group.getAdminId());
-        List<GroupResponse.Region> regions = new ArrayList<>();
+        List<GroupRegionResponse> regions = new ArrayList<>();
 
         group.getParticipations().forEach(participation -> toRegionsResponse(regions, participation));
 
-        return GroupResponse.Detail.response(group, admin, regions);
+        return GroupDetailResponse.response(group, admin, regions);
     }
 
-    private void toRegionsResponse(List<GroupResponse.Region> regions, Participation participation) {
+    private void toRegionsResponse(List<GroupRegionResponse> regions, Participation participation) {
         // 그룹화 지역 이름 생성
         String regionName = getRegionName(participation);
 
         // 참여 정보 응답 객체 변환
         Users user = getUser(participation.getUserId());
-        GroupResponse.Participations participateEntity = toParticipateEntity(participation, user);
+        GroupParticipationsResponse participateEntity = toParticipateEntity(participation, user);
 
         // 생성된 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 Optional 검증
-        Optional<GroupResponse.Region> optionalRegion = findRegionByName(regions, regionName);
+        Optional<GroupRegionResponse> optionalRegion = findRegionByName(regions, regionName);
 
         // 검증에 맞추어 Region 업데이트
         toUpdateRegion(regions, regionName, participateEntity, optionalRegion);
     }
 
-    private static void toUpdateRegion(List<GroupResponse.Region> regions, String regionName, GroupResponse.Participations participateEntity, Optional<GroupResponse.Region> optionalRegion) {
+    private static void toUpdateRegion(List<GroupRegionResponse> regions, String regionName, GroupParticipationsResponse participateEntity, Optional<GroupRegionResponse> optionalRegion) {
         if (optionalRegion.isEmpty()) { // 존재하지 않는다면
             addNewRegion(regions, regionName, participateEntity);
         } else { // 존재한다면
@@ -301,17 +307,17 @@ public class GroupService {
         }
     }
 
-    private static void addParticipationToExistingRegion(GroupResponse.Participations participateEntity, GroupResponse.Region region) {
-        List<GroupResponse.Participations> participations = new ArrayList<>(region.getParticipations());
+    private static void addParticipationToExistingRegion(GroupParticipationsResponse participateEntity, GroupRegionResponse region) {
+        List<GroupParticipationsResponse> participations = new ArrayList<>(region.getParticipations());
         participations.add(participateEntity);
         region.setParticipations(participations);
     }
 
-    private static void addNewRegion(List<GroupResponse.Region> regions, String regionName, GroupResponse.Participations participateEntity) {
+    private static void addNewRegion(List<GroupRegionResponse> regions, String regionName, GroupParticipationsResponse participateEntity) {
         regions.add(toLocalEntity(regionName, participateEntity));
     }
 
-    private static Optional<GroupResponse.Region> findRegionByName(List<GroupResponse.Region> regions, String regionName) {
+    private static Optional<GroupRegionResponse> findRegionByName(List<GroupRegionResponse> regions, String regionName) {
         return regions.stream()
                 .filter(local -> local.getRegionName().equals(regionName))
                 .findFirst();
@@ -372,9 +378,9 @@ public class GroupService {
         return String.format("%s %s", st.nextToken(), st.nextToken());
     }
 
-    private static Function<NaverMapListDto.placeList, GroupResponse.Place> toPlaceEntity(Double x, Double y, String local) {
+    private static Function<NaverMapListDto.placeList, GroupPlaceResponse> toPlaceEntity(Double x, Double y, String local) {
         return naver -> {
-            GroupResponse.Place response = GroupResponse.Place.response(naver, local);
+            GroupPlaceResponse response = GroupPlaceResponse.response(naver, local);
             double placeX = Double.parseDouble(naver.getX());
             double placeY = Double.parseDouble(naver.getY());
             String distance = String.format("%s(으)로부터 %sm", local, (int) DistanceCalculator.getDistance(y, x, placeY, placeX));
@@ -411,7 +417,7 @@ public class GroupService {
         }
     }
 
-    private Groups toGroupEntity(GroupServiceRequest.Create request, Users user) {
+    private Groups toGroupEntity(GroupCreateServiceRequest request, Users user) {
         return Groups.builder()
                 .adminId(user.getUserId())
                 .name(request.getName())

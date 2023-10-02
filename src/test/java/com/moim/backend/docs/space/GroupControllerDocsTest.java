@@ -3,10 +3,11 @@ package com.moim.backend.docs.space;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
-import com.moim.backend.domain.space.request.GroupRequest;
-import com.moim.backend.domain.space.response.GroupResponse;
-import com.moim.backend.domain.space.response.PathDto;
-import com.moim.backend.domain.space.response.PlaceRouteResponse;
+import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
+import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
+import com.moim.backend.domain.space.response.*;
+import com.moim.backend.domain.space.response.group.*;
 import com.moim.backend.domain.space.service.GroupService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.util.List;
 
+import static com.epages.restdocs.apispec.Schema.schema;
 import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
 import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static org.mockito.ArgumentMatchers.*;
@@ -44,8 +46,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void createGroup() throws Exception {
         // given
-        GroupRequest.Create request =
-                new GroupRequest.Create(
+        GroupCreateRequest request =
+                GroupCreateRequest.toRequest(
                         "테스트 그룹", null, "천이닷",
                         "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
                         PUBLIC, null
@@ -53,7 +55,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         given(groupService.createGroup(any(), any()))
                 .willReturn(
-                        GroupResponse.Create.builder()
+                        GroupCreateResponse.builder()
                                 .groupId(1L)
                                 .adminId(1L)
                                 .name("모이닷 모임")
@@ -90,8 +92,9 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         fieldWithPath("data.adminId").type(NUMBER).description("모임장 ID / Long"),
                         fieldWithPath("data.name").type(STRING).description("모임 이름"),
                         fieldWithPath("data.date").type(STRING).description("모임 날짜"),
-                        fieldWithPath("data.fixedPlace").type(STRING).description("확정 장소")
-                )
+                        fieldWithPath("data.fixedPlace").type(STRING).description("확정 장소"))
+                .requestSchema(schema("GroupCreateRequest"))
+                .responseSchema(schema("GroupCreateResponse"))
                 .build();
 
         RestDocumentationResultHandler document =
@@ -108,7 +111,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void participationGroup() throws Exception {
         // given
-        GroupRequest.Participate request = new GroupRequest.Participate(
+        GroupParticipateRequest request = GroupParticipateRequest.toRequest(
                 1L, "안지영", "서울 성북구 보문로34다길 2",
                 37.209043, 126.329194, PUBLIC,
                 "123456"
@@ -116,7 +119,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         given(groupService.participateGroup(any(), any()))
                 .willReturn(
-                        GroupResponse.Participate.builder()
+                        GroupParticipateResponse.builder()
                                 .participationId(1L)
                                 .groupId(1L)
                                 .userId(1L)
@@ -169,6 +172,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .description("경도 / Long"),
                         fieldWithPath("data.transportation").type(STRING)
                                 .description("내 이동수단"))
+                .responseSchema(schema("GroupParticipateResponse"))
+                .requestSchema(schema("GroupParticipateRequest"))
                 .build();
 
         RestDocumentationResultHandler document =
@@ -185,12 +190,14 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void participationUpdate() throws Exception {
         // given
-        GroupRequest.ParticipateUpdate request
-                = new GroupRequest.ParticipateUpdate(1L, "양파쿵야", "쇼파르", 37.5660, 126.9784, PERSONAL);
+        GroupParticipateUpdateRequest request = GroupParticipateUpdateRequest.toRequest(
+                1L, "양파쿵야", "쇼파르",
+                37.5660, 126.9784, PERSONAL
+        );
 
         given(groupService.participateUpdate(any(), any()))
                 .willReturn(
-                        GroupResponse.ParticipateUpdate.builder()
+                        GroupParticipateUpdateResponse.builder()
                                 .locationName("쇼파르")
                                 .transportation("PERSONAL")
                                 .build()
@@ -248,7 +255,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
         // given
         given(groupService.participateExit(any(), any()))
                 .willReturn(
-                        GroupResponse.Exit.builder()
+                        GroupExitResponse.builder()
                                 .isDeletedSpace(false)
                                 .message("모임에서 나갔습니다.")
                                 .build()
@@ -277,6 +284,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .description("모임 삭제 여부 : 어드민이 나간경우 모임이 삭제 / 참가자가 나간경우 모임 나가기"),
                         fieldWithPath("data.message").type(STRING)
                                 .description("모임이 삭제되었습니다. / 모임에서 나갔습니다."))
+                .responseSchema(schema("GroupExitResponse"))
                 .build();
 
         RestDocumentationResultHandler document =
@@ -443,7 +451,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void getMyParticipate() throws Exception {
         // given
-        GroupResponse.MyParticipate data1 = GroupResponse.MyParticipate.builder()
+        GroupMyParticipateResponse data1 = GroupMyParticipateResponse.builder()
                 .groupId(1L)
                 .groupName("그룹1")
                 .groupAdminName("양파쿵야")
@@ -454,7 +462,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .build();
 
-        GroupResponse.MyParticipate data2 = GroupResponse.MyParticipate.builder()
+        GroupMyParticipateResponse data2 = GroupMyParticipateResponse.builder()
                 .groupId(2L)
                 .groupName("그룹2")
                 .groupAdminName("주먹밥쿵야")
@@ -515,14 +523,14 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void keywordCentralizedMeetingSpot() throws Exception {
         // given
-        GroupResponse.Place place1 = GroupResponse.Place.builder()
+        GroupPlaceResponse place1 = GroupPlaceResponse.builder()
                 .title("멘야하나비 성신여대점")
                 .thumUrl("https://ldb-phinf.pstatic.net/20230804_174/16911100078193yaWQ_JPEG/IMG_4118.JPEG")
                 .distance("성신여대입구역(으)로부터 220m")
                 .openTime("21:00에 라스트오더")
                 .tel("02-6397-3020")
                 .detail(
-                        GroupResponse.Place.Detail.builder()
+                        GroupPlaceResponse.Detail.builder()
                                 .local("성신여대입구역")
                                 .title("멘야하나비 성신여대점")
                                 .address("서울특별시 성북구 동소문로22길 39-5 2층")
@@ -550,14 +558,14 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 )
                 .build();
 
-        GroupResponse.Place place2 = GroupResponse.Place.builder()
+        GroupPlaceResponse place2 = GroupPlaceResponse.builder()
                 .title("치치 성신여대점")
                 .thumUrl("https://ldb-phinf.pstatic.net/20230704_152/1688449596232YkYod_JPEG/3.jpg")
                 .distance("성신여대입구역(으)로부터 213m")
                 .openTime("17:30에 영업시작")
                 .tel("02-921-8520")
                 .detail(
-                        GroupResponse.Place.Detail.builder()
+                        GroupPlaceResponse.Detail.builder()
                                 .local("성신여대입구역")
                                 .title("치치 성신여대점")
                                 .address("서울특별시 성북구 동소문로20길 37-12 1층")
@@ -577,18 +585,17 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                         "버터갈릭감자 변동가격(업주문의)",
                                         "설탕토마토 변동가격(업주문의)"
                                 ))
-                                .build()
-                )
+                                .build())
                 .build();
 
-        GroupResponse.Place place3 = GroupResponse.Place.builder()
+        GroupPlaceResponse place3 = GroupPlaceResponse.builder()
                 .title("동경산책 성신여대점")
                 .thumUrl("https://ldb-phinf.pstatic.net/20220106_294/1641437440289J8dYW_JPEG/1635122589184-10.jpg")
                 .distance("성신여대입구역(으)로부터 236m")
                 .openTime("21:00에 영업종료")
                 .tel("02-923-2666")
                 .detail(
-                        GroupResponse.Place.Detail.builder()
+                        GroupPlaceResponse.Detail.builder()
                                 .local("성신여대입구역")
                                 .title("동경산책 성신여대점")
                                 .address("서울특별시 성북구 보문로34길 45")
@@ -668,6 +675,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .description("상세 이미지 URL 목록 / List<String>"),
                         fieldWithPath("data[].detail.menuInfo[]").type(ARRAY)
                                 .description("메뉴 정보 목록 / List<String>"))
+                .responseSchema(schema("GroupPlaceResponse"))
                 .build();
 
         RestDocumentationResultHandler document =
@@ -683,27 +691,27 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @DisplayName("모임 참여자 정보 리스트 조회 API")
     @Test
     void readParticipateGroupByRegion() throws Exception {
-        GroupResponse.Participations participations1 =
-                new GroupResponse.Participations(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC");
-        GroupResponse.Participations participations2 =
-                new GroupResponse.Participations(2L, "park@naver.com", "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC");
-        GroupResponse.Region region1 = new GroupResponse.Region("서울 성북구", List.of(participations1, participations2));
+        GroupParticipationsResponse participations1 =
+                GroupParticipationsResponse.toResponse(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC");
+        GroupParticipationsResponse participations2 =
+                GroupParticipationsResponse.toResponse(2L, "park@naver.com", "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC");
+        GroupRegionResponse region1 = GroupRegionResponse.toResponse("서울 성북구", List.of(participations1, participations2));
 
-        GroupResponse.Participations participations3 =
-                new GroupResponse.Participations(3L, "cheon@gmail.com", "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL");
-        GroupResponse.Participations participations4 =
-                new GroupResponse.Participations(4L, "moram@gmail.com", "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC");
-        GroupResponse.Region region2 = new GroupResponse.Region("서울 강북구", List.of(participations3, participations4));
+        GroupParticipationsResponse participations3 =
+                GroupParticipationsResponse.toResponse(3L, "cheon@gmail.com", "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL");
+        GroupParticipationsResponse participations4 =
+                GroupParticipationsResponse.toResponse(4L, "moram@gmail.com", "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC");
+        GroupRegionResponse region2 = GroupRegionResponse.toResponse("서울 강북구", List.of(participations3, participations4));
 
-        GroupResponse.Participations participations5 =
-                new GroupResponse.Participations(3L, "enfp@gmail.com", "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL");
-        GroupResponse.Region region3 =
-                new GroupResponse.Region("경기도 부천시", List.of(participations5));
+        GroupParticipationsResponse participations5 =
+                GroupParticipationsResponse.toResponse(3L, "enfp@gmail.com", "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL");
+        GroupRegionResponse region3 =
+                GroupRegionResponse.toResponse("경기도 부천시", List.of(participations5));
 
         // given
         given(groupService.readParticipateGroupByRegion(anyLong()))
                 .willReturn(
-                        GroupResponse.Detail.builder()
+                        GroupDetailResponse.builder()
                                 .groupId(1L)
                                 .adminEmail("kim@naver.com")
                                 .name("모이닷 팀 프로젝트")
@@ -738,6 +746,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         fieldWithPath(participations + ".userName").type(STRING).description("유저 이름"),
                         fieldWithPath(participations + ".locationName").type(STRING).description("유저 출발지 이름"),
                         fieldWithPath(participations + ".transportation").type(STRING).description("유저 교통수단"))
+                .responseSchema(schema("GroupDetailResponse"))
                 .build();
 
         RestDocumentationResultHandler document =
