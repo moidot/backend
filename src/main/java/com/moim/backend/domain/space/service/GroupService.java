@@ -44,8 +44,8 @@ import java.util.StringTokenizer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.moim.backend.domain.space.response.GroupParticipationsResponse.toParticipateEntity;
 import static com.moim.backend.domain.space.response.GroupRegionResponse.toLocalEntity;
-import static com.moim.backend.domain.space.response.GroupResponse.Participations.toParticipateEntity;
 import static com.moim.backend.global.common.Result.*;
 
 @Service
@@ -289,7 +289,7 @@ public class GroupService {
 
         // 참여 정보 응답 객체 변환
         Users user = getUser(participation.getUserId());
-        GroupResponse.Participations participateEntity = toParticipateEntity(participation, user);
+        GroupParticipationsResponse participateEntity = toParticipateEntity(participation, user);
 
         // 생성된 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 Optional 검증
         Optional<GroupRegionResponse> optionalRegion = findRegionByName(regions, regionName);
@@ -298,7 +298,7 @@ public class GroupService {
         toUpdateRegion(regions, regionName, participateEntity, optionalRegion);
     }
 
-    private static void toUpdateRegion(List<GroupRegionResponse> regions, String regionName, GroupResponse.Participations participateEntity, Optional<GroupRegionResponse> optionalRegion) {
+    private static void toUpdateRegion(List<GroupRegionResponse> regions, String regionName, GroupParticipationsResponse participateEntity, Optional<GroupRegionResponse> optionalRegion) {
         if (optionalRegion.isEmpty()) { // 존재하지 않는다면
             addNewRegion(regions, regionName, participateEntity);
         } else { // 존재한다면
@@ -306,13 +306,13 @@ public class GroupService {
         }
     }
 
-    private static void addParticipationToExistingRegion(GroupResponse.Participations participateEntity, GroupRegionResponse region) {
-        List<GroupResponse.Participations> participations = new ArrayList<>(region.getParticipations());
+    private static void addParticipationToExistingRegion(GroupParticipationsResponse participateEntity, GroupRegionResponse region) {
+        List<GroupParticipationsResponse> participations = new ArrayList<>(region.getParticipations());
         participations.add(participateEntity);
         region.setParticipations(participations);
     }
 
-    private static void addNewRegion(List<GroupRegionResponse> regions, String regionName, GroupResponse.Participations participateEntity) {
+    private static void addNewRegion(List<GroupRegionResponse> regions, String regionName, GroupParticipationsResponse participateEntity) {
         regions.add(toLocalEntity(regionName, participateEntity));
     }
 

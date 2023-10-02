@@ -14,16 +14,16 @@ public class GroupRegionResponse {
     private String regionName;
 
     @Setter
-    private List<GroupResponse.Participations> participations;
+    private List<GroupParticipationsResponse> participations;
 
-    public static GroupRegionResponse toLocalEntity(String region, GroupResponse.Participations participation) {
+    public static GroupRegionResponse toLocalEntity(String region, GroupParticipationsResponse participation) {
         return GroupRegionResponse.builder()
                 .regionName(region)
                 .participations(List.of(participation))
                 .build();
     }
 
-    public static GroupRegionResponse toResponse(String regionName, List<GroupResponse.Participations> participations) {
+    public static GroupRegionResponse toResponse(String regionName, List<GroupParticipationsResponse> participations) {
         return new GroupRegionResponse(regionName, participations);
     }
 }

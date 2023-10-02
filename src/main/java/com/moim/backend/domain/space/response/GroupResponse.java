@@ -16,28 +16,6 @@ import static lombok.AccessLevel.*;
 public class GroupResponse {
 
     @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
-    public static class Participations {
-        private Long participationId;
-        private String userEmail;
-        private String userName;
-        private String locationName;
-        private String transportation;
-
-        public static GroupResponse.Participations toParticipateEntity(Participation participation, Users user) {
-            return Participations.builder()
-                    .participationId(participation.getParticipationId())
-                    .userEmail(user.getEmail())
-                    .userName(participation.getUserName())
-                    .locationName(participation.getLocationName())
-                    .transportation(participation.getTransportation().name())
-                    .build();
-        }
-    }
-
-    @Getter
     @NoArgsConstructor
     @AllArgsConstructor(access = PRIVATE)
     @Builder
