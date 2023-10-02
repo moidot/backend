@@ -2,6 +2,7 @@ package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.ControllerTestSupport;
 import com.moim.backend.domain.space.request.GroupRequest;
+import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -19,8 +20,8 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void createGroup() throws Exception {
         // given
-        GroupRequest.Create request =
-                new GroupRequest.Create(
+        GroupCreateRequest request =
+                GroupCreateRequest.toRequest(
                         "테스트 그룹", LocalDate.of(2023, 7, 15), "천이닷",
                         "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
                         PUBLIC, null
@@ -41,8 +42,8 @@ class GroupControllerTest extends ControllerTestSupport {
     @Test
     void createGroupBlankGroupNameException() throws Exception {
         // given
-        GroupRequest.Create request =
-                new GroupRequest.Create(
+        GroupCreateRequest request =
+                GroupCreateRequest.toRequest(
                         " ", LocalDate.of(2023, 7, 15), "천이닷",
                         "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
                         PUBLIC, null

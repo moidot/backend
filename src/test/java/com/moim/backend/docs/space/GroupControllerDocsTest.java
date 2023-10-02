@@ -1,9 +1,11 @@
 package com.moim.backend.docs.space;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import com.epages.restdocs.apispec.Schema;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
 import com.moim.backend.domain.space.request.GroupRequest;
+import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.space.response.PathDto;
 import com.moim.backend.domain.space.response.PlaceRouteResponse;
@@ -16,6 +18,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.util.List;
 
+import static com.epages.restdocs.apispec.Schema.*;
 import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
 import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static org.mockito.ArgumentMatchers.*;
@@ -44,8 +47,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
     @Test
     void createGroup() throws Exception {
         // given
-        GroupRequest.Create request =
-                new GroupRequest.Create(
+        GroupCreateRequest request =
+                GroupCreateRequest.toRequest(
                         "테스트 그룹", null, "천이닷",
                         "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
                         PUBLIC, null
@@ -90,8 +93,9 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                         fieldWithPath("data.adminId").type(NUMBER).description("모임장 ID / Long"),
                         fieldWithPath("data.name").type(STRING).description("모임 이름"),
                         fieldWithPath("data.date").type(STRING).description("모임 날짜"),
-                        fieldWithPath("data.fixedPlace").type(STRING).description("확정 장소")
-                )
+                        fieldWithPath("data.fixedPlace").type(STRING).description("확정 장소"))
+                .requestSchema(schema("GroupCreateRequest"))
+                .responseSchema(schema("GroupCreateResponse"))
                 .build();
 
         RestDocumentationResultHandler document =

@@ -13,6 +13,7 @@ import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupRequest;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
+import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
 import com.moim.backend.domain.space.response.GroupResponse;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
@@ -72,7 +73,7 @@ class GroupServiceTest {
         // given
         Users user = savedUser("test@test.com", "테스트 이름");
 
-        GroupRequest.Create request = new GroupRequest.Create(
+        GroupCreateRequest request = GroupCreateRequest.toRequest(
                 "테스트 그룹", LocalDate.of(2023, 7, 15), "천이닷",
                 "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
                 PUBLIC, null
@@ -101,7 +102,7 @@ class GroupServiceTest {
         // given
         Users user = savedUser("test@test.com", "테스트 이름");
 
-        GroupRequest.Create request = new GroupRequest.Create(
+        GroupCreateRequest request = GroupCreateRequest.toRequest(
                 "테스트 그룹", null, "천이닷",
                 "서울 성북구 보문로34다길 2", 37.591043, 127.019721,
                 PUBLIC, null

@@ -12,6 +12,7 @@ import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.GroupServiceRequest;
+import com.moim.backend.domain.space.request.service.GroupCreateServiceRequest;
 import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
@@ -62,7 +63,7 @@ public class GroupService {
 
     // 모임 생성
     @Transactional
-    public GroupResponse.Create createGroup(GroupServiceRequest.Create request, Users user) {
+    public GroupResponse.Create createGroup(GroupCreateServiceRequest request, Users user) {
         Groups group = groupRepository.save(toGroupEntity(request, user));
         Participation participation = saveParticipation(
                 user, group, request.getUserName(),
@@ -411,7 +412,7 @@ public class GroupService {
         }
     }
 
-    private Groups toGroupEntity(GroupServiceRequest.Create request, Users user) {
+    private Groups toGroupEntity(GroupCreateServiceRequest request, Users user) {
         return Groups.builder()
                 .adminId(user.getUserId())
                 .name(request.getName())

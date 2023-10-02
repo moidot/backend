@@ -8,21 +8,6 @@ import java.time.LocalDate;
 public class GroupServiceRequest {
 
     @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Create {
-        private String name;
-        private LocalDate date;
-        private String userName;
-        private String locationName;
-        private Double latitude;
-        private Double longitude;
-        private TransportationType transportationType;
-        private String password;
-    }
-
-    @Getter
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @NoArgsConstructor
     @Builder
