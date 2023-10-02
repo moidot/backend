@@ -15,24 +15,6 @@ import static lombok.AccessLevel.*;
 
 public class GroupResponse {
 
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter
-    @Builder
-    public static class Region {
-        private String regionName;
-
-        @Setter
-        private List<Participations> participations;
-
-        public static Region toLocalEntity(String region, GroupResponse.Participations participation) {
-            return Region.builder()
-                    .regionName(region)
-                    .participations(List.of(participation))
-                    .build();
-        }
-    }
-
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor

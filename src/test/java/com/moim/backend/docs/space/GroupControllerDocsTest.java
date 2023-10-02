@@ -691,18 +691,18 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 new GroupResponse.Participations(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC");
         GroupResponse.Participations participations2 =
                 new GroupResponse.Participations(2L, "park@naver.com", "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC");
-        GroupResponse.Region region1 = new GroupResponse.Region("서울 성북구", List.of(participations1, participations2));
+        GroupRegionResponse region1 = GroupRegionResponse.toResponse("서울 성북구", List.of(participations1, participations2));
 
         GroupResponse.Participations participations3 =
                 new GroupResponse.Participations(3L, "cheon@gmail.com", "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL");
         GroupResponse.Participations participations4 =
                 new GroupResponse.Participations(4L, "moram@gmail.com", "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC");
-        GroupResponse.Region region2 = new GroupResponse.Region("서울 강북구", List.of(participations3, participations4));
+        GroupRegionResponse region2 = GroupRegionResponse.toResponse("서울 강북구", List.of(participations3, participations4));
 
         GroupResponse.Participations participations5 =
                 new GroupResponse.Participations(3L, "enfp@gmail.com", "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL");
-        GroupResponse.Region region3 =
-                new GroupResponse.Region("경기도 부천시", List.of(participations5));
+        GroupRegionResponse region3 =
+                GroupRegionResponse.toResponse("경기도 부천시", List.of(participations5));
 
         // given
         given(groupService.readParticipateGroupByRegion(anyLong()))

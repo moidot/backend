@@ -44,8 +44,8 @@ import java.util.StringTokenizer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.moim.backend.domain.space.response.GroupRegionResponse.toLocalEntity;
 import static com.moim.backend.domain.space.response.GroupResponse.Participations.toParticipateEntity;
-import static com.moim.backend.domain.space.response.GroupResponse.Region.toLocalEntity;
 import static com.moim.backend.global.common.Result.*;
 
 @Service
@@ -276,14 +276,14 @@ public class GroupService {
     public GroupDetailResponse readParticipateGroupByRegion(Long groupId) {
         Groups group = getGroupByFetchParticipation(groupId);
         Users admin = getUser(group.getAdminId());
-        List<GroupResponse.Region> regions = new ArrayList<>();
+        List<GroupRegionResponse> regions = new ArrayList<>();
 
         group.getParticipations().forEach(participation -> toRegionsResponse(regions, participation));
 
         return GroupDetailResponse.response(group, admin, regions);
     }
 
-    private void toRegionsResponse(List<GroupResponse.Region> regions, Participation participation) {
+    private void toRegionsResponse(List<GroupRegionResponse> regions, Participation participation) {
         // 그룹화 지역 이름 생성
         String regionName = getRegionName(participation);
 
@@ -292,13 +292,13 @@ public class GroupService {
         GroupResponse.Participations participateEntity = toParticipateEntity(participation, user);
 
         // 생성된 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 Optional 검증
-        Optional<GroupResponse.Region> optionalRegion = findRegionByName(regions, regionName);
+        Optional<GroupRegionResponse> optionalRegion = findRegionByName(regions, regionName);
 
         // 검증에 맞추어 Region 업데이트
         toUpdateRegion(regions, regionName, participateEntity, optionalRegion);
     }
 
-    private static void toUpdateRegion(List<GroupResponse.Region> regions, String regionName, GroupResponse.Participations participateEntity, Optional<GroupResponse.Region> optionalRegion) {
+    private static void toUpdateRegion(List<GroupRegionResponse> regions, String regionName, GroupResponse.Participations participateEntity, Optional<GroupRegionResponse> optionalRegion) {
         if (optionalRegion.isEmpty()) { // 존재하지 않는다면
             addNewRegion(regions, regionName, participateEntity);
         } else { // 존재한다면
@@ -306,17 +306,17 @@ public class GroupService {
         }
     }
 
-    private static void addParticipationToExistingRegion(GroupResponse.Participations participateEntity, GroupResponse.Region region) {
+    private static void addParticipationToExistingRegion(GroupResponse.Participations participateEntity, GroupRegionResponse region) {
         List<GroupResponse.Participations> participations = new ArrayList<>(region.getParticipations());
         participations.add(participateEntity);
         region.setParticipations(participations);
     }
 
-    private static void addNewRegion(List<GroupResponse.Region> regions, String regionName, GroupResponse.Participations participateEntity) {
+    private static void addNewRegion(List<GroupRegionResponse> regions, String regionName, GroupResponse.Participations participateEntity) {
         regions.add(toLocalEntity(regionName, participateEntity));
     }
 
-    private static Optional<GroupResponse.Region> findRegionByName(List<GroupResponse.Region> regions, String regionName) {
+    private static Optional<GroupRegionResponse> findRegionByName(List<GroupRegionResponse> regions, String regionName) {
         return regions.stream()
                 .filter(local -> local.getRegionName().equals(regionName))
                 .findFirst();

@@ -19,9 +19,9 @@ public class GroupDetailResponse {
     private String adminEmail;
     private String name;
     private String date;
-    private List<GroupResponse.Region> participantsByRegion;
+    private List<GroupRegionResponse> participantsByRegion;
 
-    public static GroupDetailResponse response(Groups group, Users admin, List<GroupResponse.Region> participantsByRegion) {
+    public static GroupDetailResponse response(Groups group, Users admin, List<GroupRegionResponse> participantsByRegion) {
         String date = group.getDate()
                 .map(d -> d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .orElse("none");
