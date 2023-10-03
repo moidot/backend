@@ -58,6 +58,10 @@ public class CarMoveInfo implements MoveInfoInterface, PathGraphicDataInterface 
         return path;
     }
 
+    public int getPayment() {
+        return getBestRouteSummary().fare.toll;
+    }
+
     @Getter
     @NoArgsConstructor
     private static class Route {
