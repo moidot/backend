@@ -383,8 +383,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // given
         List<PlaceRouteResponse.MoveUserInfo> moveUserInfoList = List.of(
-                new PlaceRouteResponse.MoveUserInfo(true, 1L, "김유정", PUBLIC, 2, 68, 15928.0, path),
-                new PlaceRouteResponse.MoveUserInfo(false, 2L, "천현우", PUBLIC, 2, 96, 27725.0, path)
+                new PlaceRouteResponse.MoveUserInfo(true, 1L, "김유정", PUBLIC, 2, 68, 15928.0, 1500, path),
+                new PlaceRouteResponse.MoveUserInfo(false, 2L, "천현우", PUBLIC, 2, 96, 27725.0, 1500, path)
         );
         List<PlaceRouteResponse> placeRouteResponseList = List.of(
                 new PlaceRouteResponse("안국", 37.576477, 126.985443, moveUserInfoList),
@@ -431,6 +431,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .description("유저 이동 수단"),
                         fieldWithPath("data[].moveUserInfo[].totalDistance").type(NUMBER)
                                 .description("유저 이동 거리(m)"),
+                        fieldWithPath("data[].moveUserInfo[].payment").type(NUMBER)
+                                .description("유저 이동 거리(원)"),
                         fieldWithPath("data[].moveUserInfo[].path[].x").type(NUMBER)
                                 .description("경로(경도)"),
                         fieldWithPath("data[].moveUserInfo[].path[].y").type(NUMBER)

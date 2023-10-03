@@ -28,7 +28,11 @@ public class BusPathResponse {
     }
 
     public Double getTotalDistance() {
+
         return searchBestPathInfo().totalDistance;
+    }
+    public int getPayment() {
+        return searchBestPathInfo().getPayment();
     }
 
     private Info searchBestPathInfo() {

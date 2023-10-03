@@ -42,6 +42,7 @@ public class PlaceRouteResponse {
         private int transitCount; // 총 환승 횟수
         private int totalTime; // 단위: 분(m)
         private Double totalDistance;
+        private int payment;
         private List<PathDto> path;
 
         public MoveUserInfo(
@@ -58,6 +59,7 @@ public class PlaceRouteResponse {
             this.totalTime = busPathResponse.getTotalTime();
             this.totalDistance = busPathResponse.getTotalDistance();
             this.path = busGraphicDataResponse.getPathList(participation);
+            this.payment = busPathResponse.getPayment();
         }
 
         public MoveUserInfo(
@@ -72,6 +74,7 @@ public class PlaceRouteResponse {
             this.totalTime = carMoveInfo.getTotalTime();
             this.totalDistance = carMoveInfo.getTotalDistance();
             this.path = carMoveInfo.getPathList(participation);
+            this.payment = carMoveInfo.getPayment();
         }
     }
 
