@@ -3,7 +3,6 @@ package com.moim.backend.domain.space.service;
 import com.moim.backend.domain.groupvote.entity.Vote;
 import com.moim.backend.domain.groupvote.repository.VoteRepository;
 import com.moim.backend.domain.hotplace.repository.HotPlaceRepository;
-import com.moim.backend.domain.space.config.OdsayProperties;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
@@ -19,14 +18,18 @@ import com.moim.backend.domain.space.response.group.*;
 import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.subway.response.BestPlaceInterface;
-import com.moim.backend.domain.user.config.KakaoProperties;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
+import com.moim.backend.global.aspect.TimeCheck;
+import com.moim.backend.global.common.CacheName;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import com.moim.backend.global.util.DistanceCalculator;
+import com.moim.backend.global.util.RedisDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +39,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -62,8 +63,8 @@ public class GroupService {
     private final BestPlaceRepository bestPlaceRepository;
     private final SubwayRepository subwayRepository;
     private final HotPlaceRepository hotPlaceRepository;
-    private final OdsayProperties odsayProperties;
-    private final KakaoProperties kakaoProperties;
+    private final DirectionService directionService;
+    private final RedisDao redisDao;
     private final RestTemplate restTemplate = new RestTemplate();
 
     // 모임 생성
@@ -99,6 +100,7 @@ public class GroupService {
 
     // 모임 참여
     @Transactional
+    @CacheEvict(value = CacheName.group, key = "#request.getGroupId()")
     public GroupParticipateResponse participateGroup(GroupParticipateServiceRequest request, Users user) {
         Groups group = getGroup(request.getGroupId());
         participateGroupValidate(request, user, group);
@@ -158,6 +160,9 @@ public class GroupService {
         // 투표 시작시 모임 나가기 불가
         checkIfVoteStartedBeforeLeaving(optionalVote);
 
+        // 관련 Redis 삭제
+        redisDao.deleteSpringCache(CacheName.group, group.getGroupId().toString());
+
         // 모임장이 나가는 경우 스페이스 삭제
         if (deleteGroupIfAdminLeaves(user, group)) {
             return GroupExitResponse.response(true, "모임이 삭제되었습니다.");
@@ -194,6 +199,7 @@ public class GroupService {
 
     // 모임 삭제
     @Transactional
+    @CacheEvict(value = CacheName.group, key = "#groupId")
     public Void participateDelete(Long groupId, Users user) {
         Groups group = getGroup(groupId);
         validateAdminStatus(user.getUserId(), group.getAdminId());
@@ -203,6 +209,8 @@ public class GroupService {
     }
 
     // 모임 추천 지역 조회하기
+    @TimeCheck
+    @Cacheable(value = CacheName.group, key = "#groupId")
     public List<PlaceRouteResponse> getBestRegion(Long groupId) {
         Groups group = getGroup(groupId);
         // 중간 좌표 구하기
@@ -440,84 +448,15 @@ public class GroupService {
 
         participationList.forEach(participation -> {
             if ((participation.getTransportation() == TransportationType.PUBLIC)) {
-                getBusRouteToResponse(bestPlace, group, participation)
+                directionService.getBusRouteToResponse(bestPlace, group, participation)
                         .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
             } else if (participation.getTransportation() == TransportationType.PERSONAL) {
-                getCarRouteToResponse(bestPlace, group, participation)
+                directionService.getCarRouteToResponse(bestPlace, group, participation)
                         .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
             }
         });
 
         return moveUserInfoList;
-    }
-
-    private Optional<PlaceRouteResponse.MoveUserInfo> getBusRouteToResponse(
-            BestPlaceInterface bestPlace, Groups group, Participation participation
-    ) {
-        Instant start = Instant.now();
-
-        Optional<PlaceRouteResponse.MoveUserInfo> moveUserInfo = Optional.empty();
-        BusPathResponse busPathResponse = restTemplate.getForObject(
-                odsayProperties.getSearchPathUriWithParams(bestPlace, participation),
-                BusPathResponse.class
-        );
-
-        if (busPathResponse.getResult() == null) {
-            log.debug("[ 버스 길찾기 실패 ] ========================================");
-            log.debug("지역: {}, url: {}", bestPlace.getName(), odsayProperties.getSearchPathUriWithParams(bestPlace, participation));
-        } else {
-            log.debug("[ 버스 길찾기 성공 ] ========================================");
-            log.debug("지역: {}, url: {}", bestPlace.getName(), odsayProperties.getSearchPathUriWithParams(bestPlace, participation));
-
-            BusGraphicDataResponse busGraphicDataResponse = restTemplate.getForObject(
-                    odsayProperties.getGraphicDataUriWIthParams(busPathResponse.getPathInfoMapObj()),
-                    BusGraphicDataResponse.class
-            );
-            if (busPathResponse.getResult() == null) {
-                log.debug("[ 버스 그래픽 데이터 조회 실패 ] ========================================");
-                log.debug("지역: {}, url: {}", bestPlace.getName(), odsayProperties.getSearchPathUriWithParams(bestPlace, participation));
-            } else {
-                log.debug("[ 버스 그래픽 데이터 조회 성공 ] ========================================");
-                log.debug("지역: {}, url: {}", bestPlace.getName(), odsayProperties.getSearchPathUriWithParams(bestPlace, participation));
-
-                moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(group, participation, busGraphicDataResponse, busPathResponse));
-            }
-        }
-
-        Instant end = Instant.now();
-        log.info("[ 버스 경로 조회 시간: {}ms ] ========================================", Duration.between(start, end).toMillis());
-        return moveUserInfo;
-    }
-
-    private Optional<PlaceRouteResponse.MoveUserInfo> getCarRouteToResponse(
-            BestPlaceInterface bestPlace, Groups group, Participation participation
-    ) {
-        Instant start = Instant.now();
-
-        Optional<PlaceRouteResponse.MoveUserInfo> moveUserInfo = Optional.empty();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "KakaoAK " + kakaoProperties.getClientId());
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        CarMoveInfo carMoveInfo = restTemplate.exchange(
-                kakaoProperties.getSearchCarPathUriWithParams(bestPlace, participation),
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
-                CarMoveInfo.class
-        ).getBody();
-        if (carMoveInfo.getRoutes() == null) {
-            log.debug("[ 차 길찾기 조회 실패 ] ========================================");
-            log.debug("지역: {}, url: {}", bestPlace.getName(), kakaoProperties.getSearchCarPathUriWithParams(bestPlace, participation));
-        } else {
-            log.debug("[ 차 길찾기 조회 성공 ] ========================================");
-            log.debug("지역: {}, url: {}", bestPlace.getName(), kakaoProperties.getSearchCarPathUriWithParams(bestPlace, participation));
-
-            moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(group, participation, carMoveInfo));
-        }
-
-        Instant end = Instant.now();
-        log.info("[ 차 경로 조회 시간: {}ms ] ========================================", Duration.between(start, end).toMillis());
-        return moveUserInfo;
     }
 
     private double getValidRange(List<Participation> participationList, MiddlePoint middlePoint) {
