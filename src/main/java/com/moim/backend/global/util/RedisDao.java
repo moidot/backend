@@ -1,6 +1,7 @@
 package com.moim.backend.global.util;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
@@ -11,12 +12,17 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class RedisDao {
+public class RedisDao implements InitializingBean {
     private final RedisTemplate<String, String> redisTemplate;
+    private ValueOperations<String, String> valueOperations;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        valueOperations = redisTemplate.opsForValue();
+    }
 
     public void setValues(String key, String data) {
-        ValueOperations<String, String> values = redisTemplate.opsForValue();
-        values.set(key, data);
+        valueOperations.set(key, data);
     }
 
     public void setValuesList(String key, String data) {
@@ -29,16 +35,18 @@ public class RedisDao {
     }
 
     public void setValues(String key, String data, Duration duration) {
-        ValueOperations<String, String> values = redisTemplate.opsForValue();
-        values.set(key, data, duration);
+        valueOperations.set(key, data, duration);
     }
 
     public String getValues(String key) {
-        ValueOperations<String, String> values = redisTemplate.opsForValue();
-        return values.get(key);
+        return valueOperations.get(key);
     }
 
     public void deleteValues(String key) {
         redisTemplate.delete(key);
+    }
+
+    public void deleteSpringCache(String name, String key) {
+        redisTemplate.delete(name + "::" + key);
     }
 }
