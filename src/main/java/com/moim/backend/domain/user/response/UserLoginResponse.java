@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserLoginResponse {
+    private Long userId;
     private String email;
     private String name;
     private String accessToken;
@@ -18,6 +19,7 @@ public class UserLoginResponse {
 
     public static UserLoginResponse response(Users user, String token, String refreshToken) {
         return UserLoginResponse.builder()
+                .userId(user.getUserId())
                 .email(user.getEmail())
                 .name(user.getName())
                 .accessToken(token)
