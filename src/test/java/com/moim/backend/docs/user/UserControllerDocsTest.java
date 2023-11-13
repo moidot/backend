@@ -43,6 +43,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
         given(userService.loginByOAuth("Hx-PXmWuFaGakYCEy8hkUIVOWUSXIOtD7cosKDSIKsiwodR1g35KXQQWX9H4hXlcpZ45eSgo3dGkWWWOSX-z9iQ", NAVER))
                 .willReturn(
                         UserLoginResponse.builder()
+                                .userId(1L)
                                 .email("moidots@gmail.com")
                                 .name("모이닷")
                                 .accessToken(accessToken)
@@ -63,6 +64,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
                 .responseFields(
                         fieldWithPath("code").type(NUMBER).description("상태 코드"),
                         fieldWithPath("message").type(STRING).description("상태 메세지"),
+                        fieldWithPath("data.userId").type(NUMBER).description("유저 아이디"),
                         fieldWithPath("data.email").type(STRING).description("유저 이메일"),
                         fieldWithPath("data.name").type(STRING).description("유저 이름"),
                         fieldWithPath("data.accessToken").type(STRING).description("엑세스 토큰"),
