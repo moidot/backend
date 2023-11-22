@@ -23,7 +23,7 @@ public class VoteCreateResponse {
 
     public static VoteCreateResponse response(Vote vote) {
         String endAt = Optional.ofNullable(vote.getEndAt())
-                .map(time -> time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .map(time -> time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))
                 .orElse("none");
 
         return VoteCreateResponse.builder()

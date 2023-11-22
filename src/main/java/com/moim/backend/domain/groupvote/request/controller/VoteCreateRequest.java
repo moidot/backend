@@ -23,7 +23,7 @@ public class VoteCreateRequest {
     @NotNull(message = "중복 선택 여부 값은 필수입니다.")
     private Boolean isEnabledMultipleChoice;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd-HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endAt;
 
     public VoteCreateServiceRequest toServiceRequest() {

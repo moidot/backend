@@ -94,7 +94,7 @@ class VoteServiceTest {
 
         assertThat(response)
                 .extracting("groupId", "isClosed", "isAnonymous", "isEnabledMultipleChoice", "endAt")
-                .contains(group.getGroupId(), false, false, false, "2023-08-10 15:00:00");
+                .contains(group.getGroupId(), false, false, false, "2023-08-10T15:00:00");
     }
 
     @DisplayName("모임장이 아닌 유저가 투표를 생성하려하면 Exception 이 발생한다.")
@@ -245,7 +245,7 @@ class VoteServiceTest {
 
         assertThat(response)
                 .extracting("groupId", "voteId", "groupName", "groupDate", "endAt")
-                .contains(group.getGroupId(), vote.getVoteId(), group.getName(), "2023-07-10", "2023-08-03 12:00:00");
+                .contains(group.getGroupId(), vote.getVoteId(), group.getName(), "2023-07-10", "2023-08-03T12:00:00");
 
         assertThat(response.getVoteStatuses())
                 .extracting("bestPlaceId", "votes", "placeName", "isVoted")
@@ -388,7 +388,7 @@ class VoteServiceTest {
                 .extracting("groupId", "voteId", "groupName", "groupDate", "endAt", "isClosed", "confirmPlace")
                 .contains(
                         group.getGroupId(), vote.getVoteId(),
-                        group.getName(), "2023-07-10", "2023-08-03 12:00:00", true, "강남역"
+                        group.getName(), "2023-07-10", "2023-08-03T12:00:00", true, "강남역"
                 );
 
         assertThat(response.getVoteStatuses())

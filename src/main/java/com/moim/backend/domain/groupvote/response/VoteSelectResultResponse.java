@@ -50,7 +50,7 @@ public class VoteSelectResultResponse {
                 .orElse("none");
 
         String endAt = Optional.ofNullable(vote.getEndAt())
-                .map(time -> time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .map(time -> time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))
                 .orElse("none");
 
         return VoteSelectResultResponse.builder()

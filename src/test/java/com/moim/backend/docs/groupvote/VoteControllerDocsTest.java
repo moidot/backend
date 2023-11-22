@@ -80,7 +80,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                         fieldWithPath("isEnabledMultipleChoice").type(JsonFieldType.BOOLEAN)
                                 .description("중복 선택 여부"),
                         fieldWithPath("endAt").type(JsonFieldType.STRING)
-                                .description("종료 날짜 / 형식 : yyyy-MM-dd-HH:mm:ss")
+                                .description("종료 날짜 / 형식 : yyyy-MM-ddTHH:mm:ss")
                                 .optional())
                 .responseFields(
                         fieldWithPath("code").type(JsonFieldType.NUMBER)
@@ -123,7 +123,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .isClosed(false)
                 .isAnonymous(true)
                 .isEnabledMultipleChoice(true)
-                .endAt("2023-08-10 18:00:00")
+                .endAt("2023-08-10T18:00:00")
                 .voteStatuses(createMockVoteStatuses())
                 .build();
 
