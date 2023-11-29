@@ -11,6 +11,7 @@ import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.service.GroupCreateServiceRequest;
+import com.moim.backend.domain.space.request.service.GroupNameUpdateServiceRequest;
 import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequest;
 import com.moim.backend.domain.space.request.service.GroupParticipateUpdateServiceRequest;
 import com.moim.backend.domain.space.response.*;
@@ -329,6 +330,14 @@ public class GroupService {
         return regions.stream()
                 .filter(local -> local.getRegionName().equals(regionName))
                 .findFirst();
+    }
+
+    // 모임 이름 수정 API
+    public Void updateGroupName(Long groupId, GroupNameUpdateServiceRequest request, Users user) {
+        Groups group = getGroup(groupId);
+        validateAdminStatus(user.getUserId(), group.getAdminId());
+        group.updateGroupName(request.getGroupName());
+        return null;
     }
 
     // validate

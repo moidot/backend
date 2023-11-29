@@ -40,6 +40,10 @@ public class Groups {
         this.place = place;
     }
 
+    public void updateGroupName(String groupName) {
+        this.name = groupName;
+    }
+
     public Optional<LocalDate> getDate() {
         return Optional.ofNullable(date);
     }

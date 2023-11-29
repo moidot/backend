@@ -1,6 +1,7 @@
 package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.request.controller.GroupNameUpdateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import com.moim.backend.domain.space.response.*;
@@ -36,6 +37,17 @@ public class GroupController {
             @RequestParam Long groupId
     ) {
         return CustomResponseEntity.success(groupService.readParticipateGroupByRegion(groupId));
+    }
+
+    // 모임 이름 수정 API
+    @PatchMapping("")
+    public CustomResponseEntity<Void> updateGroupName(
+            @RequestParam Long groupId,
+            @RequestBody @Valid GroupNameUpdateRequest request, @Login Users user
+    ) {
+        return CustomResponseEntity.success(
+                groupService.updateGroupName(groupId,request.toServiceRequest(), user)
+        );
     }
 
     // 모임 참여 API
