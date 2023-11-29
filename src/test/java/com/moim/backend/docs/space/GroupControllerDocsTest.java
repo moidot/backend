@@ -4,6 +4,7 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.request.controller.GroupNameUpdateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import com.moim.backend.domain.space.response.*;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
 
@@ -756,6 +758,37 @@ public class GroupControllerDocsTest extends RestDocsSupport {
 
         // when // then
         mockMvc.perform(httpRequest)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
+
+    @DisplayName("모임 이름 수정 API")
+    @Test
+    void updateGroupName() throws Exception {
+        // given
+        GroupNameUpdateRequest request = new GroupNameUpdateRequest("모이닷런칭준비");
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("스페이스 이름 수정 API")
+                .queryParameters(
+                        parameterWithName("groupId").description("그룹 Id"))
+                .requestFields(
+                        fieldWithPath("groupName").type(STRING).description("변경할 그룹 이름"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"))
+                .responseSchema(schema("GroupDetailResponse"))
+                .build();
+        RestDocumentationResultHandler document = documentHandler("update-groupName", prettyPrint(), prettyPrint(), parameters);
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.patch("/group")
+                                .header("Authorization", "JWT AccessToken")
+                                .param("groupId", "1")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document);
