@@ -12,6 +12,7 @@ import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.GroupRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.request.controller.GroupNameUpdateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequest;
@@ -220,9 +221,9 @@ class GroupServiceTest {
         Users user = savedUser("test@test.com", "테스트 이름");
 
         GroupParticipateRequest request = GroupParticipateRequest.toRequest(
-                        saveGroup.getGroupId(), "경기도불주먹", "서울 성북구 보문로34다길 2",
-                        37.5660, 126.9784, TransportationType.NULL, "2345"
-                );
+                saveGroup.getGroupId(), "경기도불주먹", "서울 성북구 보문로34다길 2",
+                37.5660, 126.9784, TransportationType.NULL, "2345"
+        );
 
         // when // then
         assertThatThrownBy(() -> groupService.participateGroup(request.toServiceRequest(), user))
@@ -629,8 +630,24 @@ class GroupServiceTest {
                 });
     }
 
-    // method
+    @DisplayName("모임장이 스페이스 이름을 수정한다.")
+    @Test
+    void updateGroupName() {
+        // given
+        Users user = savedUser("test@test.com", "테스트 이름");
+        Groups saveGroup = savedGroup(user.getUserId(), "테스트 그룹");
+        GroupNameUpdateRequest request = new GroupNameUpdateRequest("그룹이름변경");
 
+        // when
+        groupService.updateGroupName(saveGroup.getGroupId(), request.toServiceRequest(), user);
+
+        // then
+        em.flush();
+        em.clear();
+        assertThat(saveGroup.getName()).isEqualTo("그룹이름변경");
+    }
+
+    // method
     private BestPlace saveBestPlace(Groups group, String placeName, double longitude, double latitude) {
         return bestPlaceRepository.save(
                 BestPlace.builder()

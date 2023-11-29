@@ -2,6 +2,7 @@ package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.ControllerTestSupport;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
+import com.moim.backend.domain.space.request.controller.GroupNameUpdateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +13,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.time.LocalDate;
 
 import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
+import static org.springframework.http.MediaType.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,7 +35,7 @@ class GroupControllerTest extends ControllerTestSupport {
                         MockMvcRequestBuilders.post("/group")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(APPLICATION_JSON)
                 )
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -55,7 +57,7 @@ class GroupControllerTest extends ControllerTestSupport {
                         MockMvcRequestBuilders.post("/group")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(APPLICATION_JSON)
                 )
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -74,7 +76,7 @@ class GroupControllerTest extends ControllerTestSupport {
                         MockMvcRequestBuilders.post("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(APPLICATION_JSON)
                 )
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -93,7 +95,7 @@ class GroupControllerTest extends ControllerTestSupport {
                         MockMvcRequestBuilders.post("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(APPLICATION_JSON)
                 )
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -113,7 +115,7 @@ class GroupControllerTest extends ControllerTestSupport {
                         MockMvcRequestBuilders.patch("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(APPLICATION_JSON)
                 )
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -133,7 +135,7 @@ class GroupControllerTest extends ControllerTestSupport {
                         MockMvcRequestBuilders.patch("/group/participate")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(APPLICATION_JSON)
                 )
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -231,6 +233,24 @@ class GroupControllerTest extends ControllerTestSupport {
         mockMvc.perform(
                         MockMvcRequestBuilders.get("/group")
                                 .param("groupId", "1")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("모임 이름 수정 API")
+    @Test
+    void updateGroupName() throws Exception {
+        // given
+        GroupNameUpdateRequest request = new GroupNameUpdateRequest("모이닷런칭준비");
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.patch("/group")
+                                .header("Authorization", "JWT AccessToken")
+                                .param("groupId", "1")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(APPLICATION_JSON)
                 )
                 .andDo(print())
                 .andExpect(status().isOk());
