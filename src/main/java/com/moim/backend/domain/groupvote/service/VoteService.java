@@ -46,11 +46,18 @@ public class VoteService {
     @Transactional
     public VoteCreateResponse createVote(VoteCreateServiceRequest request, Long groupId, Users user) {
         Groups group = getGroup(groupId);
+        validateAlreadyCreatedVote(groupId);
         validateUserIsAdmin(user, group);
 
         return VoteCreateResponse.response(
                 voteRepository.save(toVoteEntity(request, groupId))
         );
+    }
+
+    private void validateAlreadyCreatedVote(Long groupId) {
+        if (voteRepository.findByGroupId(groupId).isPresent()) {
+            throw new CustomException(ALREADY_CREATED_VOTE);
+        }
     }
 
     private static void validateUserIsAdmin(Users user, Groups group) {
