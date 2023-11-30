@@ -308,15 +308,21 @@ class VoteServiceTest {
         SelectPlace selectPlace3 = saveSelectPlace(admin, bestPlace1, vote);
         SelectPlace selectPlace4 = saveSelectPlace(admin, bestPlace2, vote);
 
+        selectPlaceRepository.save(selectPlace1);
+        selectPlaceRepository.save(selectPlace2);
+        selectPlaceRepository.save(selectPlace3);
+        selectPlaceRepository.save(selectPlace4);
+
         em.flush();
         em.clear();
 
         // when
-        List<VoteSelectPlaceUserResponse> response =
-                voteService.readSelectPlaceUsers(group.getGroupId(), bestPlace1.getBestPlaceId(), user);
+        VoteSelectPlaceUserResponse response = voteService.readSelectPlaceUsers(
+                group.getGroupId(), bestPlace1.getBestPlaceId()
+        );
 
         // then
-        assertThat(response)
+        assertThat(response.getVoteParticipations())
                 .extracting("participationId", "userId", "nickName", "isAdmin")
                 .contains(
                         tuple(par1.getParticipationId(), par1.getUserId(), par1.getUserName(), true),
@@ -343,16 +349,12 @@ class VoteServiceTest {
 
         Vote vote = saveVote(group.getGroupId(), true, true, LocalDateTime.of(2023, 8, 3, 12, 0, 0));
 
-        SelectPlace selectPlace1 = saveSelectPlace(user, bestPlace1, vote);
-        SelectPlace selectPlace3 = saveSelectPlace(admin, bestPlace1, vote);
-        SelectPlace selectPlace4 = saveSelectPlace(admin, bestPlace2, vote);
-
         em.flush();
         em.clear();
 
         // when // then
         assertThatThrownBy(
-                () -> voteService.readSelectPlaceUsers(group.getGroupId(), bestPlace3.getBestPlaceId(), user))
+                () -> voteService.readSelectPlaceUsers(group.getGroupId(), bestPlace3.getBestPlaceId()))
                 .extracting("result.code", "result.message")
                 .contains(-2006, "해당 장소를 투표한 인원은 0명 입니다.");
     }

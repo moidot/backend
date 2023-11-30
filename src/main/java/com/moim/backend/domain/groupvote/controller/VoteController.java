@@ -50,11 +50,11 @@ public class VoteController {
 
     // 해당 장소 투표한 인원 리스트 조회하기 API
     @GetMapping("/{groupId}/vote/select")
-    public CustomResponseEntity<List<VoteSelectPlaceUserResponse>> readSelectPlaceUsers(
-            @PathVariable Long groupId, @RequestParam Long bestPlaceId, @Login Users user
+    public CustomResponseEntity<VoteSelectPlaceUserResponse> readSelectPlaceUsers(
+            @PathVariable Long groupId, @RequestParam Long bestPlaceId
     ) {
         return CustomResponseEntity.success(
-                voteService.readSelectPlaceUsers(groupId, bestPlaceId, user)
+                voteService.readSelectPlaceUsers(groupId, bestPlaceId)
         );
     }
 

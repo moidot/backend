@@ -30,10 +30,11 @@ public class VoteSelectResultResponse {
     private Boolean isAnonymous;
     private Boolean isEnabledMultipleChoice;
     private String endAt;
+    private int totalVoteNum; // 총 투표한 인원 수
     private List<VoteStatus> voteStatuses;
 
     public static VoteSelectResultResponse response(
-            Groups group, Vote vote, List<VoteStatus> voteStatuses
+            Groups group, Vote vote, List<VoteStatus> voteStatuses, int totalVoteNum
     ) {
 
         if (Optional.ofNullable(vote).isEmpty()) {
@@ -63,6 +64,7 @@ public class VoteSelectResultResponse {
                 .isAnonymous(vote.getIsAnonymous())
                 .isEnabledMultipleChoice(vote.getIsEnabledMultipleChoice())
                 .endAt(endAt)
+                .totalVoteNum(totalVoteNum)
                 .voteStatuses(voteStatuses)
                 .build();
 
