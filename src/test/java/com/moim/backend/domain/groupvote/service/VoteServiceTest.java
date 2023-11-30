@@ -308,11 +308,6 @@ class VoteServiceTest {
         SelectPlace selectPlace3 = saveSelectPlace(admin, bestPlace1, vote);
         SelectPlace selectPlace4 = saveSelectPlace(admin, bestPlace2, vote);
 
-        selectPlaceRepository.save(selectPlace1);
-        selectPlaceRepository.save(selectPlace2);
-        selectPlaceRepository.save(selectPlace3);
-        selectPlaceRepository.save(selectPlace4);
-
         em.flush();
         em.clear();
 
