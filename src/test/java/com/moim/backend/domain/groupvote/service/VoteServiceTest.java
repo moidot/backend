@@ -291,23 +291,24 @@ class VoteServiceTest {
         // given
         Users user = savedUser("test@test.com", "테스트");
         Users admin = savedUser("admin@admin.com", "어드민");
-
+        System.out.println("유저 및 관리자까지 생성 후 저장");
         Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
 
         Participation par1 = savedParticipation(admin, group, "어드민", "테스트", 123.123, 123.123, "PUBLIC");
         Participation par2 = savedParticipation(user, group, "일반인", "테스트", 123.123, 123.123, "PUBLIC");
-
+        System.out.println("참가자 정보 생성 후 저장");
         BestPlace bestPlace1 = saveBestPlace(group, "강남역", 123.123456, 123.123456);
         BestPlace bestPlace2 = saveBestPlace(group, "역삼역", 123.123456, 123.123456);
         BestPlace bestPlace3 = saveBestPlace(group, "신논현역", 123.123456, 123.123456);
 
         Vote vote = saveVote(group.getGroupId(), true, true, LocalDateTime.of(2023, 8, 3, 12, 0, 0));
+        System.out.println("투표 생성 후 저장");
 
         SelectPlace selectPlace1 = saveSelectPlace(user, bestPlace1, vote);
         SelectPlace selectPlace2 = saveSelectPlace(user, bestPlace3, vote);
         SelectPlace selectPlace3 = saveSelectPlace(admin, bestPlace1, vote);
         SelectPlace selectPlace4 = saveSelectPlace(admin, bestPlace2, vote);
-
+        System.out.println("투표 진행 후 저장");
         em.flush();
         em.clear();
 
@@ -315,7 +316,7 @@ class VoteServiceTest {
         VoteSelectPlaceUserResponse response = voteService.readSelectPlaceUsers(
                 group.getGroupId(), bestPlace1.getBestPlaceId()
         );
-
+        System.out.println("투표 결과 조회");
         // then
         assertThat(response.getVoteParticipations())
                 .extracting("participationId", "userId", "nickName", "isAdmin")
