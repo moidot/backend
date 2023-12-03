@@ -1,9 +1,9 @@
 package com.moim.backend.domain.space.response;
 
+import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
-import com.moim.backend.domain.subway.response.BestPlaceInterface;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,10 +22,10 @@ public class PlaceRouteResponse {
     private List<MoveUserInfo> moveUserInfo = new ArrayList<>();
 
     public PlaceRouteResponse(
-            BestPlaceInterface bestPlace,
+            BestPlace bestPlace,
             List<MoveUserInfo> moveUserInfoList
     ) {
-        this.name = bestPlace.getName();
+        this.name = bestPlace.getPlaceName();
         this.latitude = bestPlace.getLatitude();
         this.longitude = bestPlace.getLongitude();
         this.moveUserInfo = moveUserInfoList;

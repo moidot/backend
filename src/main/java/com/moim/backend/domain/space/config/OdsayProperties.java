@@ -1,5 +1,6 @@
 package com.moim.backend.domain.space.config;
 
+import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.subway.response.BestPlaceInterface;
 import lombok.Data;
@@ -19,13 +20,13 @@ public class OdsayProperties {
     private String searchPathUri;
     private String graphicDataUri;
 
-    public URI getSearchPathUriWithParams(BestPlaceInterface bestSubway, Participation participation) {
+    public URI getSearchPathUriWithParams(BestPlace bestPlace, Participation participation) {
         return UriComponentsBuilder.fromHttpUrl(searchPathUri)
                 .queryParam("apiKey", apiKey)
                 .queryParam("SX", participation.getLongitude())
                 .queryParam("SY", participation.getLatitude())
-                .queryParam("EX", bestSubway.getLongitude())
-                .queryParam("EY", bestSubway.getLatitude())
+                .queryParam("EX", bestPlace.getLongitude())
+                .queryParam("EY", bestPlace.getLatitude())
                 .build()
                 .toUri();
     }

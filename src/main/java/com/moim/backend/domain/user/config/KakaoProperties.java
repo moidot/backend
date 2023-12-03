@@ -1,5 +1,6 @@
 package com.moim.backend.domain.user.config;
 
+import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.subway.response.BestPlaceInterface;
 import lombok.Data;
@@ -32,7 +33,7 @@ public class KakaoProperties {
         return parameters;
     }
 
-    public URI getSearchCarPathUriWithParams(BestPlaceInterface bestSubway, Participation participation) {
+    public URI getSearchCarPathUriWithParams(BestPlace bestSubway, Participation participation) {
         return UriComponentsBuilder.fromHttpUrl(searchPathUri)
                 .queryParam("origin", participation.getLongitude() + "," + participation.getLatitude())
                 .queryParam("destination", bestSubway.getLongitude() + "," + bestSubway.getLatitude())

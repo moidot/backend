@@ -104,13 +104,26 @@ public class GroupService {
     @CacheEvict(value = CacheName.group, key = "#request.getGroupId()")
     public GroupParticipateResponse participateGroup(GroupParticipateServiceRequest request, Users user) {
         Groups group = getGroup(request.getGroupId());
-        participateGroupValidate(request, user, group);
 
+        participateGroupValidate(request, user, group);
         Participation participation = saveParticipation(
                 user, group, request.getUserName(),
                 request.getLocationName(), request.getLatitude(), request.getLongitude(),
                 request.getTransportationType(), request.getPassword()
         );
+
+        bestPlaceRepository.deleteAllInBatch(bestPlaceRepository.findAllByGroup(group));
+
+        for (BestPlaceInterface bestPlace : calculateBestPlaces(group)) {
+            bestPlaceRepository.save(
+                    BestPlace.builder()
+                            .group(group)
+                            .placeName(bestPlace.getName())
+                            .latitude(bestPlace.getLatitude())
+                            .longitude(bestPlace.getLongitude())
+                            .build()
+            );
+        }
 
         return GroupParticipateResponse.response(participation);
     }
@@ -214,27 +227,10 @@ public class GroupService {
     @Cacheable(value = CacheName.group, key = "#groupId")
     public List<PlaceRouteResponse> getBestRegion(Long groupId) {
         Groups group = getGroup(groupId);
-        // 중간 좌표 구하기
-        MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
-
-        // 유효범위 찾기
         List<Participation> participationList = participationRepository.findAllByGroup(group);
-        double validRange = getValidRange(participationList, middlePoint);
 
-        // 근처 지하철역 찾기
-        List<BestPlaceInterface> bestPlaceList = subwayRepository.getBestSubwayList(
-                middlePoint.getLatitude(), middlePoint.getLongitude(), validRange
-        );
-
-        // 근처에 지하철역이 없다면, 인기 장소 찾기
-        if (bestPlaceList.isEmpty()) {
-            bestPlaceList = hotPlaceRepository.getBestHotPlaceList(
-                    middlePoint.getLatitude(), middlePoint.getLongitude(), validRange
-            );
-        }
-
-        // 경로 찾기
-        return bestPlaceList.stream().map(bestPlace -> new PlaceRouteResponse(
+        // 추천 지역 조회 + 해당 지역으로 이동하는 경로 계산
+        return bestPlaceRepository.findAllByGroup(group).stream().map(bestPlace -> new PlaceRouteResponse(
                 bestPlace, getMoveUserInfoList(bestPlace, group, participationList)
         )).collect(Collectors.toList());
     }
@@ -449,7 +445,7 @@ public class GroupService {
     }
 
     private List<PlaceRouteResponse.MoveUserInfo> getMoveUserInfoList(
-            BestPlaceInterface bestPlace,
+            BestPlace bestPlace,
             Groups group,
             List<Participation> participationList
     ) {
@@ -486,5 +482,28 @@ public class GroupService {
         return userRepository.findById(userId).orElseThrow(
                 () -> new CustomException(NOT_FOUND_PARTICIPATE)
         );
+    }
+
+    private List<BestPlaceInterface> calculateBestPlaces(Groups group) {
+        // 중간 좌표 구하기
+        MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
+
+        // 유효범위 찾기
+        List<Participation> participationList = participationRepository.findAllByGroup(group);
+        double validRange = getValidRange(participationList, middlePoint);
+
+        // 근처 지하철역 찾기
+        List<BestPlaceInterface> bestPlaceList = subwayRepository.getBestSubwayList(
+                middlePoint.getLatitude(), middlePoint.getLongitude(), validRange
+        );
+
+        // 근처에 지하철역이 없다면, 인기 장소 찾기
+        if (bestPlaceList.isEmpty()) {
+            bestPlaceList = hotPlaceRepository.getBestHotPlaceList(
+                    middlePoint.getLatitude(), middlePoint.getLongitude(), validRange
+            );
+        }
+
+        return bestPlaceList;
     }
 }
