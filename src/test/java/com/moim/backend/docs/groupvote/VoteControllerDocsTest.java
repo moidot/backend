@@ -6,6 +6,7 @@ import com.moim.backend.domain.groupvote.controller.VoteController;
 import com.moim.backend.domain.groupvote.request.controller.VoteCreateRequest;
 import com.moim.backend.domain.groupvote.request.service.VoteCreateServiceRequest;
 import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
+import com.moim.backend.domain.groupvote.response.VoteParticipation;
 import com.moim.backend.domain.groupvote.response.VoteSelectPlaceUserResponse;
 import com.moim.backend.domain.groupvote.response.VoteSelectResultResponse;
 import com.moim.backend.domain.groupvote.service.VoteService;
@@ -173,6 +174,8 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                                 .description("투표 종료 일시"),
                         fieldWithPath("data.isVotingParticipant").type(JsonFieldType.BOOLEAN)
                                 .description("내가 투표했는지에 대한 여부"),
+                        fieldWithPath("data.totalVoteNum").type(JsonFieldType.NUMBER)
+                                .description("총 투표 인원 수"),
                         fieldWithPath("data.voteStatuses[].bestPlaceId").type(JsonFieldType.NUMBER)
                                 .description("장소 ID"),
                         fieldWithPath("data.voteStatuses[].votes").type(JsonFieldType.NUMBER)
@@ -240,6 +243,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                         fieldWithPath("data.isEnabledMultipleChoice").type(JsonFieldType.BOOLEAN).description("다중 선택 가능 여부"),
                         fieldWithPath("data.endAt").type(JsonFieldType.STRING).description("투표 종료 일시"),
                         fieldWithPath("data.isVotingParticipant").type(JsonFieldType.BOOLEAN).description("내가 투표했는지에 대한 여부"),
+                        fieldWithPath("data.totalVoteNum").type(JsonFieldType.NUMBER).description("총 투표 인원 수"),
                         fieldWithPath("data.voteStatuses[].bestPlaceId").type(JsonFieldType.NUMBER).description("장소 ID"),
                         fieldWithPath("data.voteStatuses[].votes").type(JsonFieldType.NUMBER).description("장소 투표 수"),
                         fieldWithPath("data.voteStatuses[].placeName").type(JsonFieldType.STRING).description("장소 이름"),
@@ -262,28 +266,29 @@ public class VoteControllerDocsTest extends RestDocsSupport {
     @Test
     void readSelectPlaceUsers() throws Exception {
         // given
-        given(voteService.readSelectPlaceUsers(anyLong(), any(), any()))
-                .willReturn(List.of(
-                                VoteSelectPlaceUserResponse.builder()
-                                        .participationId(1L)
-                                        .userId(1L)
-                                        .nickName("모이닷 모임장")
-                                        .isAdmin(true)
-                                        .build(),
-                                VoteSelectPlaceUserResponse.builder()
-                                        .participationId(2L)
-                                        .userId(2L)
-                                        .nickName("모이닷 인원1")
-                                        .isAdmin(false)
-                                        .build(),
-                                VoteSelectPlaceUserResponse.builder()
-                                        .participationId(3L)
-                                        .userId(3L)
-                                        .nickName("모이닷 인원2")
-                                        .isAdmin(false)
-                                        .build()
-                        )
-                );
+        List<VoteParticipation> voteParticipations = List.of(
+                VoteParticipation.builder()
+                        .participationId(1L)
+                        .userId(1L)
+                        .nickName("모이닷 모임장")
+                        .isAdmin(true)
+                        .build(),
+                VoteParticipation.builder()
+                        .participationId(2L)
+                        .userId(2L)
+                        .nickName("모이닷 인원1")
+                        .isAdmin(false)
+                        .build(),
+                VoteParticipation.builder()
+                        .participationId(3L)
+                        .userId(3L)
+                        .nickName("모이닷 인원2")
+                        .isAdmin(false)
+                        .build()
+        );
+
+        given(voteService.readSelectPlaceUsers(anyLong(), any()))
+                .willReturn(new VoteSelectPlaceUserResponse(5, voteParticipations));
 
         MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/group/{groupId}/vote/select", 1L)
                 .header(AUTHORIZATION, "Bearer {token}")
@@ -307,13 +312,15 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                                 .description("상태 코드"),
                         fieldWithPath("message").type(JsonFieldType.STRING)
                                 .description("상태 메세지"),
-                        fieldWithPath("data[].participationId").type(JsonFieldType.NUMBER)
+                        fieldWithPath("data.totalVoteNum").type(JsonFieldType.NUMBER)
+                                .description("총 투표 인원 수"),
+                        fieldWithPath("data.voteParticipations[].participationId").type(JsonFieldType.NUMBER)
                                 .description("참여 ID"),
-                        fieldWithPath("data[].userId").type(JsonFieldType.NUMBER)
+                        fieldWithPath("data.voteParticipations[].userId").type(JsonFieldType.NUMBER)
                                 .description("유저 ID"),
-                        fieldWithPath("data[].nickName").type(JsonFieldType.STRING)
+                        fieldWithPath("data.voteParticipations[].nickName").type(JsonFieldType.STRING)
                                 .description("그룹 내 닉네임"),
-                        fieldWithPath("data[].isAdmin").type(JsonFieldType.BOOLEAN)
+                        fieldWithPath("data.voteParticipations[].isAdmin").type(JsonFieldType.BOOLEAN)
                                 .description("관리자 여부"))
                 .build();
 
@@ -387,6 +394,8 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                                 .description("투표 종료 일시"),
                         fieldWithPath("data.isVotingParticipant").type(JsonFieldType.BOOLEAN)
                                 .description("내가 투표했는지에 대한 여부"),
+                        fieldWithPath("data.totalVoteNum").type(JsonFieldType.NUMBER)
+                                .description("총 투표 인원 수"),
                         fieldWithPath("data.voteStatuses[].bestPlaceId").type(JsonFieldType.NUMBER)
                                 .description("장소 ID"),
                         fieldWithPath("data.voteStatuses[].votes").type(JsonFieldType.NUMBER)

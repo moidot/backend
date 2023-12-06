@@ -35,6 +35,10 @@ public class VoteSelectResultResponse {
 
     public static VoteSelectResultResponse response(
             Groups group, Vote vote, List<VoteStatus> voteStatuses,Boolean isVotingParticipant
+    private int totalVoteNum; // 총 투표한 인원 수
+    private List<VoteStatus> voteStatuses;
+    public static VoteSelectResultResponse response(
+            Groups group, Vote vote, List<VoteStatus> voteStatuses, int totalVoteNum
     ) {
 
         if (Optional.ofNullable(vote).isEmpty()) {
@@ -65,6 +69,7 @@ public class VoteSelectResultResponse {
                 .isEnabledMultipleChoice(vote.getIsEnabledMultipleChoice())
                 .endAt(endAt)
                 .isVotingParticipant(isVotingParticipant)
+                .totalVoteNum(totalVoteNum)
                 .voteStatuses(voteStatuses)
                 .build();
 

@@ -6,6 +6,7 @@ import com.moim.backend.domain.groupvote.repository.SelectPlaceRepository;
 import com.moim.backend.domain.groupvote.repository.VoteRepository;
 import com.moim.backend.domain.groupvote.request.service.VoteCreateServiceRequest;
 import com.moim.backend.domain.groupvote.response.VoteCreateResponse;
+import com.moim.backend.domain.groupvote.response.VoteParticipation;
 import com.moim.backend.domain.groupvote.response.VoteSelectPlaceUserResponse;
 import com.moim.backend.domain.groupvote.response.VoteSelectResultResponse;
 import com.moim.backend.domain.space.entity.BestPlace;
@@ -48,10 +49,9 @@ public class VoteService {
         Groups group = getGroup(groupId);
         validateAlreadyCreatedVote(groupId);
         validateUserIsAdmin(user, group);
+        Vote vote = voteRepository.save(toVoteEntity(request, groupId));
 
-        return VoteCreateResponse.response(
-                voteRepository.save(toVoteEntity(request, groupId))
-        );
+        return VoteCreateResponse.response(vote);
     }
 
     private void validateAlreadyCreatedVote(Long groupId) {
@@ -86,7 +86,9 @@ public class VoteService {
         validateVote(selectPlaceIds, now, vote);
         try {
             processUserVotes(selectPlaceIds, user, vote);
-            return VoteSelectResultResponse.response(group, vote, toVoteStatusResponse(user, vote), true);
+            return VoteSelectResultResponse.response(
+                    group, vote, toVoteStatusResponse(user, vote), selectPlaceRepository.countByVote(vote), true
+            );
         } catch (OptimisticLockException ole) {
             throw new CustomException(CONCURRENCY_ISSUE_DETECTED);
         }
@@ -128,28 +130,31 @@ public class VoteService {
         Groups group = getGroup(groupId);
         Optional<Vote> optionalVote = voteRepository.findByGroupId(groupId);
         if (optionalVote.isEmpty()) {
-            return VoteSelectResultResponse.response(group, null, new ArrayList<>(), false);
+            return VoteSelectResultResponse.response(group, null, new ArrayList<>(), 0,false);
         } else {
             // 투표 이후 현재 추천된 장소들의 현황을 조회
             Vote vote = optionalVote.get();
             Boolean isVotingParticipant = selectPlaceRepository.existsByVoteAndUserId(vote, user.getUserId());
             List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
             List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
-            return VoteSelectResultResponse.response(group, vote, voteStatuses, isVotingParticipant);
+            return VoteSelectResultResponse.response(group, vote, voteStatuses, selectPlaceRepository.countByVote(vote), isVotingParticipant);
         }
     }
 
     // 해당 장소 투표한 인원 리스트 조회하기 API
-    public List<VoteSelectPlaceUserResponse> readSelectPlaceUsers(Long groupId, Long bestPlaceId, Users user) {
+    public VoteSelectPlaceUserResponse readSelectPlaceUsers(Long groupId, Long bestPlaceId) {
         List<SelectPlace> selectPlaceList = getSelectPlaceList(bestPlaceId);
 
         List<Long> userIds = extractUserIdsFromSelectPlaces(selectPlaceList);
         List<Participation> participations = participationRepository.findAllByGroupGroupIdAndUserIdIn(groupId, userIds);
 
         Groups group = getGroup(groupId);
-        return participations.stream().map(participation -> VoteSelectPlaceUserResponse.response(
-                participation, isAdmin(group, participation))
+        Vote vote = getVote(groupId);
+
+        List<VoteParticipation> voteParticipations = participations.stream().map(
+                participation -> VoteParticipation.response(participation, isAdmin(group, participation))
         ).toList();
+        return VoteSelectPlaceUserResponse.response(selectPlaceRepository.countByVote(vote), voteParticipations);
     }
 
     private static Boolean isAdmin(Groups group, Participation participation) {
@@ -168,10 +173,6 @@ public class VoteService {
         BestPlace bestPlace = bestPlaceRepository.findById(bestPlaceId).orElseThrow(
                 () -> new CustomException(NOT_FOUND_BESTPLACE)
         );
-
-        if (bestPlace.getSelectPlaces().isEmpty()) {
-            throw new CustomException(NOT_VOTED_PLACE);
-        }
 
         return bestPlace.getSelectPlaces();
     }
@@ -196,7 +197,7 @@ public class VoteService {
         List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
         List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
 
-        return VoteSelectResultResponse.response(group, vote, voteStatuses, true);
+        return VoteSelectResultResponse.response(group, vote, voteStatuses, selectPlaceRepository.countByVote(vote),true);
     }
 
     // method
