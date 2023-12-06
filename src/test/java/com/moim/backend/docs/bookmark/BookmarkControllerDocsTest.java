@@ -4,6 +4,7 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.bookmark.controller.BookmarkController;
 import com.moim.backend.domain.bookmark.entity.Bookmark;
+import com.moim.backend.domain.bookmark.request.BookmarkDeleteRequest;
 import com.moim.backend.domain.bookmark.request.BookmarkSaveRequest;
 import com.moim.backend.domain.bookmark.response.BookmarkDetailResponse;
 import com.moim.backend.domain.bookmark.response.BookmarkSaveResponse;
@@ -21,6 +22,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.JsonFieldType.*;
@@ -72,7 +74,7 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
 
         RestDocumentationResultHandler document = documentHandler("saveBookmark", prettyPrint(), prettyPrint(), parameters);
 
-        given(bookmarkService.saveBookmark(any(),any()))
+        given(bookmarkService.saveBookmark(any(), any()))
                 .willReturn(
                         BookmarkSaveResponse.builder()
                                 .bookmarkId(1L)
@@ -125,7 +127,7 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
 
         given(bookmarkService.readBookmark(any()))
                 .willReturn(
-                        List.of(bookmark1,bookmark2,bookmark3)
+                        List.of(bookmark1, bookmark2, bookmark3)
                 );
 
         ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
@@ -153,6 +155,39 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
                         RestDocumentationRequestBuilders.get("/bookmark")
                                 .header("Authorization", "JWT AccessToken")
                 )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
+
+    @DisplayName("북마크 삭제하기 API")
+    @Test
+    void deleteBookmarks() throws Exception {
+        // given
+        BookmarkDeleteRequest request = new BookmarkDeleteRequest(List.of(1L, 2L, 3L));
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("북마크 API")
+                .summary("북마크 삭제하기 API")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .requestFields(
+                        fieldWithPath("bookmarkIds").type(ARRAY).description("북마크 ID 리스트"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메시지"))
+                .build();
+
+        RestDocumentationResultHandler document = documentHandler("deleteBookmarks", prettyPrint(), parameters);
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.delete("/bookmark")
+                                .header("Authorization", "JWT AccessToken")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document);
