@@ -28,6 +28,6 @@ public class Bookmark {
     @NotNull
     private Double latitude;
 
-    @NotNull
-    private Double longitude;
+    private
+    @NotNull Double longitude;
 }
