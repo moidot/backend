@@ -2,12 +2,13 @@ package com.moim.backend.domain.bookmark.service;
 
 import com.moim.backend.domain.bookmark.entity.Bookmark;
 import com.moim.backend.domain.bookmark.repository.BookmarkRepository;
+import com.moim.backend.domain.bookmark.request.BookmarkDeleteRequest;
 import com.moim.backend.domain.bookmark.request.BookmarkSaveRequest;
 import com.moim.backend.domain.bookmark.response.BookmarkDetailResponse;
 import com.moim.backend.domain.bookmark.response.BookmarkSaveResponse;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
-import org.assertj.core.api.Assertions;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -32,6 +34,9 @@ class BookmarkServiceTest {
 
     @Autowired
     private BookmarkService bookmarkService;
+
+    @Autowired
+    private EntityManager em;
 
     @DisplayName("유저가 북마크를 등록한다.")
     @Test
@@ -77,8 +82,30 @@ class BookmarkServiceTest {
                 );
     }
 
-    private void saveBookmark(Users user, String locationName) {
-        bookmarkRepository.save(Bookmark.builder()
+    @DisplayName("유저가 자신이 등록한 북마크를 여러개 제거한다.")
+    @Test
+    void deleteBookmarks() {
+        // given
+        Users user = savedUser("test@test.com", "테스트계정");
+        Bookmark bookmark1 = saveBookmark(user, "1");
+        Bookmark bookmark2 = saveBookmark(user, "2");
+        Bookmark bookmark3 = saveBookmark(user, "3");
+        List<Long> bookmarkIds = List.of(bookmark1.getBookmarkId(), bookmark2.getBookmarkId(), bookmark3.getBookmarkId());
+        BookmarkDeleteRequest request = new BookmarkDeleteRequest(bookmarkIds);
+
+        // when
+        bookmarkService.deleteBookmarks(request.toServiceRequest(), user);
+
+        // then
+        em.flush();
+        em.clear();
+        List<Bookmark> bookmarks = bookmarkRepository.findByUserId(user.getUserId());
+
+        assertThat(bookmarks.isEmpty()).isTrue();
+    }
+
+    private Bookmark saveBookmark(Users user, String locationName) {
+        return bookmarkRepository.save(Bookmark.builder()
                 .userId(user.getUserId())
                 .locationName(locationName)
                 .address("테스트")
