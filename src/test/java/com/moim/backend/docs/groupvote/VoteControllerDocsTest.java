@@ -124,6 +124,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .isAnonymous(true)
                 .isEnabledMultipleChoice(true)
                 .endAt("2023-08-10T18:00:00")
+                .isVotingParticipant(true)
                 .voteStatuses(createMockVoteStatuses())
                 .build();
 
@@ -170,6 +171,8 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                                 description("다중 선택 가능 여부"),
                         fieldWithPath("data.endAt").type(JsonFieldType.STRING)
                                 .description("투표 종료 일시"),
+                        fieldWithPath("data.isVotingParticipant").type(JsonFieldType.BOOLEAN)
+                                .description("내가 투표했는지에 대한 여부"),
                         fieldWithPath("data.voteStatuses[].bestPlaceId").type(JsonFieldType.NUMBER)
                                 .description("장소 ID"),
                         fieldWithPath("data.voteStatuses[].votes").type(JsonFieldType.NUMBER)
@@ -206,6 +209,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .isAnonymous(true)
                 .isEnabledMultipleChoice(true)
                 .endAt("2023-08-10 18:00:00")
+                .isVotingParticipant(true)
                 .voteStatuses(createMockVoteStatuses())
                 .build();
 
@@ -235,6 +239,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                         fieldWithPath("data.isAnonymous").type(JsonFieldType.BOOLEAN).description("익명 투표 여부"),
                         fieldWithPath("data.isEnabledMultipleChoice").type(JsonFieldType.BOOLEAN).description("다중 선택 가능 여부"),
                         fieldWithPath("data.endAt").type(JsonFieldType.STRING).description("투표 종료 일시"),
+                        fieldWithPath("data.isVotingParticipant").type(JsonFieldType.BOOLEAN).description("내가 투표했는지에 대한 여부"),
                         fieldWithPath("data.voteStatuses[].bestPlaceId").type(JsonFieldType.NUMBER).description("장소 ID"),
                         fieldWithPath("data.voteStatuses[].votes").type(JsonFieldType.NUMBER).description("장소 투표 수"),
                         fieldWithPath("data.voteStatuses[].placeName").type(JsonFieldType.STRING).description("장소 이름"),
@@ -336,6 +341,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .isAnonymous(true)
                 .isEnabledMultipleChoice(true)
                 .endAt("2023-08-10 18:00:00")
+                .isVotingParticipant(true)
                 .voteStatuses(createMockVoteStatuses())
                 .build();
 
@@ -379,6 +385,8 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                                 description("다중 선택 가능 여부"),
                         fieldWithPath("data.endAt").type(JsonFieldType.STRING)
                                 .description("투표 종료 일시"),
+                        fieldWithPath("data.isVotingParticipant").type(JsonFieldType.BOOLEAN)
+                                .description("내가 투표했는지에 대한 여부"),
                         fieldWithPath("data.voteStatuses[].bestPlaceId").type(JsonFieldType.NUMBER)
                                 .description("장소 ID"),
                         fieldWithPath("data.voteStatuses[].votes").type(JsonFieldType.NUMBER)

@@ -86,7 +86,7 @@ public class VoteService {
         validateVote(selectPlaceIds, now, vote);
         try {
             processUserVotes(selectPlaceIds, user, vote);
-            return VoteSelectResultResponse.response(group, vote, toVoteStatusResponse(user, vote));
+            return VoteSelectResultResponse.response(group, vote, toVoteStatusResponse(user, vote), true);
         } catch (OptimisticLockException ole) {
             throw new CustomException(CONCURRENCY_ISSUE_DETECTED);
         }
@@ -128,13 +128,14 @@ public class VoteService {
         Groups group = getGroup(groupId);
         Optional<Vote> optionalVote = voteRepository.findByGroupId(groupId);
         if (optionalVote.isEmpty()) {
-            return VoteSelectResultResponse.response(group, null, new ArrayList<>());
+            return VoteSelectResultResponse.response(group, null, new ArrayList<>(), false);
         } else {
             // 투표 이후 현재 추천된 장소들의 현황을 조회
             Vote vote = optionalVote.get();
+            Boolean isVotingParticipant = selectPlaceRepository.existsByVoteAndUserId(vote, user.getUserId());
             List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
             List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
-            return VoteSelectResultResponse.response(group, vote, voteStatuses);
+            return VoteSelectResultResponse.response(group, vote, voteStatuses, isVotingParticipant);
         }
     }
 
@@ -195,7 +196,7 @@ public class VoteService {
         List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getGroupId());
         List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
 
-        return VoteSelectResultResponse.response(group, vote, voteStatuses);
+        return VoteSelectResultResponse.response(group, vote, voteStatuses, true);
     }
 
     // method
