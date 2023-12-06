@@ -126,6 +126,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .isEnabledMultipleChoice(true)
                 .endAt("2023-08-10T18:00:00")
                 .isVotingParticipant(true)
+                .totalVoteNum(2)
                 .voteStatuses(createMockVoteStatuses())
                 .build();
 
@@ -213,6 +214,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .isEnabledMultipleChoice(true)
                 .endAt("2023-08-10 18:00:00")
                 .isVotingParticipant(true)
+                .totalVoteNum(2)
                 .voteStatuses(createMockVoteStatuses())
                 .build();
 
@@ -349,6 +351,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .isEnabledMultipleChoice(true)
                 .endAt("2023-08-10 18:00:00")
                 .isVotingParticipant(true)
+                .totalVoteNum(2)
                 .voteStatuses(createMockVoteStatuses())
                 .build();
 
