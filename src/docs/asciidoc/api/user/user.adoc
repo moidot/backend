@@ -1,0 +1,22 @@
+=== 소셜 로그인 API
+
+==== ⬇️ 플랫폼 별 로그인 페이지
+===== 네이버
+[source,http,options="nowrap"]
+https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=PTZPaqShPpkBUX1ethFy&state=STATE_STRING&redirect_uri=http:localhost:3000/login/naver
+
+===== 카카오
+[source,http,options="nowrap"]
+https://kauth.kakao.com/oauth/authorize?client_id=da98b670c28171c6bae91e1f6fa272c3&redirect_uri=http://localhost:3000/login/kakao&response_type=code
+
+===== 구글
+[source,http,options="nowrap"]
+https://accounts.google.com/o/oauth2/v2/auth?client_id=478295786445-vre0p84v6qeu2ioh73mpv4s99iin3klj.apps.googleusercontent.com&redirect_uri=http://localhost:3000/login/google&response_type=code&scope=email%20profile%20openid&access_type=offline
+
+==== HTTP Request QueryParameters
+include::{snippets}/social-login/query-parameters.adoc[]
+include::{snippets}/social-login/http-request.adoc[]
+
+==== HTTP Response body
+include::{snippets}/social-login/http-response.adoc[]
+include::{snippets}/social-login/response-fields.adoc[]
