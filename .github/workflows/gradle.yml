@@ -1,0 +1,68 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - uses : actions/checkout@v3
+    - run : touch ./src/main/resources/application.yml
+    - run : touch ./src/main/resources/application-prod.yml
+    - run : echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
+    - run : cat ./src/main/resources/application.yml
+      
+    - run: touch ./src/test/resources/application.yml
+    - run: echo "${{ secrets.TEST_APPLICATION }}" > ./src/test/resources/application.yml
+    - run: cat ./src/test/resources/application.yml
+
+    - run: mkdir -p ./src/main/resources/db/h2
+    - run: touch ./src/main/resources/db/h2/data.sql
+    - run: echo "${{ secrets.TEST_DATA }}" > ./src/main/resources/db/h2/data.sql
+    - run: cat ./src/main/resources/db/h2/data.sql
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew clean build
+
+    - name: Make zip file
+      run: zip -r ./moidotServer.zip .
+      shell: bash
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Upload to S3
+      run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./moidotServer.zip s3://moidot-bucket/moidotServer.zip
+
+    - name: Deploy
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        aws deploy create-deployment \
+        --application-name moidot-CD \
+        --deployment-group-name moidot-cicdGroup \
+        --file-exists-behavior OVERWRITE \
+        --s3-location bucket=moidot-bucket,bundleType=zip,key=moidotServer.zip \
+        --region ${{ secrets.AWS_REGION }}
