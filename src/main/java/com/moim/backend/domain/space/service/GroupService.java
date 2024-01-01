@@ -17,7 +17,6 @@ import com.moim.backend.domain.space.request.service.GroupParticipateUpdateServi
 import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.space.response.group.*;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
-import com.moim.backend.domain.subway.response.BestPlaceInterface;
 import com.moim.backend.global.dto.BestRegion;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
@@ -484,8 +483,13 @@ public class GroupService {
     }
 
     private void updateBestRegion(Groups group) {
+        // best-place 테이블에서 관련 정보 삭제
         bestPlaceRepository.deleteAllInBatch(bestPlaceRepository.findAllByGroup(group));
 
+        // 관련 Redis 삭제
+        redisDao.deleteSpringCache(CacheName.group, group.getGroupId().toString());
+
+        // 추천 지역 다시 계산 후 best-place 테이블 업데이트
         for (BestRegion bestRegion : calculateBestPlaces(group)) {
             bestPlaceRepository.save(
                     BestPlace.builder()
