@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface HotPlaceRepository extends JpaRepository<HotPlace, Long> {
+public interface HotPlaceRepository extends JpaRepository<HotPlace, Long>, HotPlaceCustomRepository {
 
     @Query(value = "select name, latitude, longitude, "
             + "ST_DISTANCE_SPHERE(POINT(longitude, latitude), POINT(:middleLongitude, :middleLatitude)) AS distanceFromMiddlePoint "
