@@ -244,14 +244,53 @@ class VoteServiceTest {
         // then
 
         assertThat(response)
-                .extracting("groupId", "voteId", "groupName", "groupDate", "endAt")
-                .contains(group.getGroupId(), vote.getVoteId(), group.getName(), "2023-07-10", "2023-08-03T12:00:00");
+                .extracting("groupId", "voteId", "groupName", "groupDate", "endAt", "isVotingParticipant")
+                .contains(group.getGroupId(), vote.getVoteId(), group.getName(), "2023-07-10", "2023-08-03T12:00:00", true);
 
         assertThat(response.getVoteStatuses())
                 .extracting("bestPlaceId", "votes", "placeName", "isVoted")
                 .contains(
                         tuple(bestPlace1.getBestPlaceId(), 2, "강남역", true),
                         tuple(bestPlace2.getBestPlaceId(), 1, "역삼역", true),
+                        tuple(bestPlace3.getBestPlaceId(), 1, "신논현역", false)
+                );
+    }
+
+    @DisplayName("유저가 자신의 그룹의 투표를 하지 않은 상황에서 투표 현황을 확인한다.")
+    @Test
+    void readVote2() {
+        // given
+        Users user = savedUser("test@test.com", "테스트");
+        Users admin = savedUser("admin@admin.com", "어드민");
+
+        Groups group = savedGroup(admin.getUserId(), "테스트 그룹");
+
+        BestPlace bestPlace1 = saveBestPlace(group, "강남역", 123.123456, 123.123456);
+        BestPlace bestPlace2 = saveBestPlace(group, "역삼역", 123.123456, 123.123456);
+        BestPlace bestPlace3 = saveBestPlace(group, "신논현역", 123.123456, 123.123456);
+
+        Vote vote = saveVote(group.getGroupId(), true, true, LocalDateTime.of(2023, 8, 3, 12, 0, 0));
+
+        SelectPlace selectPlace1 = saveSelectPlace(user, bestPlace1, vote);
+        SelectPlace selectPlace2 = saveSelectPlace(user, bestPlace3, vote);
+
+        em.flush();
+        em.clear();
+
+        // when
+        VoteSelectResultResponse response = voteService.readVote(group.getGroupId(), admin);
+
+        // then
+
+        assertThat(response)
+                .extracting("groupId", "voteId", "groupName", "groupDate", "endAt", "isVotingParticipant")
+                .contains(group.getGroupId(), vote.getVoteId(), group.getName(), "2023-07-10", "2023-08-03T12:00:00", false);
+
+        assertThat(response.getVoteStatuses())
+                .extracting("bestPlaceId", "votes", "placeName", "isVoted")
+                .contains(
+                        tuple(bestPlace1.getBestPlaceId(), 1, "강남역", false),
+                        tuple(bestPlace2.getBestPlaceId(), 0, "역삼역", false),
                         tuple(bestPlace3.getBestPlaceId(), 1, "신논현역", false)
                 );
     }

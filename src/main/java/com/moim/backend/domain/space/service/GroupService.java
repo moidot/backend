@@ -218,7 +218,7 @@ public class GroupService {
 
     // 모임 추천 지역 조회하기
     @TimeCheck
-    @Cacheable(value = CacheName.group, key = "#groupId")
+//    @Cacheable(value = CacheName.group, key = "#groupId") 오류로 인한 캐싱 해제
     public List<PlaceRouteResponse> getBestRegion(Long groupId) {
         Groups group = getGroup(groupId);
         List<Participation> participationList = participationRepository.findAllByGroup(group);

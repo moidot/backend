@@ -1,6 +1,7 @@
 package com.moim.backend.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moim.backend.domain.bookmark.controller.BookmarkController;
 import com.moim.backend.domain.groupvote.controller.VoteController;
 import com.moim.backend.domain.space.controller.GroupController;
 import com.moim.backend.domain.user.controller.UserController;
@@ -19,7 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(controllers = {
         GroupController.class,
         UserController.class,
-        VoteController.class
+        VoteController.class,
+        BookmarkController.class
 }, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {WebConfig.class, LoginInterceptor.class}
 ))
 @AutoConfigureMockMvc(addFilters = false)
@@ -39,6 +41,9 @@ public abstract class ControllerTestSupport {
 
     @MockBean
     protected VoteController voteController;
+
+    @MockBean
+    protected BookmarkController bookmarkController;
 
     @MockBean
     protected LoginArgumentResolver loginArgumentResolver;
