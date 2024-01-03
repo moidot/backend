@@ -805,7 +805,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .willReturn(new NicknameValidationResponse(false));
 
         ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
-                .tag("닉네임 유효성 체크 API")
+                .tag("스페이스 API")
                 .summary("닉네임 유효성 체크 API")
                 .queryParameters(
                         parameterWithName("groupId").description("그룹 Id"),
