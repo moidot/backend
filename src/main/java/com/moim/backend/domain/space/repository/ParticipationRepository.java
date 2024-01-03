@@ -3,13 +3,11 @@ package com.moim.backend.domain.space.repository;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.response.MiddlePoint;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -25,5 +23,5 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
 
     List<Participation> findAllByGroupGroupIdAndUserIdIn(Long group_groupId, List<Long> userId);
     List<Participation> findAllByGroup(Groups group);
-
+    List<Participation> findAllByGroupAndUserName(Groups group, String name);
 }

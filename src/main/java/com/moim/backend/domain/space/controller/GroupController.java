@@ -46,7 +46,7 @@ public class GroupController {
             @RequestBody @Valid GroupNameUpdateRequest request, @Login Users user
     ) {
         return CustomResponseEntity.success(
-                groupService.updateGroupName(groupId,request.toServiceRequest(), user)
+                groupService.updateGroupName(groupId, request.toServiceRequest(), user)
         );
     }
 
@@ -115,5 +115,14 @@ public class GroupController {
             @RequestParam String keyword
     ) {
         return CustomResponseEntity.success(groupService.keywordCentralizedMeetingSpot(x, y, local, keyword));
+    }
+
+    // 닉네임 유효성 체크
+    @GetMapping("/nickname")
+    public CustomResponseEntity<NicknameValidationResponse> checkNicknameValidation(
+            @RequestParam Long groupId,
+            @RequestParam String nickname
+    ) {
+        return CustomResponseEntity.success(groupService.checkNicknameValidation(groupId, nickname));
     }
 }

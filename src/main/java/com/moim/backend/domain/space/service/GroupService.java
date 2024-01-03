@@ -281,6 +281,13 @@ public class GroupService {
         return GroupDetailResponse.response(group, admin, regions);
     }
 
+    public NicknameValidationResponse checkNicknameValidation(Long groupId, String nickname) {
+        Groups group = getGroup(groupId);
+        List<Participation> participationList = participationRepository.findAllByGroupAndUserName(group, nickname);
+        boolean isDuplicated = (participationList.size() > 0) ? true : false;
+        return new NicknameValidationResponse(isDuplicated);
+    }
+
     private void toRegionsResponse(List<GroupRegionResponse> regions, Participation participation) {
         // 그룹화 지역 이름 생성
         String regionName = getRegionName(participation);
