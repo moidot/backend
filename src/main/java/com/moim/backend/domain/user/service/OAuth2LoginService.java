@@ -8,4 +8,6 @@ public interface OAuth2LoginService {
     Platform supports();
 
     Users toEntityUser(String code, Platform platform);
+
+    Users toEntityUserByToken(String accessToken);
 }

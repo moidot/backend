@@ -47,6 +47,16 @@ public class GoogleLoginService implements OAuth2LoginService {
                 .build();
     }
 
+    @Override
+    public Users toEntityUserByToken(String accessToken) {
+        GoogleUserResponse profile = getGoogleUser(accessToken);
+
+        return Users.builder()
+                .email(profile.getEmail())
+                .name(profile.getName())
+                .build();
+    }
+
     // Google AccessToken 반환
     private String getGoogleAccessToken(String decodedCode) {
         return toRequestGoogleToken(decodedCode).getAccessToken();

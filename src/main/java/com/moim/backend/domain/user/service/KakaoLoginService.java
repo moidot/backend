@@ -43,6 +43,16 @@ public class KakaoLoginService implements OAuth2LoginService {
                 .build();
     }
 
+    @Override
+    public Users toEntityUserByToken(String accessToken) {
+        KakaoUserResponse profile = getKakaoUser(accessToken);
+
+        return Users.builder()
+                .email(profile.getKakaoAccount().getEmail())
+                .name(profile.getProperties().getNickname())
+                .build();
+    }
+
     // Kakao AccessToken 응답
     private String getKakaoAccessToken(String code) {
         HttpEntity<?> httpEntity = createHttpEntityWithCode(code);

@@ -31,6 +31,14 @@ public class UserController {
         return CustomResponseEntity.success(userService.loginByOAuth(code, platform));
     }
 
+    // 소셜 로그인 API
+    @GetMapping("/signin/token")
+    public CustomResponseEntity<UserLoginResponse> socialLoginByAccessToken(
+            @RequestParam(name = "token") String token, @RequestParam Platform platform
+    ) {
+        return CustomResponseEntity.success(userService.loginByAccessToken(token, platform));
+    }
+
     // 엑세스 토큰 재발급
     @GetMapping("/refresh")
     public CustomResponseEntity<UserReissueResponse> refreshAccessToken(
