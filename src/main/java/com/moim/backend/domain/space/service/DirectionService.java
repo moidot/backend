@@ -1,13 +1,13 @@
 package com.moim.backend.domain.space.service;
 
 import com.moim.backend.domain.space.config.OdsayProperties;
+import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Groups;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.response.BusGraphicDataResponse;
 import com.moim.backend.domain.space.response.BusPathResponse;
 import com.moim.backend.domain.space.response.CarMoveInfo;
 import com.moim.backend.domain.space.response.PlaceRouteResponse;
-import com.moim.backend.domain.subway.response.BestPlaceInterface;
 import com.moim.backend.domain.user.config.KakaoProperties;
 import com.moim.backend.global.aspect.TimeCheck;
 import com.moim.backend.global.util.LoggingUtil;
@@ -33,7 +33,7 @@ public class DirectionService {
 
     @TimeCheck
     public Optional<PlaceRouteResponse.MoveUserInfo> getBusRouteToResponse(
-            BestPlaceInterface bestPlace, Groups group, Participation participation
+            BestPlace bestPlace, Groups group, Participation participation
     ) {
         Optional<PlaceRouteResponse.MoveUserInfo> moveUserInfo = Optional.empty();
         URI searchPathUri = odsayProperties.getSearchPathUriWithParams(bestPlace, participation);
@@ -43,7 +43,7 @@ public class DirectionService {
             LoggingUtil.builder()
                     .title("버스 길찾기")
                     .status("실패")
-                    .message("지역: " + bestPlace.getName() + ", url: " + searchPathUri)
+                    .message("지역: " + bestPlace.getPlaceName() + ", url: " + searchPathUri)
                     .build()
                     .print();
         } else {
@@ -55,7 +55,7 @@ public class DirectionService {
                 LoggingUtil.builder()
                         .title("버스 그래픽 데이터 조회")
                         .status("실패")
-                        .message("지역: " + bestPlace.getName() + ", url: " + graphicDataUri)
+                        .message("지역: " + bestPlace.getPlaceName() + ", url: " + graphicDataUri)
                         .build()
                         .print();
             } else {
@@ -67,7 +67,7 @@ public class DirectionService {
 
     @TimeCheck
     public Optional<PlaceRouteResponse.MoveUserInfo> getCarRouteToResponse(
-            BestPlaceInterface bestPlace, Groups group, Participation participation
+            BestPlace bestPlace, Groups group, Participation participation
     ) {
         Optional<PlaceRouteResponse.MoveUserInfo> moveUserInfo = Optional.empty();
         HttpHeaders headers = new HttpHeaders();
@@ -82,7 +82,7 @@ public class DirectionService {
             LoggingUtil.builder()
                     .title("차 길찾기")
                     .status("실패")
-                    .message("지역: " + bestPlace.getName() + ", url: " + searchCarPathUri)
+                    .message("지역: " + bestPlace.getPlaceName() + ", url: " + searchCarPathUri)
                     .build()
                     .print();
         } else {

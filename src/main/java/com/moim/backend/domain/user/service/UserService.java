@@ -43,6 +43,22 @@ public class UserService {
         return UserLoginResponse.response(user, accessToken, refreshToken);
     }
 
+    // 소셜 로그인
+    @Transactional
+    public UserLoginResponse loginByAccessToken(String token, Platform platform) {
+        // 요청된 로그인 플랫폼 확인 후 소셜 로그인 진행
+        Users userEntity = oauthLoginProcessByToken(token, platform);
+
+        // 현재 서비스 내 회원인지 검증 및 save
+        Users user = saveOrUpdate(userEntity);
+
+        // 서비스 JWT 토큰 발급
+        String accessToken = jwtService.createAccessToken(user.getEmail());
+        String refreshToken = jwtService.createRefreshToken(user.getEmail());
+
+        return UserLoginResponse.response(user, accessToken, refreshToken);
+    }
+
     public UserReissueResponse reissueAccessToken(String refreshToken) {
         return UserReissueResponse.toResponse(jwtService.reissueAccessToken(refreshToken));
     }
@@ -61,10 +77,25 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(FAIL_SOCIAL_LOGIN));
     }
 
+    // method
+    private Users oauthLoginProcessByToken(String token, Platform platform) {
+        return getOptionalSocialUserEntityByToken(token, platform)
+                .orElseThrow(() -> new CustomException(FAIL_SOCIAL_LOGIN));
+    }
+
     private Optional<Users> getOptionalSocialUserEntity(String code, Platform platform) {
         for (OAuth2LoginService oAuth2LoginService : oAuth2LoginServices) {
             if (oAuth2LoginService.supports().equals(platform)) {
                 return Optional.of(oAuth2LoginService.toEntityUser(code, platform));
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<Users> getOptionalSocialUserEntityByToken(String accessToken, Platform platform) {
+        for (OAuth2LoginService oAuth2LoginService : oAuth2LoginServices) {
+            if (oAuth2LoginService.supports().equals(platform)) {
+                return Optional.of(oAuth2LoginService.toEntityUserByToken(accessToken));
             }
         }
         return Optional.empty();

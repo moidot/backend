@@ -46,6 +46,16 @@ public class NaverLoginService implements OAuth2LoginService {
                 .build();
     }
 
+    @Override
+    public Users toEntityUserByToken(String accessToken) {
+        NaverUserResponse.NaverUserDetail profile = getNaverUser(accessToken);
+
+        return Users.builder()
+                .email(profile.getEmail())
+                .name(profile.getName())
+                .build();
+    }
+
     // Naver AccessToken 응답
     private String getNaverAccessToken(String code) {
         NaverTokenResponse response = toRequestTokenNaverAccessToken(code);

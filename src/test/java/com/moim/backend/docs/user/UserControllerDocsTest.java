@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerDocsTest extends RestDocsSupport {
 
     private final UserService userService = mock(UserService.class);
+    private final String code = "Hx-PXmWuFaGakYCEy8hkUIVOWUSXIOtD7cosKDSIKsiwodR1g35KXQQWX9H4hXlcpZ45eSgo3dGkWWWOSX-z9iQ";
     private final String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5dS1qdW5nMzE0NzZAbmF2ZXIuY29tIiwiZXhwIjoxNjg5MjYwODM2fQ.cgZ8eFDU_Gz7Z3EghXxoa3v-iXUeQmBZ1AfKCBQZnnqFJ6mqMqGdiTS5uVCF1lIKBarXeD6nEmRZj9Ng94pnHw";
     private final String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5dS1qdW5nMzE0NzZAbmF2ZXIuY29tIiwiZXhwIjoxNjg5MjYwODM2fQ.cgZ8eFDU_Gz7Z3EghXxoa3v-iXUeQmBZ1AfKCBQZnnqFJ6mqMqGdiTS5uVCF1lIKBarXeD6nEmRZj9Ng94pnHw";
 
@@ -40,7 +41,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
     @Test
     void loginByOAuth() throws Exception {
         // given
-        given(userService.loginByOAuth("Hx-PXmWuFaGakYCEy8hkUIVOWUSXIOtD7cosKDSIKsiwodR1g35KXQQWX9H4hXlcpZ45eSgo3dGkWWWOSX-z9iQ", NAVER))
+        given(userService.loginByOAuth(code, NAVER))
                 .willReturn(
                         UserLoginResponse.builder()
                                 .userId(1L)
@@ -73,6 +74,51 @@ public class UserControllerDocsTest extends RestDocsSupport {
 
         RestDocumentationResultHandler document =
                 documentHandler("social-login", prettyPrint(), parameters);
+
+        // when // then
+        mockMvc.perform(httpRequest)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
+
+    @DisplayName("소셜 로그인 API")
+    @Test
+    void socialLoginByAccessToken() throws Exception {
+        // given
+        given(userService.loginByAccessToken(accessToken, NAVER))
+                .willReturn(
+                        UserLoginResponse.builder()
+                                .userId(1L)
+                                .email("moidots@gmail.com")
+                                .name("모이닷")
+                                .accessToken(accessToken)
+                                .refreshToken(refreshToken)
+                                .build()
+                );
+
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/auth/signin/token")
+                .param("token", accessToken)
+                .param("platform", "NAVER");
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("유저 API")
+                .summary("소셜 로그인 API")
+                .queryParameters(
+                        parameterWithName("token").description("소셜 로그인 redirect 엑세스 코드"),
+                        parameterWithName("platform").description("플랫폼 : 'NAVER' / 'KAKAO' / 'GOOGLE' "))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"),
+                        fieldWithPath("data.userId").type(NUMBER).description("유저 아이디"),
+                        fieldWithPath("data.email").type(STRING).description("유저 이메일"),
+                        fieldWithPath("data.name").type(STRING).description("유저 이름"),
+                        fieldWithPath("data.accessToken").type(STRING).description("엑세스 토큰"),
+                        fieldWithPath("data.refreshToken").type(STRING).description("리프레쉬 토큰"))
+                .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("social-login-by-access-token", prettyPrint(), parameters);
 
         // when // then
         mockMvc.perform(httpRequest)

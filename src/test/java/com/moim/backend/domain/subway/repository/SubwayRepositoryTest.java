@@ -1,7 +1,7 @@
 package com.moim.backend.domain.subway.repository;
 
 import com.moim.backend.TestQueryDSLConfig;
-import com.moim.backend.domain.subway.entity.Subway;
+import com.moim.backend.global.dto.BestRegion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ class SubwayRepositoryTest {
     @Test
     void getNearestStations() {
         // when
-        List<Subway> subwayList = subwayRepository.getNearestStationsList(37.498085, 127.027706);
+        List<BestRegion> subwayList = subwayRepository.getNearestStationsList(37.498085, 127.027706);
 
         // then
         assertThat(subwayList)

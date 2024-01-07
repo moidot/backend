@@ -16,9 +16,8 @@ import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequ
 import com.moim.backend.domain.space.request.service.GroupParticipateUpdateServiceRequest;
 import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.space.response.group.*;
-import com.moim.backend.domain.subway.entity.Subway;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
-import com.moim.backend.domain.subway.response.BestPlaceInterface;
+import com.moim.backend.global.dto.BestRegion;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.global.aspect.TimeCheck;
@@ -84,16 +83,16 @@ public class GroupService {
     }
 
     private void saveNearestStationList(Groups group, Double latitude, Double longitude) {
-        List<Subway> nearestStationsList =
+        List<BestRegion> nearestStationsList =
                 subwayRepository.getNearestStationsList(latitude, longitude);
 
-        for (Subway subway : nearestStationsList) {
+        for (BestRegion bestRegion : nearestStationsList) {
             bestPlaceRepository.save(
                     BestPlace.builder()
                             .group(group)
-                            .placeName(subway.getName())
-                            .latitude(subway.getLatitude().doubleValue())
-                            .longitude(subway.getLongitude().doubleValue())
+                            .placeName(bestRegion.getName())
+                            .latitude(bestRegion.getLatitude())
+                            .longitude(bestRegion.getLongitude())
                             .build()
             );
         }
@@ -104,13 +103,15 @@ public class GroupService {
     @CacheEvict(value = CacheName.group, key = "#request.getGroupId()")
     public GroupParticipateResponse participateGroup(GroupParticipateServiceRequest request, Users user) {
         Groups group = getGroup(request.getGroupId());
-        participateGroupValidate(request, user, group);
 
+        participateGroupValidate(request, user, group);
         Participation participation = saveParticipation(
                 user, group, request.getUserName(),
                 request.getLocationName(), request.getLatitude(), request.getLongitude(),
                 request.getTransportationType(), request.getPassword()
         );
+
+        updateBestRegion(group);
 
         return GroupParticipateResponse.response(participation);
     }
@@ -145,7 +146,14 @@ public class GroupService {
     ) {
         Participation myParticipate = getParticipate(request.getParticipateId());
         validateParticipationMyInfo(user, myParticipate);
+        // 추천 지역 업데이트 필요한지 확인(업데이트가 필요한 경우: 위치가 변경되었을 때)
+        boolean isRequiredBestRegionUpdate = isUpdateBestRegionRequired(request, myParticipate);
+        // 참여 정보 수정
         myParticipate.update(request);
+        // 추천 지역 업데이트
+        if (isRequiredBestRegionUpdate) {
+            updateBestRegion(myParticipate.getGroup());
+        }
         return GroupParticipateUpdateResponse.response(myParticipate);
     }
 
@@ -161,15 +169,13 @@ public class GroupService {
         // 투표 시작시 모임 나가기 불가
         checkIfVoteStartedBeforeLeaving(optionalVote);
 
-        // 관련 Redis 삭제
-        redisDao.deleteSpringCache(CacheName.group, group.getGroupId().toString());
 
         // 모임장이 나가는 경우 스페이스 삭제
         if (deleteGroupIfAdminLeaves(user, group)) {
             return GroupExitResponse.response(true, "모임이 삭제되었습니다.");
         }
 
-        participationRepository.delete(myParticipate);
+        removeParticipation(myParticipate, group);
         return GroupExitResponse.response(false, "모임에서 나갔습니다.");
     }
 
@@ -194,7 +200,7 @@ public class GroupService {
         Participation participate = getParticipate(participateId);
         Groups group = participate.getGroup();
         validateAdminStatus(user.getUserId(), group.getAdminId());
-        participationRepository.delete(participate);
+        removeParticipation(participate, group);
         return null;
     }
 
@@ -211,30 +217,12 @@ public class GroupService {
 
     // 모임 추천 지역 조회하기
     @TimeCheck
-//    @Cacheable(value = CacheName.group, key = "#groupId") 오류로 인한 캐싱 해제
+    @Cacheable(value = CacheName.group, key = "#groupId")
     public List<PlaceRouteResponse> getBestRegion(Long groupId) {
         Groups group = getGroup(groupId);
-        // 중간 좌표 구하기
-        MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
-
-        // 유효범위 찾기
         List<Participation> participationList = participationRepository.findAllByGroup(group);
-        double validRange = getValidRange(participationList, middlePoint);
 
-        // 근처 지하철역 찾기
-        List<BestPlaceInterface> bestPlaceList = subwayRepository.getBestSubwayList(
-                middlePoint.getLatitude(), middlePoint.getLongitude(), validRange
-        );
-
-        // 근처에 지하철역이 없다면, 인기 장소 찾기
-        if (bestPlaceList.isEmpty()) {
-            bestPlaceList = hotPlaceRepository.getBestHotPlaceList(
-                    middlePoint.getLatitude(), middlePoint.getLongitude(), validRange
-            );
-        }
-
-        // 경로 찾기
-        return bestPlaceList.stream().map(bestPlace -> new PlaceRouteResponse(
+        return bestPlaceRepository.findAllByGroup(group).stream().map(bestPlace -> new PlaceRouteResponse(
                 bestPlace, getMoveUserInfoList(bestPlace, group, participationList)
         )).collect(Collectors.toList());
     }
@@ -291,6 +279,13 @@ public class GroupService {
         group.getParticipations().forEach(participation -> toRegionsResponse(regions, participation));
 
         return GroupDetailResponse.response(group, admin, regions);
+    }
+
+    public NicknameValidationResponse checkNicknameValidation(Long groupId, String nickname) {
+        Groups group = getGroup(groupId);
+        List<Participation> participationList = participationRepository.findAllByGroupAndUserName(group, nickname);
+        boolean isDuplicated = (participationList.size() > 0) ? true : false;
+        return new NicknameValidationResponse(isDuplicated);
     }
 
     private void toRegionsResponse(List<GroupRegionResponse> regions, Participation participation) {
@@ -449,7 +444,7 @@ public class GroupService {
     }
 
     private List<PlaceRouteResponse.MoveUserInfo> getMoveUserInfoList(
-            BestPlaceInterface bestPlace,
+            BestPlace bestPlace,
             Groups group,
             List<Participation> participationList
     ) {
@@ -486,5 +481,62 @@ public class GroupService {
         return userRepository.findById(userId).orElseThrow(
                 () -> new CustomException(NOT_FOUND_PARTICIPATE)
         );
+    }
+
+    private void removeParticipation(Participation participate, Groups group) {
+        participationRepository.delete(participate);
+        // 추천 지역 다시 계산
+        updateBestRegion(group);
+    }
+
+    private void updateBestRegion(Groups group) {
+        // best-place 테이블에서 관련 정보 삭제
+        bestPlaceRepository.deleteAllInBatch(bestPlaceRepository.findAllByGroup(group));
+
+        // 관련 Redis 삭제
+        redisDao.deleteSpringCache(CacheName.group, group.getGroupId().toString());
+
+        // 추천 지역 다시 계산 후 best-place 테이블 업데이트
+        for (BestRegion bestRegion : calculateBestPlaces(group)) {
+            bestPlaceRepository.save(
+                    BestPlace.builder()
+                            .group(group)
+                            .placeName(bestRegion.getName())
+                            .latitude(bestRegion.getLatitude())
+                            .longitude(bestRegion.getLongitude())
+                            .build()
+            );
+        }
+    }
+
+    private List<BestRegion> calculateBestPlaces(Groups group) {
+        // 중간 좌표 구하기
+        MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
+
+        // 유효범위 찾기
+        List<Participation> participationList = participationRepository.findAllByGroup(group);
+        double validRange = getValidRange(participationList, middlePoint);
+
+        // 근처 지하철역 찾기
+        List<BestRegion> bestRegionList = subwayRepository.getNearestStationsList(
+                middlePoint.getLatitude(), middlePoint.getLongitude(), validRange
+        );
+
+        // 근처에 지하철역이 없다면, 인기 장소 찾기
+        if (bestRegionList.isEmpty()) {
+            bestRegionList = hotPlaceRepository.getNearestHotPlaceList(
+                    middlePoint.getLatitude(), middlePoint.getLongitude(), validRange
+            );
+        }
+
+        return bestRegionList;
+    }
+
+    // 추천 지역 업데이트가 필요한지에 대한 여부 판단. 참여자의 위치 정보가 수정되었다면 업데이트 필요.
+    private boolean isUpdateBestRegionRequired(GroupParticipateUpdateServiceRequest request, Participation myParticipate) {
+        if (request.getLatitude() != myParticipate.getLatitude() || request.getLongitude() != myParticipate.getLongitude()) {
+            return true;
+        }
+        return false;
     }
 }

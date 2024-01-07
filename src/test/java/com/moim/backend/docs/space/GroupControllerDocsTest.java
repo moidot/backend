@@ -1,6 +1,7 @@
 package com.moim.backend.docs.space;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
@@ -10,6 +11,7 @@ import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRe
 import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.space.response.group.*;
 import com.moim.backend.domain.space.service.GroupService;
+import com.moim.backend.domain.user.response.UserLoginResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
@@ -22,6 +24,7 @@ import java.util.List;
 import static com.epages.restdocs.apispec.Schema.schema;
 import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
 import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
+import static com.moim.backend.domain.user.config.Platform.NAVER;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -789,6 +792,38 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .param("groupId", "1")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
+
+    @DisplayName("닉네임 유효성 체크")
+    @Test
+    void checkNicknameValidation() throws Exception {
+        // given
+        given(groupService.checkNicknameValidation(1L, "중복될일없는 특이한 닉네임"))
+                .willReturn(new NicknameValidationResponse(false));
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("닉네임 유효성 체크 API")
+                .queryParameters(
+                        parameterWithName("groupId").description("그룹 Id"),
+                        parameterWithName("nickname").description("닉네임"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"),
+                        fieldWithPath("data.duplicated").type(BOOLEAN).description("닉네임 중복 여부"))
+                .responseSchema(schema("NicknameValidationResponse"))
+                .build();
+        RestDocumentationResultHandler document = documentHandler("check-nickname-validation", prettyPrint(), prettyPrint(), parameters);
+
+        // when // then
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/group/nickname")
+                .param("groupId", "1")
+                .param("nickname", "중복될일없는 특이한 닉네임");
+
+        mockMvc.perform(httpRequest)
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document);

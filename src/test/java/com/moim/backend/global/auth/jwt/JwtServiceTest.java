@@ -24,10 +24,11 @@ public class JwtServiceTest {
     @Test
     protected void createTokenTest() {
         // given
-        String mail = "test@gmail.com";
+        String mail = "kathy.jungmin.lee@gmail.com";
 
         // when
         String token = jwtService.createAccessToken(mail);
+        System.out.println("token = " + token);
         String tokenPattern = ".+\\..+\\..+";
 
         // then

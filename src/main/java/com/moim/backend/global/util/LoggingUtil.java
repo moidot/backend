@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 public class LoggingUtil {
     private String title;
-    private String status = "";
+    private String status;
     private String message;
 
     public void print() {
