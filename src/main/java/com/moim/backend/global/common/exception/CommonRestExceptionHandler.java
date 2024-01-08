@@ -113,14 +113,14 @@ public class CommonRestExceptionHandler extends RuntimeException {
         return CustomResponseEntity.fail("잘못된 JWT 서명입니다.");
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(ExpiredJwtException.class)
     public CustomResponseEntity<String> expiredJwtExceptionHandler(
             ExpiredJwtException e, HttpServletRequest request
     ) {
         log.error("url: \"{}\", message: {}", request.getRequestURI(), e.getMessage());
 
-        return CustomResponseEntity.fail(e.getMessage());
+        return CustomResponseEntity.fail("토큰이 만료되었습니다.");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
