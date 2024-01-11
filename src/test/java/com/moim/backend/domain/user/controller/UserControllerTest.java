@@ -40,4 +40,16 @@ public class UserControllerTest extends ControllerTestSupport {
                 .andExpect(status().isOk());
     }
 
+    @DisplayName("회원탈퇴 API")
+    @Test
+    void deleteAccount() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/auth")
+                                .header(AUTHORIZATION, "Bearer {token}")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }

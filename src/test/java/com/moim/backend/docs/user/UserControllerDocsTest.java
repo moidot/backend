@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static com.moim.backend.domain.user.config.Platform.NAVER;
 import static org.mockito.BDDMockito.given;
@@ -184,6 +185,33 @@ public class UserControllerDocsTest extends RestDocsSupport {
                         RestDocumentationRequestBuilders.delete("/auth/logout")
                                 .header(AUTHORIZATION, "Bearer {token}")
                 )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
+
+    @DisplayName("회원탈퇴 API")
+    @Test
+    void deleteAccount() throws Exception {
+        // given
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("유저 API")
+                .summary("회원탈퇴 API")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"))
+                .build();
+
+        RestDocumentationResultHandler document = documentHandler("delete-account", prettyPrint(), parameters);
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.delete("/auth")
+                                .header(AUTHORIZATION, "Bearer {token}"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document);
