@@ -21,19 +21,15 @@ public enum Result {
 
     // Space
     UNEXPECTED_EXCEPTION(-500,"예상치 못한 예외가 발생했습니다."),
-
     NOT_FOUND_GROUP(-1001,"존재하지 않는 그룹입니다."),
-
     INVALID_TRANSPORTATION(-1002,"잘못된 이동수단 입니다."),
-
     NOT_FOUND_PARTICIPATE(-1003,"존재하지 않는 참여자 정보 입니다."),
-
     NOT_MATCHED_PARTICIPATE(-1004,"자신의 참여 정보가 아닙니다."),
-
     NOT_ADMIN_USER(-1005,"해당 유저는 그룹의 어드민이 아닙니다."),
     DUPLICATE_PARTICIPATION(-1006, "동일한 유저가 이미 스페이스에 참여하고 있습니다."),
     NOT_REQUEST_NAVER(-1007, "네이버 API 요청에 실패하였습니다."),
     INCORRECT_LOCATION_NAME(-1009, "잘못된 지역 이름 입니다."),
+    NOT_ALL_EXIT_PARTICIPATE(-1010, "투표가 종료되지 않은 그룹이 있습니다."),
 
     // Vote
     NOT_CREATED_VOTE(-2001, "해당 그룹은 투표가 개설되지 않았습니다."),
