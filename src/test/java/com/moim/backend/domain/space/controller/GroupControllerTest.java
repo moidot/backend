@@ -7,13 +7,12 @@ import com.moim.backend.domain.space.request.controller.GroupParticipateRequest;
 import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
 
 import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
-import static org.springframework.http.MediaType.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -155,6 +154,19 @@ class GroupControllerTest extends ControllerTestSupport {
                 .andExpect(status().isOk());
     }
 
+    @DisplayName("모임 전체 나가기 API")
+    @Test
+    void allParticipateExit() throws Exception {
+        // given
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/group/participate/all")
+                                .header("Authorization", "JWT AccessToken")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
     @DisplayName("모임 나가기 API - 참여자 ID 미입력 실패")
     @Test
     void failWhenParticipantIdNotProvided() throws Exception {
@@ -255,4 +267,5 @@ class GroupControllerTest extends ControllerTestSupport {
                 .andDo(print())
                 .andExpect(status().isOk());
     }
+
 }

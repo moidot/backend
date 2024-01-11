@@ -335,6 +335,23 @@ public class GroupService {
         return null;
     }
 
+    // 모임 전체 나가기 API
+    public Void allParticipateExit(Users user) {
+        Long userId = user.getUserId();
+        List<Participation> participations = participationRepository.findByUserId(userId);
+
+        for (Participation participation : participations) {
+            Long groupId = participation.getGroup().getGroupId();
+            Optional<Vote> optionalVote = voteRepository.findByGroupId(groupId);
+            if (optionalVote.isPresent() && !optionalVote.get().getIsClosed()) {
+                throw new CustomException(NOT_ALL_EXIT_PARTICIPATE);
+            }
+        }
+
+        participationRepository.deleteByUserId(userId);
+        return null;
+    }
+
     // validate
 
     private static URI createNaverRequestUri(String local, String keyword) {

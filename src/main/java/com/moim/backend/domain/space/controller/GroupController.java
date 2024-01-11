@@ -82,6 +82,14 @@ public class GroupController {
         return CustomResponseEntity.success(groupService.participateExit(participateId, user));
     }
 
+    // 모임 전체 나가기 API
+    @DeleteMapping("/participate/all")
+    public CustomResponseEntity<Void> allParticipateExit(
+            @Login Users user
+    ) {
+        return CustomResponseEntity.success(groupService.allParticipateExit(user));
+    }
+
     // 모임원 내보내기 API
     @DeleteMapping("/participate/removal")
     public CustomResponseEntity<Void> participateRemoval(

@@ -828,4 +828,28 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .andExpect(status().isOk())
                 .andDo(document);
     }
+
+    @DisplayName("모임 전체 나가기 API")
+    @Test
+    void allParticipateExit() throws Exception {
+        // given
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("모임 전체 나가기 API")
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"))
+                .build();
+
+        RestDocumentationResultHandler document = documentHandler("all-participate-exit", prettyPrint(), parameters);
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.delete("/group/participate/all")
+                                .header("Authorization", "JWT AccessToken")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
 }

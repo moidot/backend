@@ -39,6 +39,7 @@ import java.util.Optional;
 
 import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
 import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
+import static com.moim.backend.global.common.Result.*;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
@@ -317,6 +318,73 @@ class GroupServiceTest {
         assertThat(optionalParticipation.isEmpty()).isTrue();
     }
 
+    @DisplayName("모임원이 속해있는 모임에서 나가기를 한다.")
+    @Test
+    void allParticipateExit() {
+        // given
+        Users admin = savedUser("admin@test.com", "테스트 어드민");
+        Users user = savedUser("test@test.com", "테스트 이름");
+        Groups group1 = savedGroup(admin.getUserId(), "테스트 그룹");
+        Groups group2 = savedGroup(admin.getUserId(), "테스트 그룹");
+        Groups group3 = savedGroup(admin.getUserId(), "테스트 그룹");
+
+
+        savedParticipation(user, group1, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
+        savedParticipation(user, group2, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
+        savedParticipation(user, group3, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
+
+        em.flush();
+        em.clear();
+
+        // when
+        groupService.allParticipateExit(user);
+
+        // then
+        List<Participation> group1Participations = participationRepository.findAllByGroup(group1);
+        List<Participation> group2Participations = participationRepository.findAllByGroup(group2);
+        List<Participation> group3Participations = participationRepository.findAllByGroup(group3);
+
+        assertThat(group1Participations.isEmpty()).isTrue();
+        assertThat(group2Participations.isEmpty()).isTrue();
+        assertThat(group3Participations.isEmpty()).isTrue();
+    }
+
+    @DisplayName("모임원이 속해있는 모임에서 나가기를 할때 투표가 종료되지 않은 상태면 예외가 발생한다.")
+    @Test
+    void allParticipateExitThrowNotClosedVote() {
+        // given
+        Users admin = savedUser("admin@test.com", "테스트 어드민");
+        Users user = savedUser("test@test.com", "테스트 이름");
+        Groups group1 = savedGroup(admin.getUserId(), "테스트 그룹");
+        savedVote(group1);
+        Groups group2 = savedGroup(admin.getUserId(), "테스트 그룹");
+        Groups group3 = savedGroup(admin.getUserId(), "테스트 그룹");
+
+        savedParticipation(user, group1, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
+        savedParticipation(user, group2, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
+        savedParticipation(user, group3, "참여자", "어딘가", 37.5660, 126.1234, PUBLIC);
+
+        em.flush();
+        em.clear();
+
+        // when // then
+        assertThatThrownBy(() -> groupService.allParticipateExit(user))
+                .extracting("result.code", "result.message")
+                .contains(NOT_ALL_EXIT_PARTICIPATE.getCode(), NOT_ALL_EXIT_PARTICIPATE.getMessage());
+    }
+
+    private Vote savedVote(Groups group1) {
+        return voteRepository.save(
+                Vote.builder()
+                        .groupId(group1.getGroupId())
+                        .isClosed(false)
+                        .isAnonymous(false)
+                        .isEnabledMultipleChoice(true)
+                        .endAt(LocalDateTime.of(2023, 9, 23, 15, 0))
+                        .build()
+        );
+    }
+
     @DisplayName("모임장이 모임에서 나가기를 하면 해당 모임이 삭제된다.")
     @Test
     void groupAdminExitsThenGroupIsDeleted() {
@@ -406,15 +474,7 @@ class GroupServiceTest {
 
         BestPlace bestPlace1 = saveBestPlace(group, "성신여대입구역", 1.0, 1.0);
 
-        Vote vote = voteRepository.save(
-                Vote.builder()
-                        .groupId(group.getGroupId())
-                        .isClosed(false)
-                        .isAnonymous(false)
-                        .isEnabledMultipleChoice(true)
-                        .endAt(LocalDateTime.of(2023, 9, 23, 15, 0))
-                        .build()
-        );
+        Vote vote = savedVote(group);
 
         SelectPlace selectPlace1 = saveSelectPlace(admin.getUserId(), bestPlace1, vote);
 
@@ -553,7 +613,7 @@ class GroupServiceTest {
         // when // then
         assertThatThrownBy(() -> groupService.participateGroup(request, user))
                 .extracting("result.code", "result.message")
-                .contains(Result.DUPLICATE_PARTICIPATION.getCode(), Result.DUPLICATE_PARTICIPATION.getMessage());
+                .contains(DUPLICATE_PARTICIPATION.getCode(), DUPLICATE_PARTICIPATION.getMessage());
     }
 
     @DisplayName("네이버 API 를 이용해 장소의 정보를 가져온다.")
@@ -708,7 +768,7 @@ class GroupServiceTest {
             }
             return sb.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new CustomException(Result.FAIL);
+            throw new CustomException(FAIL);
         }
     }
 }
