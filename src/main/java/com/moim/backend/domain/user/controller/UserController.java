@@ -55,4 +55,12 @@ public class UserController {
     ) {
         return CustomResponseEntity.success(userService.logout(user, atk));
     }
+
+    // 회원탈퇴 API
+    @DeleteMapping("")
+    public CustomResponseEntity<Void> deleteAccount(
+            @Login Users user
+    ) {
+        return CustomResponseEntity.success(userService.deleteAccount(user));
+    }
 }

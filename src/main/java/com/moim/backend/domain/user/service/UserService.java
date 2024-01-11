@@ -1,6 +1,9 @@
 package com.moim.backend.domain.user.service;
 
+import com.moim.backend.domain.bookmark.repository.BookmarkRepository;
+import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.user.config.Platform;
+import com.moim.backend.domain.user.entity.BookmarkPlace;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.domain.user.response.UserLoginResponse;
@@ -24,6 +27,8 @@ public class UserService {
 
     private final List<OAuth2LoginService> oAuth2LoginServices;
     private final UserRepository userRepository;
+    private final BookmarkRepository bookmarkRepository;
+    private final ParticipationRepository participationRepository;
     private final JwtService jwtService;
     private final RedisService redisService;
 
@@ -114,5 +119,12 @@ public class UserService {
                 .email(request.getEmail())
                 .name(request.getName())
                 .build();
+    }
+
+    public Void deleteAccount(Users user) {
+        Long userId = user.getUserId();
+        bookmarkRepository.deleteByUserId(userId);
+        participationRepository.deleteByUserId(userId);
+        return null;
     }
 }
