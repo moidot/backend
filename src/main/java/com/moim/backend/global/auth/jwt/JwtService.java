@@ -66,6 +66,17 @@ public class JwtService implements InitializingBean {
         }
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("JWT 토큰이 잘못되었습니다.");
+        }
+    }
+
+    public void validateRefreshToken(String token) {
+        if (redisDao.getValues(token) != null) {
+            throw new CustomException(IS_TOKEN_LOGOUT);
+        }
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
         } catch (ExpiredJwtException e) {
             throw new CustomException(IS_TOKEN_LOGOUT);
         } catch (IllegalArgumentException e) {
@@ -96,7 +107,7 @@ public class JwtService implements InitializingBean {
     }
 
     public String reissueAccessToken(String refreshToken) {
-        validateToken(refreshToken);
+        validateRefreshToken(refreshToken);
         String mail = getUserEmail(refreshToken);
         String redisKey = REFRESH_TOKEN.getPrefix() + mail;
         if (refreshToken.equals(valueOperations.get(redisKey))) {
