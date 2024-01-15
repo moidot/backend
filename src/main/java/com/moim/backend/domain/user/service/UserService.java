@@ -66,11 +66,7 @@ public class UserService {
     }
 
     public UserReissueResponse reissueAccessToken(String refreshToken) {
-        try {
-            return UserReissueResponse.toResponse(jwtService.reissueAccessToken(refreshToken));
-        } catch (ExpiredJwtException e) {
-            throw new CustomException(IS_TOKEN_LOGOUT);
-        }
+        return UserReissueResponse.toResponse(jwtService.reissueAccessToken(refreshToken));
     }
 
     // 로그아웃

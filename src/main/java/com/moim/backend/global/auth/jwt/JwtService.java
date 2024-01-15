@@ -5,6 +5,7 @@ import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import com.moim.backend.global.util.RedisDao;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -65,6 +66,8 @@ public class JwtService implements InitializingBean {
         }
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(IS_TOKEN_LOGOUT);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("JWT 토큰이 잘못되었습니다.");
         }
