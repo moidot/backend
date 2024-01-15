@@ -11,6 +11,7 @@ import com.moim.backend.domain.user.response.UserReissueResponse;
 import com.moim.backend.global.auth.jwt.JwtService;
 import com.moim.backend.global.common.RedisService;
 import com.moim.backend.global.common.exception.CustomException;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.moim.backend.global.common.Result.FAIL_SOCIAL_LOGIN;
+import static com.moim.backend.global.common.Result.*;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +66,11 @@ public class UserService {
     }
 
     public UserReissueResponse reissueAccessToken(String refreshToken) {
-        return UserReissueResponse.toResponse(jwtService.reissueAccessToken(refreshToken));
+        try {
+            return UserReissueResponse.toResponse(jwtService.reissueAccessToken(refreshToken));
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(IS_TOKEN_LOGOUT);
+        }
     }
 
     // 로그아웃
