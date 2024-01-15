@@ -113,7 +113,7 @@ public class CommonRestExceptionHandler extends RuntimeException {
         return CustomResponseEntity.fail("잘못된 JWT 서명입니다.");
     }
 
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ExpiredJwtException.class)
     public CustomResponseEntity<String> expiredJwtExceptionHandler(
             ExpiredJwtException e, HttpServletRequest request
