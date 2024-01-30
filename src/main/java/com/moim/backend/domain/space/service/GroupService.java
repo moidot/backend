@@ -400,9 +400,7 @@ public class GroupService {
 
 
     // method
-
     private static String getRegionName(Participation participation) {
-        validateLocationName(participation.getLocationName());
         StringTokenizer st = new StringTokenizer(participation.getLocationName());
         return String.format("%s %s", st.nextToken(), st.nextToken());
     }
