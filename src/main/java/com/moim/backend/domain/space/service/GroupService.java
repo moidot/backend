@@ -234,22 +234,25 @@ public class GroupService {
         List<Groups> groups = groupRepository.findByGroupsFetch(user.getUserId());
 
         return groups.stream()
-                .map(GroupService::toMyParticiPateResponse)
+                .map(group -> toMyParticiPateResponse(group, user))
                 .toList();
     }
 
-    private static GroupMyParticipateResponse toMyParticiPateResponse(Groups group) {
+    private static GroupMyParticipateResponse toMyParticiPateResponse(Groups group, Users user) {
+        Participation admin = getGroupAdmin(group);
         return GroupMyParticipateResponse.response(
                 group,
-                getGroupAdminName(group),
+                admin.getUserName(),
+                admin.getUserId().equals(user.getUserId()),
                 group.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
                 group.getParticipations().stream().map(Participation::getUserName).toList());
     }
 
-    private static String getGroupAdminName(Groups group) {
+    private static Participation getGroupAdmin(Groups group) {
         return group.getParticipations().stream()
                 .filter(participation -> participation.getUserId().equals(group.getAdminId()))
-                .map(Participation::getUserName).findFirst().orElseThrow(
+                .findFirst()
+                .orElseThrow(
                         () -> new CustomException(NOT_FOUND_PARTICIPATE)
                 );
     }
