@@ -14,23 +14,26 @@ import com.moim.backend.domain.space.request.service.GroupCreateServiceRequest;
 import com.moim.backend.domain.space.request.service.GroupNameUpdateServiceRequest;
 import com.moim.backend.domain.space.request.service.GroupParticipateServiceRequest;
 import com.moim.backend.domain.space.request.service.GroupParticipateUpdateServiceRequest;
-import com.moim.backend.domain.space.response.*;
+import com.moim.backend.domain.space.response.MiddlePoint;
+import com.moim.backend.domain.space.response.NaverMapListDto;
+import com.moim.backend.domain.space.response.NicknameValidationResponse;
+import com.moim.backend.domain.space.response.PlaceRouteResponse;
 import com.moim.backend.domain.space.response.group.*;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
-import com.moim.backend.global.dto.BestRegion;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.global.aspect.TimeCheck;
 import com.moim.backend.global.common.CacheName;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
+import com.moim.backend.global.dto.BestRegion;
 import com.moim.backend.global.util.DistanceCalculator;
 import com.moim.backend.global.util.RedisDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -42,7 +45,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.StringTokenizer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -232,22 +234,25 @@ public class GroupService {
         List<Groups> groups = groupRepository.findByGroupsFetch(user.getUserId());
 
         return groups.stream()
-                .map(GroupService::toMyParticiPateResponse)
+                .map(group -> toMyParticiPateResponse(group, user))
                 .toList();
     }
 
-    private static GroupMyParticipateResponse toMyParticiPateResponse(Groups group) {
+    private static GroupMyParticipateResponse toMyParticiPateResponse(Groups group, Users user) {
+        Participation admin = getGroupAdmin(group);
         return GroupMyParticipateResponse.response(
                 group,
-                getGroupAdminName(group),
+                admin.getUserName(),
+                admin.getUserId().equals(user.getUserId()),
                 group.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
                 group.getParticipations().stream().map(Participation::getUserName).toList());
     }
 
-    private static String getGroupAdminName(Groups group) {
+    private static Participation getGroupAdmin(Groups group) {
         return group.getParticipations().stream()
                 .filter(participation -> participation.getUserId().equals(group.getAdminId()))
-                .map(Participation::getUserName).findFirst().orElseThrow(
+                .findFirst()
+                .orElseThrow(
                         () -> new CustomException(NOT_FOUND_PARTICIPATE)
                 );
     }
@@ -400,11 +405,12 @@ public class GroupService {
 
 
     // method
-
     private static String getRegionName(Participation participation) {
-        validateLocationName(participation.getLocationName());
-        StringTokenizer st = new StringTokenizer(participation.getLocationName());
-        return String.format("%s %s", st.nextToken(), st.nextToken());
+        String[] locationName = participation.getLocationName().split(" ");
+        if (locationName.length < 2) {
+            return participation.getLocationName();
+        }
+        return String.format("%s %s", locationName[0], locationName[1]);
     }
 
     private static Function<NaverMapListDto.placeList, GroupPlaceResponse> toPlaceEntity(Double x, Double y, String local) {

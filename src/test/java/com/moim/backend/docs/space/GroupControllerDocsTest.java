@@ -1,7 +1,6 @@
 package com.moim.backend.docs.space;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.GroupController;
 import com.moim.backend.domain.space.request.controller.GroupCreateRequest;
@@ -11,20 +10,17 @@ import com.moim.backend.domain.space.request.controller.GroupParticipateUpdateRe
 import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.space.response.group.*;
 import com.moim.backend.domain.space.service.GroupService;
-import com.moim.backend.domain.user.response.UserLoginResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
 
 import static com.epages.restdocs.apispec.Schema.schema;
 import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
 import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
-import static com.moim.backend.domain.user.config.Platform.NAVER;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -465,6 +461,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .groupDate("2023-07-15")
                 .groupParticipates(3)
                 .confirmPlace("none")
+                .isAdmin(true)
                 .bestPlaceNames(List.of("종로5가역", "종로3가역", "동대문역"))
                 .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .build();
@@ -476,6 +473,7 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                 .groupDate("2023-07-28")
                 .groupParticipates(3)
                 .confirmPlace("교대역")
+                .isAdmin(false)
                 .bestPlaceNames(List.of("강남역", "교대역", "역삼역"))
                 .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .build();
@@ -510,6 +508,8 @@ public class GroupControllerDocsTest extends RestDocsSupport {
                                 .description("그룹 참여자 수 / Integer"),
                         fieldWithPath("data[].confirmPlace").type(STRING)
                                 .description("그룹 확정 장소 / 미확정 : 'none' "),
+                        fieldWithPath("data[].isAdmin").type(BOOLEAN)
+                                .description("해당 그룹 모임장 여부"),
                         fieldWithPath("data[].participantNames[]").type(ARRAY)
                                 .description("그룹 참여자 이름 리스트"),
                         fieldWithPath("data[].bestPlaceNames[]").type(ARRAY)

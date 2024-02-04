@@ -22,11 +22,12 @@ public class GroupMyParticipateResponse {
     private String groupDate;
     private Integer groupParticipates;
     private String confirmPlace;
+    private Boolean isAdmin;
     private List<String> bestPlaceNames;
     private List<String> participantNames;
 
     public static GroupMyParticipateResponse response(
-            Groups group, String groupAdminName, List<String> bestPlaceNames, List<String> participantNames
+            Groups group, String groupAdminName, boolean isAdmin, List<String> bestPlaceNames, List<String> participantNames
     ) {
         return GroupMyParticipateResponse.builder()
                 .groupId(group.getGroupId())
@@ -37,6 +38,7 @@ public class GroupMyParticipateResponse {
                         .orElse("none"))
                 .groupParticipates(group.getParticipations().size())
                 .confirmPlace(group.getPlace())
+                .isAdmin(isAdmin)
                 .bestPlaceNames(bestPlaceNames)
                 .participantNames(participantNames)
                 .build();
