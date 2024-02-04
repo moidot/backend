@@ -508,7 +508,10 @@ public class GroupService {
 
     private void updateBestRegion(Groups group) {
         // best-place 테이블에서 관련 정보 삭제
-        bestPlaceRepository.deleteAllInBatch(bestPlaceRepository.findAllByGroup(group));
+        List<BestPlace> bestPlaces = bestPlaceRepository.findAllByGroup(group);
+        for (BestPlace bestPlace : bestPlaces) {
+            bestPlaceRepository.delete(bestPlace);
+        }
 
         // 관련 Redis 삭제
         redisDao.deleteSpringCache(CacheName.group, group.getGroupId().toString());

@@ -105,11 +105,11 @@ public class VoteService {
     }
 
     private void saveUserVotesForSelectPlaces(List<Long> selectPlaceIds, Users user, Vote vote) {
-        List<BestPlace> selectPlaces = bestPlaceRepository.findAllById(selectPlaceIds);
-        for (BestPlace selectPlace : selectPlaces) {
+        List<BestPlace> bestPlaces = bestPlaceRepository.findAllById(selectPlaceIds);
+        for (BestPlace bestPlace : bestPlaces) {
             selectPlaceRepository.save(
                     SelectPlace.builder()
-                            .bestPlace(selectPlace)
+                            .bestPlace(bestPlace)
                             .vote(vote)
                             .userId(user.getUserId())
                             .build()
