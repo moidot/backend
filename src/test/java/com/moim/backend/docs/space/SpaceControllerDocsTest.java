@@ -752,7 +752,8 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                         fieldWithPath(participations + ".userEmail").type(STRING).description("유저 이메"),
                         fieldWithPath(participations + ".userName").type(STRING).description("유저 이름"),
                         fieldWithPath(participations + ".locationName").type(STRING).description("유저 출발지 이름"),
-                        fieldWithPath(participations + ".transportation").type(STRING).description("유저 교통수단"))
+                        fieldWithPath(participations + ".transportation").type(STRING).description("유저 교통수단"),
+                        fieldWithPath(participations + ".isAdmin").type(BOOLEAN).description("관리자 여부(true: 모임장, false: 모임원)"))
                 .responseSchema(schema("GroupDetailResponse"))
                 .build();
 
