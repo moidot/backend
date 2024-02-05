@@ -1,12 +1,12 @@
 package com.moim.backend.domain.space.repository;
 
 import com.moim.backend.TestQueryDSLConfig;
-import com.moim.backend.domain.groupvote.entity.SelectPlace;
-import com.moim.backend.domain.groupvote.entity.Vote;
-import com.moim.backend.domain.groupvote.repository.SelectPlaceRepository;
-import com.moim.backend.domain.groupvote.repository.VoteRepository;
+import com.moim.backend.domain.spacevote.entity.SelectPlace;
+import com.moim.backend.domain.spacevote.entity.Vote;
+import com.moim.backend.domain.spacevote.repository.SelectPlaceRepository;
+import com.moim.backend.domain.spacevote.repository.VoteRepository;
 import com.moim.backend.domain.space.entity.BestPlace;
-import com.moim.backend.domain.space.entity.Groups;
+import com.moim.backend.domain.space.entity.Space;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.user.entity.Users;
@@ -47,7 +47,7 @@ class GroupRepositoryTest {
     private UserRepository userRepository;
 
     @Autowired
-    private GroupRepository groupRepository;
+    private SpaceRepository groupRepository;
 
     @Autowired
     private ParticipationRepository participationRepository;
@@ -63,9 +63,9 @@ class GroupRepositoryTest {
         Users admin2 = savedUser("admin2@test.com", "어드민2");
         Users admin3 = savedUser("admin3@test.com", "어드민3");
 
-        Groups group1 = savedGroup(admin1.getUserId(), "그룹1");
-        Groups group2 = savedGroup(admin2.getUserId(), "그룹2");
-        Groups group3 = savedGroup(admin3.getUserId(), "그룹3");
+        Space group1 = savedGroup(admin1.getUserId(), "그룹1");
+        Space group2 = savedGroup(admin2.getUserId(), "그룹2");
+        Space group3 = savedGroup(admin3.getUserId(), "그룹3");
 
         saveBestPlace(group1, "의정부역", 127.123456, 36.123456);
         saveBestPlace(group1, "서울역", 127.123457, 36.123457);
@@ -89,22 +89,22 @@ class GroupRepositoryTest {
         em.clear();
 
         // when
-        List<Groups> groups = groupRepository.findByGroupsFetch(user1.getUserId());
+        List<Space> spaces = groupRepository.findBySpaceFetch(user1.getUserId());
 
         // then
-        assertThat(groups).hasSize(3)
-                .extracting("groupId", "name")
+        assertThat(spaces).hasSize(3)
+                .extracting("spaceId", "name")
                 .contains(
-                        tuple(group1.getGroupId(), "그룹1"),
-                        tuple(group2.getGroupId(), "그룹2"),
-                        tuple(group3.getGroupId(), "그룹3")
+                        tuple(group1.getSpaceId(), "그룹1"),
+                        tuple(group2.getSpaceId(), "그룹2"),
+                        tuple(group3.getSpaceId(), "그룹3")
                 );
 
-        assertThat(groups.get(0))
-                .extracting("groupId", "name", "date", "place")
-                .contains(group1.getGroupId(), "그룹1", Optional.of(LocalDate.of(2023, 7, 10)), "none");
+        assertThat(spaces.get(0))
+                .extracting("spaceId", "name", "date", "place")
+                .contains(group1.getSpaceId(), "그룹1", Optional.of(LocalDate.of(2023, 7, 10)), "none");
 
-        assertThat(groups.get(0).getBestPlaces())
+        assertThat(spaces.get(0).getBestPlaces())
                 .extracting("placeName", "longitude", "latitude")
                 .contains(
                         tuple("의정부역", 127.123456, 36.123456),
@@ -122,7 +122,7 @@ class GroupRepositoryTest {
         Users user3 = savedUser("test3@test.com", "모이닷 운영자3");
         Users user4 = savedUser("test4@test.com", "모이닷 운영자4");
 
-        Groups group = savedGroup(user1.getUserId(), "모이닷");
+        Space group = savedGroup(user1.getUserId(), "모이닷");
 
         Participation participation1 = savedParticipation(user1, group, "모이닷1", "서울 성북구 보문로34다길 2", 36.123456, 127.1234567, "PERSONAL");
         Participation participation2 = savedParticipation(user2, group, "모이닷2", "서울 강북구 도봉로 76가길 55", 36.123456, 127.1234567, "PUBLIC");
@@ -133,7 +133,7 @@ class GroupRepositoryTest {
         em.clear();
 
         // when
-        Groups validateGroup = groupRepository.findByGroupParticipation(group.getGroupId()).get();
+        Space validateGroup = groupRepository.findBySpaceParticipation(group.getSpaceId()).get();
 
         // then
         assertThat(validateGroup.getParticipations())
@@ -162,7 +162,7 @@ class GroupRepositoryTest {
     ) {
         return voteRepository.save(
                 Vote.builder()
-                        .groupId(groupId)
+                        .spaceId(groupId)
                         .isClosed(false)
                         .isAnonymous(isAnonymous)
                         .isEnabledMultipleChoice(isEnabledMultipleChoice)
@@ -171,10 +171,10 @@ class GroupRepositoryTest {
         );
     }
 
-    private BestPlace saveBestPlace(Groups group, String placeName, double longitude, double latitude) {
+    private BestPlace saveBestPlace(Space group, String placeName, double longitude, double latitude) {
         return bestPlaceRepository.save(
                 BestPlace.builder()
-                        .group(group)
+                        .space(group)
                         .placeName(placeName)
                         .longitude(longitude)
                         .latitude(latitude)
@@ -191,9 +191,9 @@ class GroupRepositoryTest {
         );
     }
 
-    private Groups savedGroup(Long userId, String name) {
+    private Space savedGroup(Long userId, String name) {
         return groupRepository.save(
-                Groups.builder()
+                Space.builder()
                         .adminId(userId)
                         .name(name)
                         .place("none")
@@ -203,7 +203,7 @@ class GroupRepositoryTest {
     }
 
     private Participation savedParticipation(
-            Users user, Groups group, String userName,
+            Users user, Space group, String userName,
             String locationName, Double latitude, Double longitude,
             String type
     ) {

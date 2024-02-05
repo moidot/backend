@@ -1,6 +1,6 @@
 package com.moim.backend.domain.space.entity;
 
-import com.moim.backend.domain.space.request.service.GroupParticipateUpdateServiceRequest;
+import com.moim.backend.domain.space.request.service.SpaceParticipateUpdateServiceRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -18,8 +18,8 @@ public class Participation {
     private Long participationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id")
-    private Groups group;
+    @JoinColumn(name = "space_id")
+    private Space space;
 
     @NotNull
     private Long userId;
@@ -42,9 +42,9 @@ public class Participation {
     private String password;
 
     @Builder
-    private Participation(Long participationId, Groups group, Long userId, String userName, String locationName, Double latitude, Double longitude, TransportationType transportation, String password) {
+    private Participation(Long participationId, Space group, Long userId, String userName, String locationName, Double latitude, Double longitude, TransportationType transportation, String password) {
         this.participationId = participationId;
-        this.group = group;
+        this.space = group;
         this.userId = userId;
         this.userName = userName;
         this.locationName = locationName;
@@ -54,7 +54,7 @@ public class Participation {
         this.password = password;
     }
 
-    public void update(GroupParticipateUpdateServiceRequest request) {
+    public void update(SpaceParticipateUpdateServiceRequest request) {
         this.userName = request.getUserName();
         this.locationName = request.getLocationName();
         this.latitude = request.getLatitude();

@@ -1,7 +1,7 @@
 package com.moim.backend.domain.space.response;
 
 import com.moim.backend.domain.space.entity.BestPlace;
-import com.moim.backend.domain.space.entity.Groups;
+import com.moim.backend.domain.space.entity.Space;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.entity.TransportationType;
 import lombok.AllArgsConstructor;
@@ -46,7 +46,7 @@ public class PlaceRouteResponse {
         private List<PathDto> path;
 
         public MoveUserInfo(
-                Groups group,
+                Space group,
                 Participation participation,
                 BusGraphicDataResponse busGraphicDataResponse,
                 BusPathResponse busPathResponse
@@ -63,7 +63,7 @@ public class PlaceRouteResponse {
         }
 
         public MoveUserInfo(
-                Groups group,
+                Space group,
                 Participation participation,
                 CarMoveInfo carMoveInfo
         ) {

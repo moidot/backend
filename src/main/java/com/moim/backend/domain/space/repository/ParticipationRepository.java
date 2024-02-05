@@ -1,6 +1,6 @@
 package com.moim.backend.domain.space.repository;
 
-import com.moim.backend.domain.space.entity.Groups;
+import com.moim.backend.domain.space.entity.Space;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.response.MiddlePoint;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,15 +15,15 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     @Query("SELECT "
             + "new com.moim.backend.domain.space.response.MiddlePoint(SUM(p.latitude), SUM(p.longitude), COUNT(*)) "
             + "FROM Participation p "
-            + "GROUP BY p.group "
-            + "HAVING p.group = :group")
-    MiddlePoint getMiddlePoint(@Param("group") Groups group);
+            + "GROUP BY p.space "
+            + "HAVING p.space = :space")
+    MiddlePoint getMiddlePoint(@Param("space") Space space);
 
-    int countByGroupAndUserId(Groups group, Long userId);
+    int countBySpaceAndUserId(Space space, Long userId);
 
-    List<Participation> findAllByGroupGroupIdAndUserIdIn(Long group_groupId, List<Long> userId);
-    List<Participation> findAllByGroup(Groups group);
-    List<Participation> findAllByGroupAndUserName(Groups group, String name);
+    List<Participation> findAllBySpaceSpaceIdAndUserIdIn(Long spaceId, List<Long> userId);
+    List<Participation> findAllBySpace(Space space);
+    List<Participation> findAllBySpaceAndUserName(Space space, String name);
 
     List<Participation> findByUserId(Long userId);
     void deleteByUserId(Long userId);

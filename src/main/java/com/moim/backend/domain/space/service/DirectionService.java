@@ -2,7 +2,7 @@ package com.moim.backend.domain.space.service;
 
 import com.moim.backend.domain.space.config.OdsayProperties;
 import com.moim.backend.domain.space.entity.BestPlace;
-import com.moim.backend.domain.space.entity.Groups;
+import com.moim.backend.domain.space.entity.Space;
 import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.response.BusGraphicDataResponse;
 import com.moim.backend.domain.space.response.BusPathResponse;
@@ -33,7 +33,7 @@ public class DirectionService {
 
     @TimeCheck
     public Optional<PlaceRouteResponse.MoveUserInfo> getBusRouteToResponse(
-            BestPlace bestPlace, Groups group, Participation participation
+            BestPlace bestPlace, Space group, Participation participation
     ) {
         Optional<PlaceRouteResponse.MoveUserInfo> moveUserInfo = Optional.empty();
         URI searchPathUri = odsayProperties.getSearchPathUriWithParams(bestPlace, participation);
@@ -67,7 +67,7 @@ public class DirectionService {
 
     @TimeCheck
     public Optional<PlaceRouteResponse.MoveUserInfo> getCarRouteToResponse(
-            BestPlace bestPlace, Groups group, Participation participation
+            BestPlace bestPlace, Space group, Participation participation
     ) {
         Optional<PlaceRouteResponse.MoveUserInfo> moveUserInfo = Optional.empty();
         HttpHeaders headers = new HttpHeaders();
