@@ -277,13 +277,13 @@ public class SpaceService {
 
     // 모임 참여자 정보 리스트 조회 API
     public SpaceDetailResponse readParticipateSpaceByRegion(Long groupId) {
-        Space group = getGroupByFetchParticipation(groupId);
-        Users admin = getUser(group.getAdminId());
+        Space space = getGroupByFetchParticipation(groupId);
+        Users admin = getUser(space.getAdminId());
         List<SpaceRegionResponse> regions = new ArrayList<>();
 
-        group.getParticipations().forEach(participation -> toRegionsResponse(regions, participation));
+        space.getParticipations().forEach(participation -> toRegionsResponse(space, regions, participation));
 
-        return SpaceDetailResponse.response(group, admin, regions);
+        return SpaceDetailResponse.response(space, admin, regions);
     }
 
     public NicknameValidationResponse checkNicknameValidation(Long groupId, String nickname) {
@@ -293,13 +293,13 @@ public class SpaceService {
         return new NicknameValidationResponse(isDuplicated);
     }
 
-    private void toRegionsResponse(List<SpaceRegionResponse> regions, Participation participation) {
+    private void toRegionsResponse(Space space, List<SpaceRegionResponse> regions, Participation participation) {
         // 그룹화 지역 이름 생성
         String regionName = getRegionName(participation);
 
         // 참여 정보 응답 객체 변환
         Users user = getUser(participation.getUserId());
-        SpaceParticipationsResponse participateEntity = toParticipateEntity(participation, user);
+        SpaceParticipationsResponse participateEntity = toParticipateEntity(space, participation, user);
 
         // 생성된 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 Optional 검증
         Optional<SpaceRegionResponse> optionalRegion = findRegionByName(regions, regionName);

@@ -699,19 +699,19 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
     @Test
     void readParticipateGroupByRegion() throws Exception {
         SpaceParticipationsResponse participations1 =
-                SpaceParticipationsResponse.toResponse(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC");
+                SpaceParticipationsResponse.toResponse(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC", true);
         SpaceParticipationsResponse participations2 =
-                SpaceParticipationsResponse.toResponse(2L, "park@naver.com", "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC");
+                SpaceParticipationsResponse.toResponse(2L, "park@naver.com", "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC", false);
         SpaceRegionResponse region1 = SpaceRegionResponse.toResponse("서울 성북구", List.of(participations1, participations2));
 
         SpaceParticipationsResponse participations3 =
-                SpaceParticipationsResponse.toResponse(3L, "cheon@gmail.com", "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL");
+                SpaceParticipationsResponse.toResponse(3L, "cheon@gmail.com", "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL", false);
         SpaceParticipationsResponse participations4 =
-                SpaceParticipationsResponse.toResponse(4L, "moram@gmail.com", "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC");
+                SpaceParticipationsResponse.toResponse(4L, "moram@gmail.com", "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC", false);
         SpaceRegionResponse region2 = SpaceRegionResponse.toResponse("서울 강북구", List.of(participations3, participations4));
 
         SpaceParticipationsResponse participations5 =
-                SpaceParticipationsResponse.toResponse(3L, "enfp@gmail.com", "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL");
+                SpaceParticipationsResponse.toResponse(3L, "enfp@gmail.com", "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL", false);
         SpaceRegionResponse region3 =
                 SpaceRegionResponse.toResponse("경기도 부천시", List.of(participations5));
 
