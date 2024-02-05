@@ -1,6 +1,6 @@
 package com.moim.backend.domain.space.entity;
 
-import com.moim.backend.domain.groupvote.entity.SelectPlace;
+import com.moim.backend.domain.spacevote.entity.SelectPlace;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -21,8 +21,8 @@ public class BestPlace {
     private Long bestPlaceId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id")
-    private Groups group;
+    @JoinColumn(name = "space_id")
+    private Space space;
 
     @NotNull
     private String placeName;
