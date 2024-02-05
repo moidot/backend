@@ -333,6 +333,7 @@ public class SpaceService {
     }
 
     // 모임 이름 수정 API
+    @Transactional
     public Void updateSpaceName(Long groupId, SpaceNameUpdateServiceRequest request, Users user) {
         Space group = getGroup(groupId);
         validateAdminStatus(user.getUserId(), group.getAdminId());
