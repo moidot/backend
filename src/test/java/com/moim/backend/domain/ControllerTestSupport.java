@@ -2,6 +2,7 @@ package com.moim.backend.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moim.backend.domain.bookmark.controller.BookmarkController;
+import com.moim.backend.domain.space.controller.SpaceCalendarController;
 import com.moim.backend.domain.spacevote.controller.VoteController;
 import com.moim.backend.domain.space.controller.SpaceController;
 import com.moim.backend.domain.user.controller.UserCalendarController;
@@ -23,7 +24,8 @@ import org.springframework.test.web.servlet.MockMvc;
         UserController.class,
         VoteController.class,
         BookmarkController.class,
-        UserCalendarController.class
+        UserCalendarController.class,
+        SpaceCalendarController.class
 }, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {WebConfig.class, LoginInterceptor.class}
 ))
 @AutoConfigureMockMvc(addFilters = false)
@@ -49,6 +51,9 @@ public abstract class ControllerTestSupport {
 
     @MockBean
     protected BookmarkController bookmarkController;
+
+    @MockBean
+    protected SpaceCalendarController spaceCalendarController;
 
     @MockBean
     protected LoginArgumentResolver loginArgumentResolver;
