@@ -6,7 +6,7 @@ import com.moim.backend.domain.space.controller.SpaceCalendarController;
 import com.moim.backend.domain.spacevote.controller.VoteController;
 import com.moim.backend.domain.space.controller.SpaceController;
 import com.moim.backend.domain.user.controller.UserCalendarController;
-import com.moim.backend.domain.user.controller.UserController;
+import com.moim.backend.domain.user.controller.AuthController;
 import com.moim.backend.global.auth.LoginArgumentResolver;
 import com.moim.backend.global.auth.LoginInterceptor;
 import com.moim.backend.global.auth.jwt.JwtService;
@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = {
         SpaceController.class,
-        UserController.class,
+        AuthController.class,
         VoteController.class,
         BookmarkController.class,
         UserCalendarController.class,
@@ -41,7 +41,7 @@ public abstract class ControllerTestSupport {
     protected SpaceController spaceController;
 
     @MockBean
-    protected UserController userController;
+    protected AuthController authController;
 
     @MockBean
     protected UserCalendarController userCalendarController;

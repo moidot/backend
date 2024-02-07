@@ -66,6 +66,15 @@ public class SpaceController {
         return CustomResponseEntity.success(spaceService.participateDelete(groupId, user));
     }
 
+    // 내 참여 정보 조회
+    @GetMapping("/user")
+    public CustomResponseEntity<SpaceParticipationsResponse> getParticipationDetail(
+            @RequestParam Long groupId, @Login Users user
+    ) {
+        return CustomResponseEntity.success(spaceService.getParticipationDetail(groupId, user));
+    }
+
+
     // 내 참여 정보 수정 API
     @PatchMapping("/participate")
     public CustomResponseEntity<SpaceParticipateUpdateResponse> participateUpdate(

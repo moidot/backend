@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ParticipationRepository extends JpaRepository<Participation, Long> {
@@ -23,6 +24,7 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
 
     List<Participation> findAllBySpaceSpaceIdAndUserIdIn(Long spaceId, List<Long> userId);
     List<Participation> findAllBySpace(Space space);
+    Optional<Participation> findBySpaceAndUserId(Space space, long userId);
     List<Participation> findAllBySpaceAndUserName(Space space, String name);
 
     List<Participation> findByUserId(Long userId);

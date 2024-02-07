@@ -42,9 +42,9 @@ public class Participation {
     private String password;
 
     @Builder
-    private Participation(Long participationId, Space group, Long userId, String userName, String locationName, Double latitude, Double longitude, TransportationType transportation, String password) {
+    private Participation(Long participationId, Space space, Long userId, String userName, String locationName, Double latitude, Double longitude, TransportationType transportation, String password) {
         this.participationId = participationId;
-        this.space = group;
+        this.space = space;
         this.userId = userId;
         this.userName = userName;
         this.locationName = locationName;
