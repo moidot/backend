@@ -168,7 +168,7 @@ class UserCalendarServiceTest {
     ) {
         return participationRepository.save(
                 Participation.builder()
-                        .group(group)
+                        .space(group)
                         .userId(user.getUserId())
                         .userName(userName)
                         .locationName(locationName)
