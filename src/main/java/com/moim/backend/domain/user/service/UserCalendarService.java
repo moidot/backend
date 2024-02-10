@@ -10,14 +10,16 @@ import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserCalendarRepository;
 import com.moim.backend.domain.user.request.CreateUserCalendarRequest;
 import com.moim.backend.domain.user.request.UserCalendarPageRequest;
+import com.moim.backend.domain.user.request.UserDetailCalendarRequest;
 import com.moim.backend.domain.user.response.CreateUserCalendarResponse;
 import com.moim.backend.domain.user.response.UserCalendarPageResponse;
-import jakarta.persistence.criteria.CriteriaBuilder;
+import com.moim.backend.domain.user.response.UserDetailCalendarResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -122,4 +124,41 @@ public class UserCalendarService {
         return yearMonth.atEndOfMonth().atTime(23, 59, 59);
     }
 
+    public List<UserDetailCalendarResponse> readDetailCalendar(Users user, UserDetailCalendarRequest request) {
+        List<UserDetailCalendarResponse> response = new ArrayList<>();
+        List<Participation> participations = participationRepository.findByUserId(user.getUserId());
+
+        // 해당 날짜의 개인 일정 추가
+        addMyCalendar(user, request, response);
+        // 해당 날짜의 스페이스 일정 추가
+        addSpaceCalendar(request, response, participations);
+
+        return response;
+    }
+
+    private void addMyCalendar(Users user, UserDetailCalendarRequest request, List<UserDetailCalendarResponse> response) {
+        LocalDateTime startDateTime = request.getDate();
+        LocalDateTime endDateTime = getEndDateTime(startDateTime);
+        List<UserCalendar> userCalendars = userCalendarRepository.findByUserAndDateBetween(user, startDateTime, endDateTime);
+        for (UserCalendar userCalendar : userCalendars) {
+            response.add(UserDetailCalendarResponse.userCalendarResponse(userCalendar));
+        }
+    }
+
+    private void addSpaceCalendar(UserDetailCalendarRequest request, List<UserDetailCalendarResponse> response, List<Participation> participations) {
+        for (Participation participation : participations) {
+            Space space = participation.getSpace();
+            LocalDateTime startDateTime = request.getDate();
+            LocalDateTime endDateTime = getEndDateTime(startDateTime);
+
+            List<SpaceCalendar> spaceCalendars = spaceCalendarRepository.findBySpaceAndDateBetween(space, startDateTime, endDateTime);
+            for (SpaceCalendar spaceCalendar : spaceCalendars) {
+                response.add(UserDetailCalendarResponse.spaceCalendarResponse(space, spaceCalendar));
+            }
+        }
+    }
+
+    private static LocalDateTime getEndDateTime(LocalDateTime startDateTime) {
+        return startDateTime.with(LocalTime.MAX);
+    }
 }
