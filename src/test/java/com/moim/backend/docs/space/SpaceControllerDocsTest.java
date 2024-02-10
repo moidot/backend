@@ -368,6 +368,50 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                 .andDo(document);
     }
 
+    @DisplayName("내 참여 정보 조회")
+    @Test
+    void getParticipationDetail() throws Exception {
+        // given
+        MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/group/user")
+                .header(AUTHORIZATION, "Bearer {token}")
+                .param("groupId", String.valueOf(1L));
+        SpaceParticipationsResponse participation =
+                SpaceParticipationsResponse.toResponse(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC", true);
+
+        given(spaceService.getParticipationDetail(anyLong(), any()))
+                .willReturn(participation);
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("스페이스 API")
+                .summary("내 참여 정보 조회 API")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .queryParameters(
+                        parameterWithName("groupId")
+                                .description("그룹 ID"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"),
+                        fieldWithPath("data.participationId").type(NUMBER).description("참여 ID"),
+                        fieldWithPath("data.userEmail").type(STRING).description("유저 이메일"),
+                        fieldWithPath("data.userName").type(STRING).description("유저 이름"),
+                        fieldWithPath("data.locationName").type(STRING).description("유저 출발지 이름"),
+                        fieldWithPath("data.transportation").type(STRING).description("유저 교통수단"),
+                        fieldWithPath("data.isAdmin").type(BOOLEAN).description("관리자 여부(true: 모임장, false: 모임원)"))
+                        .build();
+
+        RestDocumentationResultHandler document =
+                documentHandler("group-participation-detail", prettyPrint(), parameters);
+
+        // when // then
+        mockMvc.perform(httpRequest)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
+
     @DisplayName("모임 추천 역(랜드마크) 조회하기 API")
     @Test
     void getBestRegion() throws Exception {
@@ -699,19 +743,19 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
     @Test
     void readParticipateGroupByRegion() throws Exception {
         SpaceParticipationsResponse participations1 =
-                SpaceParticipationsResponse.toResponse(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC");
+                SpaceParticipationsResponse.toResponse(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC", true);
         SpaceParticipationsResponse participations2 =
-                SpaceParticipationsResponse.toResponse(2L, "park@naver.com", "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC");
+                SpaceParticipationsResponse.toResponse(2L, "park@naver.com", "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC", false);
         SpaceRegionResponse region1 = SpaceRegionResponse.toResponse("서울 성북구", List.of(participations1, participations2));
 
         SpaceParticipationsResponse participations3 =
-                SpaceParticipationsResponse.toResponse(3L, "cheon@gmail.com", "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL");
+                SpaceParticipationsResponse.toResponse(3L, "cheon@gmail.com", "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL", false);
         SpaceParticipationsResponse participations4 =
-                SpaceParticipationsResponse.toResponse(4L, "moram@gmail.com", "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC");
+                SpaceParticipationsResponse.toResponse(4L, "moram@gmail.com", "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC", false);
         SpaceRegionResponse region2 = SpaceRegionResponse.toResponse("서울 강북구", List.of(participations3, participations4));
 
         SpaceParticipationsResponse participations5 =
-                SpaceParticipationsResponse.toResponse(3L, "enfp@gmail.com", "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL");
+                SpaceParticipationsResponse.toResponse(3L, "enfp@gmail.com", "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL", false);
         SpaceRegionResponse region3 =
                 SpaceRegionResponse.toResponse("경기도 부천시", List.of(participations5));
 
@@ -749,10 +793,11 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                         fieldWithPath(participationsByRegion + ".regionName").type(STRING).description("그룹화된 지역 이름"),
                         fieldWithPath(participations).type(ARRAY).description("그룹화된 지역 참여자 리스트"),
                         fieldWithPath(participations + ".participationId").type(NUMBER).description("참여 ID"),
-                        fieldWithPath(participations + ".userEmail").type(STRING).description("유저 이메"),
+                        fieldWithPath(participations + ".userEmail").type(STRING).description("유저 이메일"),
                         fieldWithPath(participations + ".userName").type(STRING).description("유저 이름"),
                         fieldWithPath(participations + ".locationName").type(STRING).description("유저 출발지 이름"),
-                        fieldWithPath(participations + ".transportation").type(STRING).description("유저 교통수단"))
+                        fieldWithPath(participations + ".transportation").type(STRING).description("유저 교통수단"),
+                        fieldWithPath(participations + ".isAdmin").type(BOOLEAN).description("관리자 여부(true: 모임장, false: 모임원)"))
                 .responseSchema(schema("GroupDetailResponse"))
                 .build();
 

@@ -9,7 +9,7 @@ import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class UserControllerTest extends ControllerTestSupport {
+public class AuthControllerTest extends ControllerTestSupport {
 
     @DisplayName("소셜 로그인 API")
     @Test

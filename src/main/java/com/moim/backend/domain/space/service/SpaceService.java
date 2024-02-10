@@ -72,16 +72,16 @@ public class SpaceService {
     // 모임 생성
     @Transactional
     public SpaceCreateResponse createSpace(SpaceCreateServiceRequest request, Users user) {
-        Space group = groupRepository.save(toGroupEntity(request, user));
+        Space space = groupRepository.save(toGroupEntity(request, user));
         saveParticipation(
-                user, group, request.getUserName(),
+                user, space, request.getUserName(),
                 request.getLocationName(), request.getLatitude(), request.getLongitude(),
                 request.getTransportationType(), request.getPassword()
         );
 
-        saveNearestStationList(group, request.getLatitude(), request.getLongitude());
+        saveNearestStationList(space, request.getLatitude(), request.getLongitude());
 
-        return SpaceCreateResponse.response(group);
+        return SpaceCreateResponse.response(space);
     }
 
     private void saveNearestStationList(Space space, Double latitude, Double longitude) {
@@ -104,27 +104,27 @@ public class SpaceService {
     @Transactional
     @CacheEvict(value = CacheName.group, key = "#request.getGroupId()")
     public SpaceParticipateResponse participateSpace(SpaceParticipateServiceRequest request, Users user) {
-        Space group = getGroup(request.getGroupId());
+        Space space = getGroup(request.getGroupId());
 
-        participateGroupValidate(request, user, group);
+        participateGroupValidate(request, user, space);
         Participation participation = saveParticipation(
-                user, group, request.getUserName(),
+                user, space, request.getUserName(),
                 request.getLocationName(), request.getLatitude(), request.getLongitude(),
                 request.getTransportationType(), request.getPassword()
         );
 
-        updateBestRegion(group);
+        updateBestRegion(space);
 
         return SpaceParticipateResponse.response(participation);
     }
 
     private Participation saveParticipation(
-            Users user, Space group, String userName,
+            Users user, Space space, String userName,
             String locationName, Double latitude, Double longitude,
             TransportationType transportation, String password
     ) {
         return participationRepository.save(Participation.builder()
-                .space(group)
+                .space(space)
                 .userId(user.getUserId())
                 .userName(userName)
                 .locationName(locationName)
@@ -135,9 +135,9 @@ public class SpaceService {
                 .build());
     }
 
-    private void participateGroupValidate(SpaceParticipateServiceRequest request, Users user, Space group) {
+    private void participateGroupValidate(SpaceParticipateServiceRequest request, Users user, Space space) {
         validateLocationName(request.getLocationName());
-        checkDuplicateParticipation(group, user);
+        checkDuplicateParticipation(space, user);
         validateTransportation(request.getTransportationType());
     }
 
@@ -165,26 +165,26 @@ public class SpaceService {
         Participation myParticipate = getParticipate(participateId);
         validateParticipationMyInfo(user, myParticipate);
 
-        Space group = myParticipate.getSpace();
-        Optional<Vote> optionalVote = voteRepository.findBySpaceId(group.getSpaceId());
+        Space space = myParticipate.getSpace();
+        Optional<Vote> optionalVote = voteRepository.findBySpaceId(space.getSpaceId());
 
         // 투표 시작시 모임 나가기 불가
         checkIfVoteStartedBeforeLeaving(optionalVote);
 
 
         // 모임장이 나가는 경우 스페이스 삭제
-        if (deleteGroupIfAdminLeaves(user, group)) {
+        if (deleteGroupIfAdminLeaves(user, space)) {
             return SpaceExitResponse.response(true, "모임이 삭제되었습니다.");
         }
 
-        removeParticipation(myParticipate, group);
+        removeParticipation(myParticipate, space);
         return SpaceExitResponse.response(false, "모임에서 나갔습니다.");
     }
 
-    private boolean deleteGroupIfAdminLeaves(Users user, Space group) {
-        if (group.getAdminId().equals(user.getUserId())) {
-            groupRepository.delete(group);
-            voteRepository.deleteBySpaceId(group.getSpaceId());
+    private boolean deleteGroupIfAdminLeaves(Users user, Space space) {
+        if (space.getAdminId().equals(user.getUserId())) {
+            groupRepository.delete(space);
+            voteRepository.deleteBySpaceId(space.getSpaceId());
             return true;
         }
         return false;
@@ -200,9 +200,9 @@ public class SpaceService {
     @Transactional
     public Void participateRemoval(Long participateId, Users user) {
         Participation participate = getParticipate(participateId);
-        Space group = participate.getSpace();
-        validateAdminStatus(user.getUserId(), group.getAdminId());
-        removeParticipation(participate, group);
+        Space space = participate.getSpace();
+        validateAdminStatus(user.getUserId(), space.getAdminId());
+        removeParticipation(participate, space);
         return null;
     }
 
@@ -210,11 +210,19 @@ public class SpaceService {
     @Transactional
     @CacheEvict(value = CacheName.group, key = "#groupId")
     public Void participateDelete(Long groupId, Users user) {
-        Space group = getGroup(groupId);
-        validateAdminStatus(user.getUserId(), group.getAdminId());
-        groupRepository.delete(group);
+        Space space = getGroup(groupId);
+        validateAdminStatus(user.getUserId(), space.getAdminId());
+        groupRepository.delete(space);
         voteRepository.deleteBySpaceId(groupId);
         return null;
+    }
+
+    public SpaceParticipationsResponse getParticipationDetail(Long groupId, Users user) {
+        Space space = getGroup(groupId);
+        Participation participation = participationRepository.findBySpaceAndUserId(space, user.getUserId())
+                .orElseThrow(() -> new CustomException(NOT_FOUND_PARTICIPATE));
+
+        return SpaceParticipationsResponse.toParticipateEntity(space, participation, user);
     }
 
     // 모임 추천 지역 조회하기
@@ -238,19 +246,19 @@ public class SpaceService {
                 .toList();
     }
 
-    private static SpaceMyParticipateResponse toMyParticiPateResponse(Space group, Users user) {
-        Participation admin = getGroupAdmin(group);
+    private static SpaceMyParticipateResponse toMyParticiPateResponse(Space space, Users user) {
+        Participation admin = getGroupAdmin(space);
         return SpaceMyParticipateResponse.response(
-                group,
+                space,
                 admin.getUserName(),
                 admin.getUserId().equals(user.getUserId()),
-                group.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
-                group.getParticipations().stream().map(Participation::getUserName).toList());
+                space.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
+                space.getParticipations().stream().map(Participation::getUserName).toList());
     }
 
-    private static Participation getGroupAdmin(Space group) {
-        return group.getParticipations().stream()
-                .filter(participation -> participation.getUserId().equals(group.getAdminId()))
+    private static Participation getGroupAdmin(Space space) {
+        return space.getParticipations().stream()
+                .filter(participation -> participation.getUserId().equals(space.getAdminId()))
                 .findFirst()
                 .orElseThrow(
                         () -> new CustomException(NOT_FOUND_PARTICIPATE)
@@ -277,13 +285,13 @@ public class SpaceService {
 
     // 모임 참여자 정보 리스트 조회 API
     public SpaceDetailResponse readParticipateSpaceByRegion(Long groupId) {
-        Space group = getGroupByFetchParticipation(groupId);
-        Users admin = getUser(group.getAdminId());
+        Space space = getGroupByFetchParticipation(groupId);
+        Users admin = getUser(space.getAdminId());
         List<SpaceRegionResponse> regions = new ArrayList<>();
 
-        group.getParticipations().forEach(participation -> toRegionsResponse(regions, participation));
+        space.getParticipations().forEach(participation -> toRegionsResponse(space, regions, participation));
 
-        return SpaceDetailResponse.response(group, admin, regions);
+        return SpaceDetailResponse.response(space, admin, regions);
     }
 
     public NicknameValidationResponse checkNicknameValidation(Long groupId, String nickname) {
@@ -293,13 +301,13 @@ public class SpaceService {
         return new NicknameValidationResponse(isDuplicated);
     }
 
-    private void toRegionsResponse(List<SpaceRegionResponse> regions, Participation participation) {
+    private void toRegionsResponse(Space space, List<SpaceRegionResponse> regions, Participation participation) {
         // 그룹화 지역 이름 생성
         String regionName = getRegionName(participation);
 
         // 참여 정보 응답 객체 변환
         Users user = getUser(participation.getUserId());
-        SpaceParticipationsResponse participateEntity = toParticipateEntity(participation, user);
+        SpaceParticipationsResponse participateEntity = toParticipateEntity(space, participation, user);
 
         // 생성된 그룹화 지역 이름과 일치하는 그룹화 지역이 이미 존재하는지 Optional 검증
         Optional<SpaceRegionResponse> optionalRegion = findRegionByName(regions, regionName);
@@ -333,10 +341,11 @@ public class SpaceService {
     }
 
     // 모임 이름 수정 API
+    @Transactional
     public Void updateSpaceName(Long groupId, SpaceNameUpdateServiceRequest request, Users user) {
-        Space group = getGroup(groupId);
-        validateAdminStatus(user.getUserId(), group.getAdminId());
-        group.updateGroupName(request.getGroupName());
+        Space space = getGroup(groupId);
+        validateAdminStatus(user.getUserId(), space.getAdminId());
+        space.updateGroupName(request.getGroupName());
         return null;
     }
 
@@ -379,8 +388,8 @@ public class SpaceService {
         }
     }
 
-    private void checkDuplicateParticipation(Space group, Users user) {
-        if (participationRepository.countBySpaceAndUserId(group, user.getUserId()) > 0) {
+    private void checkDuplicateParticipation(Space space, Users user) {
+        if (participationRepository.countBySpaceAndUserId(space, user.getUserId()) > 0) {
             throw new CustomException(DUPLICATE_PARTICIPATION);
         }
     }
@@ -468,17 +477,17 @@ public class SpaceService {
 
     private List<PlaceRouteResponse.MoveUserInfo> getMoveUserInfoList(
             BestPlace bestPlace,
-            Space group,
+            Space space,
             List<Participation> participationList
     ) {
         List<PlaceRouteResponse.MoveUserInfo> moveUserInfoList = new ArrayList<>();
 
         participationList.forEach(participation -> {
             if ((participation.getTransportation() == TransportationType.PUBLIC)) {
-                directionService.getBusRouteToResponse(bestPlace, group, participation)
+                directionService.getBusRouteToResponse(bestPlace, space, participation)
                         .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
             } else if (participation.getTransportation() == TransportationType.PERSONAL) {
-                directionService.getCarRouteToResponse(bestPlace, group, participation)
+                directionService.getCarRouteToResponse(bestPlace, space, participation)
                         .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
             }
         });
@@ -506,10 +515,10 @@ public class SpaceService {
         );
     }
 
-    private void removeParticipation(Participation participate, Space group) {
+    private void removeParticipation(Participation participate, Space space) {
         participationRepository.delete(participate);
         // 추천 지역 다시 계산
-        updateBestRegion(group);
+        updateBestRegion(space);
     }
 
     private void updateBestRegion(Space space) {
@@ -535,12 +544,12 @@ public class SpaceService {
         }
     }
 
-    private List<BestRegion> calculateBestPlaces(Space group) {
+    private List<BestRegion> calculateBestPlaces(Space space) {
         // 중간 좌표 구하기
-        MiddlePoint middlePoint = participationRepository.getMiddlePoint(group);
+        MiddlePoint middlePoint = participationRepository.getMiddlePoint(space);
 
         // 유효범위 찾기
-        List<Participation> participationList = participationRepository.findAllBySpace(group);
+        List<Participation> participationList = participationRepository.findAllBySpace(space);
         double validRange = getValidRange(participationList, middlePoint);
 
         // 근처 지하철역 찾기

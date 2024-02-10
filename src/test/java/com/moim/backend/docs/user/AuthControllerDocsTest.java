@@ -2,7 +2,7 @@ package com.moim.backend.docs.user;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.moim.backend.RestDocsSupport;
-import com.moim.backend.domain.user.controller.UserController;
+import com.moim.backend.domain.user.controller.AuthController;
 import com.moim.backend.domain.user.response.UserLoginResponse;
 import com.moim.backend.domain.user.response.UserReissueResponse;
 import com.moim.backend.domain.user.service.UserService;
@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static com.moim.backend.domain.user.config.Platform.NAVER;
 import static org.mockito.BDDMockito.given;
@@ -26,7 +25,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class UserControllerDocsTest extends RestDocsSupport {
+public class AuthControllerDocsTest extends RestDocsSupport {
 
     private final UserService userService = mock(UserService.class);
     private final String code = "Hx-PXmWuFaGakYCEy8hkUIVOWUSXIOtD7cosKDSIKsiwodR1g35KXQQWX9H4hXlcpZ45eSgo3dGkWWWOSX-z9iQ";
@@ -35,7 +34,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
 
     @Override
     protected Object initController() {
-        return new UserController(userService);
+        return new AuthController(userService);
     }
 
     @DisplayName("소셜 로그인 API")
