@@ -5,8 +5,10 @@ import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.user.controller.UserCalendarController;
 import com.moim.backend.domain.user.request.CreateUserCalendarRequest;
 import com.moim.backend.domain.user.request.UserCalendarPageRequest;
+import com.moim.backend.domain.user.request.UserDetailCalendarRequest;
 import com.moim.backend.domain.user.response.CreateUserCalendarResponse;
 import com.moim.backend.domain.user.response.UserCalendarPageResponse;
+import com.moim.backend.domain.user.response.UserDetailCalendarResponse;
 import com.moim.backend.domain.user.service.UserCalendarService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -133,6 +135,10 @@ public class UserCalendarDocsTest extends RestDocsSupport {
                 .tag("개인 캘린더 API")
                 .summary("내 캘린더 조회 API")
                 .description("요청시 date의 경우 배열 타입이 아닌 yyyy-MM-dd'T'HH:mm:ss 형식의 String으로 보내야 합니다")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
                 .requestFields(
                         fieldWithPath("date").type(ARRAY).description("형식(String) : yyyy-MM-dd'T'HH:mm:ss"))
                 .responseFields(
@@ -182,6 +188,66 @@ public class UserCalendarDocsTest extends RestDocsSupport {
         // when // then
         mockMvc.perform(
                         RestDocumentationRequestBuilders.get("/auth/calendar")
+                                .header("Authorization", "JWT AccessToken")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
+
+    @DisplayName("해당 날짜 일정 조회 API")
+    @Test
+    void readDetailCalendar() throws Exception {
+        // given
+        UserDetailCalendarRequest request = new UserDetailCalendarRequest(LocalDateTime.of(2024, 2, 9, 0, 0, 0));
+
+        UserDetailCalendarResponse response1 = UserDetailCalendarResponse.builder()
+                .spaceName("")
+                .scheduleName("엄마랑 데이트")
+                .date("2024.02.09(금) 15:00")
+                .locationName("부천역 뉴코아 아웃백")
+                .color("RED")
+                .build();
+
+        UserDetailCalendarResponse response2 = UserDetailCalendarResponse.builder()
+                .spaceName("")
+                .scheduleName("모이닷 회의")
+                .date("2024.02.09(금) 15:00")
+                .locationName("부천역 뉴코아 아웃백")
+                .color("RED")
+                .build();
+
+        given(userCalendarService.readDetailCalendar(any(), any(UserDetailCalendarRequest.class)))
+                .willReturn(List.of(response1, response2));
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("개인 캘린더 API")
+                .summary("해당 날짜 일정 조회 API")
+                .description("요청시 date의 경우 배열 타입이 아닌 yyyy-MM-dd'T'HH:mm:ss 형식의 String으로 보내야 합니다")
+                .requestHeaders(
+                        headerWithName("Authorization")
+                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
+                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .requestFields(
+                        fieldWithPath("date").type(ARRAY).description("형식(String) : yyyy-MM-dd'T'HH:mm:ss"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"),
+                        fieldWithPath("data[].spaceName").type(STRING).description("스페이스 이름(개인 일정인 경우 공백)"),
+                        fieldWithPath("data[].scheduleName").type(STRING).description("스케줄명"),
+                        fieldWithPath("data[].date").type(STRING).description("날짜"),
+                        fieldWithPath("data[].locationName").type(STRING).description("장소 이름"),
+                        fieldWithPath("data[].color").type(STRING).description("색상")
+                )
+                .build();
+
+        RestDocumentationResultHandler document = documentHandler("read-detail-calendar", prettyPrint(), prettyPrint(), parameters);
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.get("/auth/calendar/detail")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(APPLICATION_JSON)
