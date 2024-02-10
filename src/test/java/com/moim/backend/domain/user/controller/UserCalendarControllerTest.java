@@ -3,6 +3,7 @@ package com.moim.backend.domain.user.controller;
 import com.moim.backend.domain.ControllerTestSupport;
 import com.moim.backend.domain.user.request.CreateUserCalendarRequest;
 import com.moim.backend.domain.user.request.UserCalendarPageRequest;
+import com.moim.backend.domain.user.request.UserDetailCalendarRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -32,7 +33,7 @@ class UserCalendarControllerTest extends ControllerTestSupport {
                 .andExpect(status().isOk());
     }
 
-    @DisplayName("개인 캘린더 일정 추가 API")
+    @DisplayName("캘린더 조회 API")
     @Test
     void readCalendar() throws Exception {
         // given
@@ -41,6 +42,23 @@ class UserCalendarControllerTest extends ControllerTestSupport {
         // when // then
         mockMvc.perform(
                         MockMvcRequestBuilders.get("/auth/calendar")
+                                .header("Authorization", "JWT AccessToken")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("해당 날짜 일정 조회 API")
+    @Test
+    void readDetailCalendar() throws Exception {
+        // given
+        UserDetailCalendarRequest request = new UserDetailCalendarRequest(LocalDateTime.of(2024, 2, 9, 0, 0, 0));
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/auth/calendar/detail")
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(APPLICATION_JSON)
