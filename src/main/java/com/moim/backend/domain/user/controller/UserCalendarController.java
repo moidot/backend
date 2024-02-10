@@ -3,14 +3,18 @@ package com.moim.backend.domain.user.controller;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.request.CreateUserCalendarRequest;
 import com.moim.backend.domain.user.request.UserCalendarPageRequest;
+import com.moim.backend.domain.user.request.UserDetailCalendarRequest;
 import com.moim.backend.domain.user.response.CreateUserCalendarResponse;
 import com.moim.backend.domain.user.response.UserCalendarPageResponse;
+import com.moim.backend.domain.user.response.UserDetailCalendarResponse;
 import com.moim.backend.domain.user.service.UserCalendarService;
 import com.moim.backend.global.auth.Login;
 import com.moim.backend.global.common.CustomResponseEntity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,5 +37,13 @@ public class UserCalendarController {
             @RequestBody @Valid UserCalendarPageRequest request
     ) {
         return CustomResponseEntity.success(userCalendarService.readMyCalendar(user, request));
+    }
+
+    @GetMapping("/calendar/detail")
+    public CustomResponseEntity<List<UserDetailCalendarResponse>> readDetailCalendar(
+            @Login Users user,
+            @RequestBody @Valid UserDetailCalendarRequest request
+    ) {
+        return CustomResponseEntity.success(userCalendarService.readDetailCalendar(user, request));
     }
 }

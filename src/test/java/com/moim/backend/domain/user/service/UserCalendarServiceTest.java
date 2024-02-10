@@ -13,8 +13,11 @@ import com.moim.backend.domain.user.repository.UserCalendarRepository;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.domain.user.request.CreateUserCalendarRequest;
 import com.moim.backend.domain.user.request.UserCalendarPageRequest;
+import com.moim.backend.domain.user.request.UserDetailCalendarRequest;
 import com.moim.backend.domain.user.response.CreateUserCalendarResponse;
 import com.moim.backend.domain.user.response.UserCalendarPageResponse;
+import com.moim.backend.domain.user.response.UserDetailCalendarResponse;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
+import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
 import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -51,6 +56,9 @@ class UserCalendarServiceTest {
 
     @Autowired
     private SpaceCalendarRepository spaceCalendarRepository;
+
+    @Autowired
+    private EntityManager em;
 
     @DisplayName("유저가 자신의 일정을 하나 추가한다.")
     @Test
@@ -110,6 +118,31 @@ class UserCalendarServiceTest {
                         tuple("RED", "치킨 주문하기"),
                         tuple("space", "모이닷 회의"),
                         tuple("space", "모이닷 회의")
+                );
+    }
+
+    @DisplayName("해당 날짜의 내 전체 일정을 확인한다.")
+    @Test
+    void readDetailCalendar() {
+        // given
+        Users user = savedUser("백1@gmail.com", "백1");
+        Space space = savedSpace(user.getUserId(), "스1");
+        savedParticipation(user, space, "백1", "test test", 123.123456, 37.123456, PERSONAL);
+
+        savedMyCalendar(user, LocalDateTime.of(2024, 2, 9, 0, 0, 0));
+        savedCalendar(space, LocalDateTime.of(2024, 2, 9, 23, 59, 59));
+
+        UserDetailCalendarRequest request = new UserDetailCalendarRequest(LocalDateTime.of(2024, 2, 9, 0, 0, 0));
+
+        // when
+        List<UserDetailCalendarResponse> response = userCalendarService.readDetailCalendar(user, request);
+
+        // then
+        assertThat(response)
+                .extracting("spaceName", "scheduleName", "date", "color")
+                .contains(
+                        tuple("", "엄마랑 데이트", "2024.02.09(금) 00:00", "RED"),
+                        tuple("스1", "모이닷 회의", "2024.02.09(금) 23:59", "space")
                 );
     }
 
