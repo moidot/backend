@@ -4,15 +4,24 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.space.controller.SpaceCalendarController;
 import com.moim.backend.domain.space.request.controller.CreateSpaceCalendarRequest;
+import com.moim.backend.domain.space.request.controller.SpaceTimeLineRequest;
 import com.moim.backend.domain.space.response.space.CreateSpaceCalendarResponse;
+import com.moim.backend.domain.space.response.space.SpaceTimeLineResponse;
 import com.moim.backend.domain.space.service.SpaceCalendarService;
+import com.moim.backend.global.util.DateParser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static com.moim.backend.domain.space.response.space.SpaceTimeLineResponse.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -87,5 +96,101 @@ public class SpaceCalendarControllerDocsTest extends RestDocsSupport {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document);
+    }
+
+    @DisplayName("타임라인 조회 API")
+    @Test
+    void readSpaceTimeLine() throws Exception {
+        // given
+        SpaceTimeLineRequest request = new SpaceTimeLineRequest(1L, LocalDateTime.of(2024, 2, 1, 0, 0, 0));
+        Map<String, List<Schedule>> timeLine = getDefaultTimeLine();
+
+        List<Schedule> schedules = new ArrayList<>();
+        schedules.add(Schedule.builder()
+                .scheduleName("안드로이드 회의")
+                .date("오전 11:00")
+                .build());
+        schedules.add(Schedule.builder()
+                .scheduleName("모이닷 회의")
+                .date("오후 10:00")
+                .build());
+
+        timeLine.put("1/목", schedules);
+
+        given(spaceCalendarService.readSpaceTimeLine(any(SpaceTimeLineRequest.class)))
+                .willReturn(builder()
+                        .timeLine(timeLine)
+                        .build()
+                );
+
+        ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
+                .tag("모임 캘린더 API")
+                .summary("타임라인 조회 API")
+                .description("date 요청 시 String으로 보내야 합니다. ex) 2024-02-01T00:00:00 / 해당 응답 예시는 2024년 2월 기준입니다.")
+                .requestFields(
+                        fieldWithPath("spaceId").type(NUMBER).description("스페이스 ID"),
+                        fieldWithPath("date").type(ARRAY).description("조회하려는 달의 1일 0시 0분으로 보내주세요!"))
+                .responseFields(
+                        fieldWithPath("code").type(NUMBER).description("상태 코드"),
+                        fieldWithPath("message").type(STRING).description("상태 메세지"),
+                        fieldWithPath("data.timeLine").type(OBJECT).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.1/목").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.1/목[].date").type(STRING).description("날짜 ex) 1/목"),
+                        fieldWithPath("data.timeLine.1/목[].scheduleName").type(STRING).description("스케줄 이름"),
+                        fieldWithPath("data.timeLine.2/금").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.3/토").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.4/일").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.5/월").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.6/화").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.7/수").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.8/목").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.9/금").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.10/토").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.11/일").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.12/월").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.13/화").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.14/수").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.15/목").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.16/금").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.17/토").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.18/일").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.19/월").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.20/화").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.21/수").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.22/목").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.23/금").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.24/토").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.25/일").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.26/월").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.27/화").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.28/수").type(ARRAY).description("모임 스케줄 리스트"),
+                        fieldWithPath("data.timeLine.29/목").type(ARRAY).description("모임 스케줄 리스트"))
+                .build();
+
+        RestDocumentationResultHandler document = documentHandler("read-timeLine", prettyPrint(), prettyPrint(), parameters);
+
+        // when // then
+        mockMvc.perform(
+                        RestDocumentationRequestBuilders.get("/space/timeLine")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
+
+    private static Map<String, List<Schedule>> getDefaultTimeLine() {
+        Map<String, List<Schedule>> timeLine = new HashMap<>();
+
+        for (int nextDay = 0; nextDay < 29; nextDay++) {
+            LocalDateTime day = LocalDateTime.of(2024, 2, 1, 0, 0, 0).plusDays(nextDay);
+            String dayOfWeek = DateParser.getDayOfWeek(day);
+            String date = day.getDayOfMonth() + "/" + dayOfWeek;
+            System.out.println(date);
+            timeLine.put(date, new ArrayList<>());
+        }
+
+        return timeLine;
     }
 }
