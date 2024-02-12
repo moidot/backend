@@ -2,6 +2,7 @@ package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.ControllerTestSupport;
 import com.moim.backend.domain.space.request.controller.CreateSpaceCalendarRequest;
+import com.moim.backend.domain.space.request.controller.SpaceTimeLineRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -25,6 +26,22 @@ class SpaceCalendarControllerTest extends ControllerTestSupport {
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/space/calendar")
                                 .header("Authorization", "JWT AccessToken")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("타임라인 조회 API")
+    @Test
+    void readSpaceTimeLine() throws Exception {
+        // given
+        SpaceTimeLineRequest request = new SpaceTimeLineRequest(1L, LocalDateTime.of(2024, 2, 1, 0, 0, 0));
+
+        // when // then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/space/timeLine")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(APPLICATION_JSON)
                 )
