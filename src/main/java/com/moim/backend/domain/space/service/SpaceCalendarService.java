@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.moim.backend.domain.space.response.space.SpaceTimeLineResponse.*;
 import static com.moim.backend.global.common.Result.NOT_FOUND_GROUP;
@@ -79,7 +76,7 @@ public class SpaceCalendarService {
     }
 
     private static Map<String, List<Schedule>> getDefaultTimeLine(SpaceTimeLineRequest request) {
-        Map<String, List<Schedule>> timeLine = new HashMap<>();
+        Map<String, List<Schedule>> timeLine = new LinkedHashMap<>();
 
         int endDayOfMonth = getEndDate(request.getDate()).getDayOfMonth();
         for (int nextDay = 0; nextDay < endDayOfMonth; nextDay++) {
