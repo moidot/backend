@@ -16,10 +16,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.moim.backend.domain.space.response.space.SpaceTimeLineResponse.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -181,7 +178,7 @@ public class SpaceCalendarControllerDocsTest extends RestDocsSupport {
     }
 
     private static Map<String, List<Schedule>> getDefaultTimeLine() {
-        Map<String, List<Schedule>> timeLine = new HashMap<>();
+        Map<String, List<Schedule>> timeLine = new LinkedHashMap<>();
 
         for (int nextDay = 0; nextDay < 29; nextDay++) {
             LocalDateTime day = LocalDateTime.of(2024, 2, 1, 0, 0, 0).plusDays(nextDay);
