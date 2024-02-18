@@ -1,4 +1,4 @@
-package com.moim.backend.domain.user.response;
+package com.moim.backend.domain.user.response.naver;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -8,20 +8,17 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class KakaoTokenResponse {
-
+public class NaverTokenResponse {
     @JsonProperty("access_token")
     private String accessToken;
-    @JsonProperty("token_type")
-    private String tokenType;
     @JsonProperty("refresh_token")
     private String refreshToken;
-    @JsonProperty("id_token")
-    private String idToken;
+    @JsonProperty("token_type")
+    private String tokenType;
     @JsonProperty("expires_in")
-    private int expiresIn;
-    private String scope;
-    @JsonProperty("refresh_token_expires_in")
-    private int refreshTokenExpiresIn;
-
+    private String expiresIn;
+    @JsonProperty("error")
+    private String error;
+    @JsonProperty("error_description")
+    private String errorDescription;
 }
