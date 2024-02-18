@@ -1,6 +1,8 @@
 package com.moim.backend.global.util;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 
@@ -20,5 +22,14 @@ public class DateParser {
 
     public static String getDayOfWeek(LocalDateTime date) {
         return date.getDayOfWeek().getDisplayName(SHORT, KOREAN);
+    }
+
+    public static LocalDateTime getEndDate(LocalDateTime startDate) {
+        YearMonth yearMonth = YearMonth.from(startDate);
+        return yearMonth.atEndOfMonth().atTime(23, 59, 59);
+    }
+
+    public static LocalDateTime getEndDateTime(LocalDateTime startDateTime) {
+        return startDateTime.with(LocalTime.MAX);
     }
 }
