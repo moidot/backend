@@ -3,7 +3,6 @@ package com.moim.backend.domain.user.service;
 import com.moim.backend.domain.bookmark.repository.BookmarkRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.user.config.Platform;
-import com.moim.backend.domain.user.entity.BookmarkPlace;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
 import com.moim.backend.domain.user.response.UserLoginResponse;
@@ -11,7 +10,6 @@ import com.moim.backend.domain.user.response.UserReissueResponse;
 import com.moim.backend.global.auth.jwt.JwtService;
 import com.moim.backend.global.common.RedisService;
 import com.moim.backend.global.common.exception.CustomException;
-import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.moim.backend.global.common.Result.*;
+import static com.moim.backend.global.common.Result.FAIL_SOCIAL_LOGIN;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +31,7 @@ public class UserService {
     private final JwtService jwtService;
     private final RedisService redisService;
 
-    // 소셜 로그인
+    // 소셜 로그인 API
     @Transactional
     public UserLoginResponse loginByOAuth(String code, Platform platform) {
         // 요청된 로그인 플랫폼 확인 후 소셜 로그인 진행
@@ -49,7 +47,21 @@ public class UserService {
         return UserLoginResponse.response(user, accessToken, refreshToken);
     }
 
-    // 소셜 로그인
+    private Users oauthLoginProcess(String code, Platform platform) {
+        return getOptionalSocialUserEntity(code, platform)
+                .orElseThrow(() -> new CustomException(FAIL_SOCIAL_LOGIN));
+    }
+
+    private Optional<Users> getOptionalSocialUserEntity(String code, Platform platform) {
+        for (OAuth2LoginService oAuth2LoginService : oAuth2LoginServices) {
+            if (oAuth2LoginService.supports().equals(platform)) {
+                return Optional.of(oAuth2LoginService.toEntityUser(code, platform));
+            }
+        }
+        return Optional.empty();
+    }
+
+    // 소셜 로그인 (accessToken) API
     @Transactional
     public UserLoginResponse loginByAccessToken(String token, Platform platform) {
         // 요청된 로그인 플랫폼 확인 후 소셜 로그인 진행
@@ -65,37 +77,9 @@ public class UserService {
         return UserLoginResponse.response(user, accessToken, refreshToken);
     }
 
-    public UserReissueResponse reissueAccessToken(String refreshToken) {
-        return UserReissueResponse.toResponse(jwtService.reissueAccessToken(refreshToken));
-    }
-
-    // 로그아웃
-    public Void logout(Users user, String atk) {
-        String decodeAtk = atk.substring(7);
-        Long expiration = jwtService.getExpiration(decodeAtk);
-
-        return redisService.logoutFromRedis(user.getEmail(), decodeAtk, expiration);
-    }
-
-    // method
-    private Users oauthLoginProcess(String code, Platform platform) {
-        return getOptionalSocialUserEntity(code, platform)
-                .orElseThrow(() -> new CustomException(FAIL_SOCIAL_LOGIN));
-    }
-
-    // method
     private Users oauthLoginProcessByToken(String token, Platform platform) {
         return getOptionalSocialUserEntityByToken(token, platform)
                 .orElseThrow(() -> new CustomException(FAIL_SOCIAL_LOGIN));
-    }
-
-    private Optional<Users> getOptionalSocialUserEntity(String code, Platform platform) {
-        for (OAuth2LoginService oAuth2LoginService : oAuth2LoginServices) {
-            if (oAuth2LoginService.supports().equals(platform)) {
-                return Optional.of(oAuth2LoginService.toEntityUser(code, platform));
-            }
-        }
-        return Optional.empty();
     }
 
     private Optional<Users> getOptionalSocialUserEntityByToken(String accessToken, Platform platform) {
@@ -105,6 +89,27 @@ public class UserService {
             }
         }
         return Optional.empty();
+    }
+
+    // 액세스 토큰 재발급 API
+    public UserReissueResponse reissueAccessToken(String refreshToken) {
+        return UserReissueResponse.toResponse(jwtService.reissueAccessToken(refreshToken));
+    }
+
+    // 로그아웃 API
+    public Void logout(Users user, String atk) {
+        String decodeAtk = atk.substring(7);
+        Long expiration = jwtService.getExpiration(decodeAtk);
+
+        return redisService.logoutFromRedis(user.getEmail(), decodeAtk, expiration);
+    }
+
+    // 회원탈퇴 API
+    public Void deleteAccount(Users user) {
+        Long userId = user.getUserId();
+        bookmarkRepository.deleteByUserId(userId);
+        participationRepository.deleteByUserId(userId);
+        return null;
     }
 
     private Users saveOrUpdate(Users userEntity) {
@@ -120,12 +125,5 @@ public class UserService {
                 .email(request.getEmail())
                 .name(request.getName())
                 .build();
-    }
-
-    public Void deleteAccount(Users user) {
-        Long userId = user.getUserId();
-        bookmarkRepository.deleteByUserId(userId);
-        participationRepository.deleteByUserId(userId);
-        return null;
     }
 }
