@@ -17,6 +17,7 @@ public class SpaceCalendarController {
 
     private final SpaceCalendarService spaceCalendarService;
 
+    // 모임 캘린더 일정 추가 API
     @PostMapping("/calendar")
     public CustomResponseEntity<CreateSpaceCalendarResponse> createSpaceCalendar(
             @RequestBody @Valid CreateSpaceCalendarRequest request
@@ -24,6 +25,7 @@ public class SpaceCalendarController {
         return CustomResponseEntity.success(spaceCalendarService.createSpaceCalendar(request));
     }
 
+    // 타임라인 조회 API
     @GetMapping("/timeLine")
     public CustomResponseEntity<SpaceTimeLineResponse> readSpaceTimeLine(
             @RequestBody @Valid SpaceTimeLineRequest request
