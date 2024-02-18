@@ -1,6 +1,6 @@
 package com.moim.backend.domain.space.entity;
 
-import com.moim.backend.domain.space.request.service.SpaceParticipateUpdateServiceRequest;
+import com.moim.backend.domain.space.request.SpaceParticipateUpdateRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -54,7 +54,7 @@ public class Participation {
         this.password = password;
     }
 
-    public void update(SpaceParticipateUpdateServiceRequest request) {
+    public void update(SpaceParticipateUpdateRequest request) {
         this.userName = request.getUserName();
         this.locationName = request.getLocationName();
         this.latitude = request.getLatitude();

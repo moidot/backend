@@ -1,10 +1,10 @@
 package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.ControllerTestSupport;
-import com.moim.backend.domain.space.request.controller.SpaceCreateRequest;
-import com.moim.backend.domain.space.request.controller.SpaceNameUpdateRequest;
-import com.moim.backend.domain.space.request.controller.SpaceParticipateRequest;
-import com.moim.backend.domain.space.request.controller.SpaceParticipateUpdateRequest;
+import com.moim.backend.domain.space.request.SpaceCreateRequest;
+import com.moim.backend.domain.space.request.SpaceNameUpdateRequest;
+import com.moim.backend.domain.space.request.SpaceParticipateRequest;
+import com.moim.backend.domain.space.request.SpaceParticipateUpdateRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;

@@ -1,12 +1,10 @@
 package com.moim.backend.domain.space.controller;
 
-import com.moim.backend.domain.space.request.controller.CreateSpaceCalendarRequest;
-import com.moim.backend.domain.space.request.controller.SpaceTimeLineRequest;
+import com.moim.backend.domain.space.request.CreateSpaceCalendarRequest;
+import com.moim.backend.domain.space.request.SpaceTimeLineRequest;
 import com.moim.backend.domain.space.response.space.CreateSpaceCalendarResponse;
 import com.moim.backend.domain.space.response.space.SpaceTimeLineResponse;
 import com.moim.backend.domain.space.service.SpaceCalendarService;
-import com.moim.backend.domain.user.entity.Users;
-import com.moim.backend.global.auth.Login;
 import com.moim.backend.global.common.CustomResponseEntity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

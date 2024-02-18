@@ -1,5 +1,9 @@
 package com.moim.backend.domain.space.service;
 
+import com.moim.backend.domain.space.request.SpaceCreateRequest;
+import com.moim.backend.domain.space.request.SpaceNameUpdateRequest;
+import com.moim.backend.domain.space.request.SpaceParticipateRequest;
+import com.moim.backend.domain.space.request.SpaceParticipateUpdateRequest;
 import com.moim.backend.domain.spacevote.entity.Vote;
 import com.moim.backend.domain.spacevote.repository.VoteRepository;
 import com.moim.backend.domain.hotplace.repository.HotPlaceRepository;
@@ -10,10 +14,6 @@ import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.SpaceRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
-import com.moim.backend.domain.space.request.service.SpaceCreateServiceRequest;
-import com.moim.backend.domain.space.request.service.SpaceNameUpdateServiceRequest;
-import com.moim.backend.domain.space.request.service.SpaceParticipateServiceRequest;
-import com.moim.backend.domain.space.request.service.SpaceParticipateUpdateServiceRequest;
 import com.moim.backend.domain.space.response.MiddlePoint;
 import com.moim.backend.domain.space.response.NaverMapListDto;
 import com.moim.backend.domain.space.response.NicknameValidationResponse;
@@ -71,7 +71,7 @@ public class SpaceService {
 
     // 모임 생성
     @Transactional
-    public SpaceCreateResponse createSpace(SpaceCreateServiceRequest request, Users user) {
+    public SpaceCreateResponse createSpace(SpaceCreateRequest request, Users user) {
         Space space = groupRepository.save(toGroupEntity(request, user));
         saveParticipation(
                 user, space, request.getUserName(),
@@ -103,7 +103,7 @@ public class SpaceService {
     // 모임 참여
     @Transactional
     @CacheEvict(value = CacheName.group, key = "#request.getGroupId()")
-    public SpaceParticipateResponse participateSpace(SpaceParticipateServiceRequest request, Users user) {
+    public SpaceParticipateResponse participateSpace(SpaceParticipateRequest request, Users user) {
         Space space = getGroup(request.getGroupId());
 
         participateGroupValidate(request, user, space);
@@ -135,7 +135,7 @@ public class SpaceService {
                 .build());
     }
 
-    private void participateGroupValidate(SpaceParticipateServiceRequest request, Users user, Space space) {
+    private void participateGroupValidate(SpaceParticipateRequest request, Users user, Space space) {
         validateLocationName(request.getLocationName());
         checkDuplicateParticipation(space, user);
         validateTransportation(request.getTransportationType());
@@ -144,7 +144,7 @@ public class SpaceService {
     // 내 참여 정보 수정
     @Transactional
     public SpaceParticipateUpdateResponse participateUpdate(
-            SpaceParticipateUpdateServiceRequest request, Users user
+            SpaceParticipateUpdateRequest request, Users user
     ) {
         Participation myParticipate = getParticipate(request.getParticipateId());
         validateParticipationMyInfo(user, myParticipate);
@@ -342,7 +342,7 @@ public class SpaceService {
 
     // 모임 이름 수정 API
     @Transactional
-    public Void updateSpaceName(Long groupId, SpaceNameUpdateServiceRequest request, Users user) {
+    public Void updateSpaceName(Long groupId, SpaceNameUpdateRequest request, Users user) {
         Space space = getGroup(groupId);
         validateAdminStatus(user.getUserId(), space.getAdminId());
         space.updateGroupName(request.getGroupName());
@@ -461,7 +461,7 @@ public class SpaceService {
         }
     }
 
-    private Space toGroupEntity(SpaceCreateServiceRequest request, Users user) {
+    private Space toGroupEntity(SpaceCreateRequest request, Users user) {
         return Space.builder()
                 .adminId(user.getUserId())
                 .name(request.getName())
@@ -568,7 +568,7 @@ public class SpaceService {
     }
 
     // 추천 지역 업데이트가 필요한지에 대한 여부 판단. 참여자의 위치 정보가 수정되었다면 업데이트 필요.
-    private boolean isUpdateBestRegionRequired(SpaceParticipateUpdateServiceRequest request, Participation myParticipate) {
+    private boolean isUpdateBestRegionRequired(SpaceParticipateUpdateRequest request, Participation myParticipate) {
         if (request.getLatitude() != myParticipate.getLatitude() || request.getLongitude() != myParticipate.getLongitude()) {
             return true;
         }
