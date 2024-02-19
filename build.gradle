@@ -36,7 +36,7 @@ swaggerSources {
 // 6. openapi3 스펙 생성시 설정 정보
 openapi3 {
     servers = [
-            {url = "http://ec2-3-36-231-219.ap-northeast-2.compute.amazonaws.com"},
+            {url = "https://api.moidot.co.kr"},
             {url = "http://localhost:8080"}
     ]
     title = "모이닷 API 문서"
