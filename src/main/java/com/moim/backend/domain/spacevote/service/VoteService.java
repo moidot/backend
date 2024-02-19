@@ -46,7 +46,7 @@ public class VoteService {
     // 투표 생성 API
     @Transactional
     public VoteCreateResponse createVote(VoteCreateRequest request, Long groupId, Users user) {
-        Space group = getGroup(groupId);
+        Space group = getSpace(groupId);
         validateAlreadyCreatedVote(groupId);
         validateUserIsAdmin(user, group);
         Vote vote = voteRepository.save(toVoteEntity(request, groupId));
@@ -81,7 +81,7 @@ public class VoteService {
     public VoteSelectResultResponse selectVote(
             Long groupId, List<Long> selectPlaceIds, Users user, LocalDateTime now
     ) {
-        Space group = getGroup(groupId);
+        Space group = getSpace(groupId);
         Vote vote = getVote(groupId);
         validateVote(selectPlaceIds, now, vote);
         try {
@@ -127,7 +127,7 @@ public class VoteService {
 
     // 투표 읽기 API
     public VoteSelectResultResponse readVote(Long groupId, Users user) {
-        Space group = getGroup(groupId);
+        Space group = getSpace(groupId);
         Optional<Vote> optionalVote = voteRepository.findBySpaceId(groupId);
         if (optionalVote.isEmpty()) {
             return VoteSelectResultResponse.response(group, null, new ArrayList<>(), 0,false);
@@ -148,7 +148,7 @@ public class VoteService {
         List<Long> userIds = extractUserIdsFromSelectPlaces(selectPlaceList);
         List<Participation> participations = participationRepository.findAllBySpaceSpaceIdAndUserIdIn(groupId, userIds);
 
-        Space group = getGroup(groupId);
+        Space group = getSpace(groupId);
         Vote vote = getVote(groupId);
 
         List<VoteParticipation> voteParticipations = participations.stream().map(
@@ -180,7 +180,7 @@ public class VoteService {
     // 투표 종료하기 API
     @Transactional
     public VoteSelectResultResponse conclusionVote(Long groupId, Users user) {
-        Space group = getGroup(groupId);
+        Space group = getSpace(groupId);
         validateUserIsAdmin(user, group);
         Vote vote = getVote(groupId);
 
@@ -200,6 +200,33 @@ public class VoteService {
         return VoteSelectResultResponse.response(group, vote, voteStatuses, selectPlaceRepository.countByVote(vote),true);
     }
 
+    // 재투표 API
+    @Transactional
+    public VoteCreateResponse reCreateVote(VoteCreateRequest request, Long spaceId, Users user) {
+        Space space = getSpace(spaceId);
+        validateUserIsAdmin(user, space);
+
+        Vote vote = getVote(spaceId);
+        deleteVote(vote);
+
+        Vote newVote = voteRepository.save(
+                Vote.builder()
+                        .spaceId(spaceId)
+                        .isAnonymous(request.getIsAnonymous())
+                        .isEnabledMultipleChoice(request.getIsEnabledMultipleChoice())
+                        .isClosed(false)
+                        .endAt(request.getEndAt())
+                        .build()
+        );
+
+        return VoteCreateResponse.response(newVote);
+    }
+
+    private void deleteVote(Vote vote) {
+        selectPlaceRepository.deleteByVote(vote);
+        voteRepository.delete(vote);
+    }
+
     // method
 
     private Vote getVote(Long groupId) {
@@ -209,7 +236,7 @@ public class VoteService {
                 );
     }
 
-    private Space getGroup(Long groupId) {
+    private Space getSpace(Long groupId) {
         return groupRepository.findById(groupId)
                 .orElseThrow(
                         () -> new CustomException(NOT_FOUND_GROUP)

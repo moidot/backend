@@ -65,4 +65,13 @@ public class VoteController {
     ) {
         return CustomResponseEntity.success(voteService.conclusionVote(groupId, user));
     }
+
+    // 재투표 API
+    @PutMapping("/{spaceId}/vote")
+    public CustomResponseEntity<VoteCreateResponse> reCreateVote(
+            @PathVariable Long spaceId,
+            @RequestBody @Valid VoteCreateRequest request, @Login Users user
+    ) {
+        return CustomResponseEntity.success(voteService.reCreateVote(request, spaceId, user));
+    }
 }
