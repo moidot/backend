@@ -4,7 +4,6 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.moim.backend.RestDocsSupport;
 import com.moim.backend.domain.spacevote.controller.VoteController;
 import com.moim.backend.domain.spacevote.request.controller.VoteCreateRequest;
-import com.moim.backend.domain.spacevote.request.service.VoteCreateServiceRequest;
 import com.moim.backend.domain.spacevote.response.VoteCreateResponse;
 import com.moim.backend.domain.spacevote.response.VoteParticipation;
 import com.moim.backend.domain.spacevote.response.VoteSelectPlaceUserResponse;
@@ -48,7 +47,7 @@ public class VoteControllerDocsTest extends RestDocsSupport {
     void createVote() throws Exception {
         // given
         VoteCreateRequest request = VoteCreateRequest.toRequest(true, true, null);
-        given(voteService.createVote(any(VoteCreateServiceRequest.class), anyLong(), any(Users.class)))
+        given(voteService.createVote(any(VoteCreateRequest.class), anyLong(), any(Users.class)))
                 .willReturn(
                         VoteCreateResponse.builder()
                                 .voteId(1L)

@@ -4,7 +4,7 @@ import com.moim.backend.domain.spacevote.entity.SelectPlace;
 import com.moim.backend.domain.spacevote.entity.Vote;
 import com.moim.backend.domain.spacevote.repository.SelectPlaceRepository;
 import com.moim.backend.domain.spacevote.repository.VoteRepository;
-import com.moim.backend.domain.spacevote.request.service.VoteCreateServiceRequest;
+import com.moim.backend.domain.spacevote.request.controller.VoteCreateRequest;
 import com.moim.backend.domain.spacevote.response.VoteCreateResponse;
 import com.moim.backend.domain.spacevote.response.VoteParticipation;
 import com.moim.backend.domain.spacevote.response.VoteSelectPlaceUserResponse;
@@ -45,7 +45,7 @@ public class VoteService {
 
     // 투표 생성 API
     @Transactional
-    public VoteCreateResponse createVote(VoteCreateServiceRequest request, Long groupId, Users user) {
+    public VoteCreateResponse createVote(VoteCreateRequest request, Long groupId, Users user) {
         Space group = getGroup(groupId);
         validateAlreadyCreatedVote(groupId);
         validateUserIsAdmin(user, group);
@@ -66,13 +66,13 @@ public class VoteService {
         }
     }
 
-    private static Vote toVoteEntity(VoteCreateServiceRequest request, Long groupId) {
+    private static Vote toVoteEntity(VoteCreateRequest request, Long groupId) {
         return Vote.builder()
                 .spaceId(groupId)
                 .isAnonymous(request.getIsAnonymous())
                 .isEnabledMultipleChoice(request.getIsEnabledMultipleChoice())
                 .isClosed(false)
-                .endAt(request.getEndAt().orElse(null))
+                .endAt(request.getEndAt())
                 .build();
     }
 

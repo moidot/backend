@@ -66,7 +66,7 @@ class VoteServiceTest {
 
         // when
         VoteCreateResponse response =
-                voteService.createVote(request.toServiceRequest(), group.getSpaceId(), admin);
+                voteService.createVote(request, group.getSpaceId(), admin);
 
         // then
 
@@ -88,7 +88,7 @@ class VoteServiceTest {
 
         // when
         VoteCreateResponse response =
-                voteService.createVote(request.toServiceRequest(), group.getSpaceId(), admin);
+                voteService.createVote(request, group.getSpaceId(), admin);
 
         // then
 
@@ -110,7 +110,7 @@ class VoteServiceTest {
         );
 
         // when // then
-        assertThatThrownBy(() -> voteService.createVote(request.toServiceRequest(), group.getSpaceId(), user))
+        assertThatThrownBy(() -> voteService.createVote(request, group.getSpaceId(), user))
                 .extracting("result.code", "result.message")
                 .contains(Result.NOT_ADMIN_USER.getCode(), Result.NOT_ADMIN_USER.getMessage());
 

@@ -27,7 +27,7 @@ public class VoteController {
             @PathVariable Long groupId,
             @RequestBody @Valid VoteCreateRequest request, @Login Users user
     ) {
-        return CustomResponseEntity.success(voteService.createVote(request.toServiceRequest(), groupId, user));
+        return CustomResponseEntity.success(voteService.createVote(request, groupId, user));
     }
 
     // 투표 읽기 API
@@ -65,5 +65,4 @@ public class VoteController {
     ) {
         return CustomResponseEntity.success(voteService.conclusionVote(groupId, user));
     }
-
 }
