@@ -66,7 +66,7 @@ class VoteServiceTest {
 
         // when
         VoteCreateResponse response =
-                voteService.createVote(request.toServiceRequest(), group.getSpaceId(), admin);
+                voteService.createVote(request, group.getSpaceId(), admin);
 
         // then
 
@@ -88,7 +88,7 @@ class VoteServiceTest {
 
         // when
         VoteCreateResponse response =
-                voteService.createVote(request.toServiceRequest(), group.getSpaceId(), admin);
+                voteService.createVote(request, group.getSpaceId(), admin);
 
         // then
 
@@ -110,7 +110,7 @@ class VoteServiceTest {
         );
 
         // when // then
-        assertThatThrownBy(() -> voteService.createVote(request.toServiceRequest(), group.getSpaceId(), user))
+        assertThatThrownBy(() -> voteService.createVote(request, group.getSpaceId(), user))
                 .extracting("result.code", "result.message")
                 .contains(Result.NOT_ADMIN_USER.getCode(), Result.NOT_ADMIN_USER.getMessage());
 
@@ -441,6 +441,37 @@ class VoteServiceTest {
         assertThatThrownBy(() -> voteService.conclusionVote(group.getSpaceId(), user))
                 .extracting("result.code", "result.message")
                 .contains(-1005, "해당 유저는 그룹의 어드민이 아닙니다.");
+    }
+
+    @DisplayName("모임장이 재투표를 진행한다.")
+    @Test
+    void reCreateVote() {
+        // given
+        Users user = savedUser("test@test.com", "테스트");
+        Users admin = savedUser("admin@admin.com", "어드민");
+
+        Space group = savedGroup(admin.getUserId(), "테스트 그룹");
+
+        BestPlace bestPlace1 = saveBestPlace(group, "강남역", 123.123456, 123.123456);
+        BestPlace bestPlace2 = saveBestPlace(group, "역삼역", 123.123456, 123.123456);
+        BestPlace bestPlace3 = saveBestPlace(group, "신논현역", 123.123456, 123.123456);
+
+        Vote vote = saveVote(group.getSpaceId(), true, true, LocalDateTime.of(2023, 8, 3, 12, 0, 0));
+
+        SelectPlace selectPlace1 = saveSelectPlace(user, bestPlace1, vote);
+        SelectPlace selectPlace2 = saveSelectPlace(user, bestPlace3, vote);
+        SelectPlace selectPlace3 = saveSelectPlace(admin, bestPlace1, vote);
+        SelectPlace selectPlace4 = saveSelectPlace(admin, bestPlace2, vote);
+
+        VoteCreateRequest request = VoteCreateRequest.toRequest(false, true, null);
+
+        // when
+        VoteCreateResponse response = voteService.reCreateVote(request, group.getSpaceId(), admin);
+
+        // then
+        assertThat(response)
+                .extracting("groupId", "isClosed", "isAnonymous", "isEnabledMultipleChoice", "endAt")
+                .contains(group.getSpaceId(), false, true, true, "none");
     }
 
     // method

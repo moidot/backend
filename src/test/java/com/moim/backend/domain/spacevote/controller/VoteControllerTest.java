@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
+import static org.springframework.http.MediaType.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -26,7 +27,7 @@ class VoteControllerTest extends ControllerTestSupport {
                         MockMvcRequestBuilders.post("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(APPLICATION_JSON)
                 )
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -44,7 +45,7 @@ class VoteControllerTest extends ControllerTestSupport {
                         MockMvcRequestBuilders.post("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
                                 .content(objectMapper.writeValueAsString(request))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(APPLICATION_JSON)
                 )
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -103,6 +104,23 @@ class VoteControllerTest extends ControllerTestSupport {
         mockMvc.perform(
                         MockMvcRequestBuilders.patch("/group/{groupId}/vote", 1L)
                                 .header("Authorization", "JWT AccessToken")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("재투표 API")
+    @Test
+    void reCreateVote() throws Exception {
+        // given
+        VoteCreateRequest request = VoteCreateRequest.toRequest(true, true, null);
+
+        // when// then
+        mockMvc.perform(
+                        MockMvcRequestBuilders.put("/group/{spaceId}/vote", 1L)
+                                .header("Authorization", "JWT AccessToken")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(APPLICATION_JSON)
                 )
                 .andDo(print())
                 .andExpect(status().isOk());

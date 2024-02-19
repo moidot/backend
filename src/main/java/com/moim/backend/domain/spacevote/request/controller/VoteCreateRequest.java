@@ -1,6 +1,5 @@
 package com.moim.backend.domain.spacevote.request.controller;
 
-import com.moim.backend.domain.spacevote.request.service.VoteCreateServiceRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,14 +23,6 @@ public class VoteCreateRequest {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endAt;
-
-    public VoteCreateServiceRequest toServiceRequest() {
-        return VoteCreateServiceRequest.builder()
-                .isAnonymous(isAnonymous)
-                .isEnabledMultipleChoice(isEnabledMultipleChoice)
-                .endAt(endAt)
-                .build();
-    }
 
     public static VoteCreateRequest toRequest(Boolean isAnonymous, Boolean isEnabledMultipleChoice, LocalDateTime endAt) {
         return new VoteCreateRequest(isAnonymous, isEnabledMultipleChoice, endAt);

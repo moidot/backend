@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface SelectPlaceRepository extends JpaRepository<SelectPlace, Long>, SelectPlaceCustomRepository {
     Boolean existsByVoteAndUserId(Vote vote, Long userId);
     int countByVote(Vote vote);
+    void deleteByVote(Vote vote);
 }
