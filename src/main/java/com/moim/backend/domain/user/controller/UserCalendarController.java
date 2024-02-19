@@ -22,6 +22,7 @@ import java.util.List;
 public class UserCalendarController {
     private final UserCalendarService userCalendarService;
 
+    // 개인 캘린더 일정 추가 API
     @PostMapping("/calendar")
     public CustomResponseEntity<CreateUserCalendarResponse> createUserCalendar(
             @Login Users user,
@@ -31,6 +32,7 @@ public class UserCalendarController {
         return CustomResponseEntity.success(userCalendarService.createUserCalendar(user, createUserCalendarRequest));
     }
 
+    // 캘린더 조회 API
     @GetMapping("/calendar")
     public CustomResponseEntity<UserCalendarPageResponse> readCalendar(
             @Login Users user,
@@ -39,6 +41,7 @@ public class UserCalendarController {
         return CustomResponseEntity.success(userCalendarService.readMyCalendar(user, request));
     }
 
+    // 해당 날짜 일정 조회 API
     @GetMapping("/calendar/detail")
     public CustomResponseEntity<List<UserDetailCalendarResponse>> readDetailCalendar(
             @Login Users user,

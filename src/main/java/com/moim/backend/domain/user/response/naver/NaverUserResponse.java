@@ -1,4 +1,4 @@
-package com.moim.backend.domain.user.response;
+package com.moim.backend.domain.user.response.naver;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

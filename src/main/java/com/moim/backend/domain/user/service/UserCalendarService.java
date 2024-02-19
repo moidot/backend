@@ -19,14 +19,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.moim.backend.domain.user.response.UserCalendarPageResponse.*;
+import static com.moim.backend.domain.user.response.UserCalendarPageResponse.Schedule;
+import static com.moim.backend.global.util.DateParser.getEndDate;
+import static com.moim.backend.global.util.DateParser.getEndDateTime;
 import static java.time.format.TextStyle.SHORT;
 import static java.util.Locale.KOREAN;
 
@@ -37,6 +37,7 @@ public class UserCalendarService {
     private final SpaceCalendarRepository spaceCalendarRepository;
     private final ParticipationRepository participationRepository;
 
+    // 개인 캘린더 일정 추가 API
     public CreateUserCalendarResponse createUserCalendar(Users user, CreateUserCalendarRequest request) {
         UserCalendar userCalendar = userCalendarRepository.save(
                 toUserCalendarEntity(user, request)
@@ -56,6 +57,7 @@ public class UserCalendarService {
                 .build();
     }
 
+    // 캘린더 조회 API
     public UserCalendarPageResponse readMyCalendar(Users user, @Valid UserCalendarPageRequest request) {
         // 기본 1~31 까지 응답 값 생성
         Map<Integer, List<Schedule>> data = getDefaultResponse();
@@ -115,15 +117,7 @@ public class UserCalendarService {
         return response;
     }
 
-    private List<Participation> getParticipations(Users user) {
-        return participationRepository.findByUserId(user.getUserId());
-    }
-
-    private static LocalDateTime getEndDate(LocalDateTime startDate) {
-        YearMonth yearMonth = YearMonth.from(startDate);
-        return yearMonth.atEndOfMonth().atTime(23, 59, 59);
-    }
-
+    // 해당 날짜 일정 조회 API
     public List<UserDetailCalendarResponse> readDetailCalendar(Users user, UserDetailCalendarRequest request) {
         List<UserDetailCalendarResponse> response = new ArrayList<>();
         List<Participation> participations = participationRepository.findByUserId(user.getUserId());
@@ -158,7 +152,4 @@ public class UserCalendarService {
         }
     }
 
-    private static LocalDateTime getEndDateTime(LocalDateTime startDateTime) {
-        return startDateTime.with(LocalTime.MAX);
-    }
 }

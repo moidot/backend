@@ -1,11 +1,11 @@
-package com.moim.backend.domain.space.request.controller;
+package com.moim.backend.domain.space.request;
 
 import com.moim.backend.domain.space.entity.TransportationType;
-import com.moim.backend.domain.space.request.service.SpaceParticipateServiceRequest;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +15,7 @@ import static lombok.AccessLevel.PRIVATE;
 @Getter
 @AllArgsConstructor(access = PRIVATE)
 @NoArgsConstructor
+@Builder
 public class SpaceParticipateRequest {
     @NotNull(message = "스페이스 아이디를 입력하지 않았습니다.")
     private Long groupId;
@@ -36,18 +37,6 @@ public class SpaceParticipateRequest {
     private TransportationType transportationType;
 
     private String password;
-
-    public SpaceParticipateServiceRequest toServiceRequest() {
-        return SpaceParticipateServiceRequest.builder()
-                .groupId(groupId)
-                .userName(userName)
-                .locationName(locationName)
-                .latitude(latitude)
-                .longitude(longitude)
-                .transportationType(transportationType)
-                .password(password)
-                .build();
-    }
 
     public static SpaceParticipateRequest toRequest(Long groupId, String userName, String locationName, Double latitude, Double longitude, TransportationType transportationType, String password) {
         return new SpaceParticipateRequest(

@@ -4,22 +4,23 @@ import com.moim.backend.domain.space.entity.Space;
 import com.moim.backend.domain.space.entity.SpaceCalendar;
 import com.moim.backend.domain.space.repository.SpaceCalendarRepository;
 import com.moim.backend.domain.space.repository.SpaceRepository;
-import com.moim.backend.domain.space.request.controller.CreateSpaceCalendarRequest;
-import com.moim.backend.domain.space.request.controller.SpaceTimeLineRequest;
+import com.moim.backend.domain.space.request.CreateSpaceCalendarRequest;
+import com.moim.backend.domain.space.request.SpaceTimeLineRequest;
 import com.moim.backend.domain.space.response.space.CreateSpaceCalendarResponse;
 import com.moim.backend.domain.space.response.space.SpaceTimeLineResponse;
-import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.global.common.exception.CustomException;
-import com.moim.backend.global.util.DateParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import static com.moim.backend.domain.space.response.space.SpaceTimeLineResponse.*;
+import static com.moim.backend.domain.space.response.space.SpaceTimeLineResponse.Schedule;
 import static com.moim.backend.global.common.Result.NOT_FOUND_GROUP;
+import static com.moim.backend.global.util.DateParser.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class SpaceCalendarService {
     private final SpaceCalendarRepository spaceCalendarRepository;
     private final SpaceRepository spaceRepository;
 
+    // 모임 캘린더 일정 추가 API
     public CreateSpaceCalendarResponse createSpaceCalendar(CreateSpaceCalendarRequest request) {
         Space space = getSpace(request.getSpaceId());
 
@@ -34,7 +36,7 @@ public class SpaceCalendarService {
                 .space(space)
                 .scheduleName(request.getScheduleName())
                 .date(request.getDate())
-                .dayOfWeek(DateParser.getDayOfWeek(request.getDate()))
+                .dayOfWeek(getDayOfWeek(request.getDate()))
                 .note(request.getNote())
                 .locationName(request.getLocationName())
                 .build());
@@ -42,6 +44,7 @@ public class SpaceCalendarService {
         return CreateSpaceCalendarResponse.response(spaceCalendar);
     }
 
+    // 타임라인 조회 API
     public SpaceTimeLineResponse readSpaceTimeLine(SpaceTimeLineRequest request) {
         Map<String, List<Schedule>> timeLine = getDefaultTimeLine(request);
         List<SpaceCalendar> dayOfMonthSchedules = getSpaceDayOfMonthSchedules(request);
@@ -71,7 +74,7 @@ public class SpaceCalendarService {
 
     private static Schedule createTimeLineSchedule(SpaceCalendar daySchedule) {
         return Schedule.to(
-                daySchedule.getScheduleName(), DateParser.hourAndMinuteFormat(daySchedule.getDate())
+                daySchedule.getScheduleName(), hourAndMinuteFormat(daySchedule.getDate())
         );
     }
 
@@ -81,7 +84,7 @@ public class SpaceCalendarService {
         int endDayOfMonth = getEndDate(request.getDate()).getDayOfMonth();
         for (int nextDay = 0; nextDay < endDayOfMonth; nextDay++) {
             LocalDateTime day = request.getDate().plusDays(nextDay);
-            String dayOfWeek = DateParser.getDayOfWeek(day);
+            String dayOfWeek = getDayOfWeek(day);
             String date = day.getDayOfMonth() + "/" + dayOfWeek;
             timeLine.put(date, new ArrayList<>());
         }
@@ -93,10 +96,5 @@ public class SpaceCalendarService {
         return spaceRepository.findById(spaceId).orElseThrow(
                 () -> new CustomException(NOT_FOUND_GROUP)
         );
-    }
-
-    private static LocalDateTime getEndDate(LocalDateTime startDate) {
-        YearMonth yearMonth = YearMonth.from(startDate);
-        return yearMonth.atEndOfMonth().atTime(23, 59, 59);
     }
 }

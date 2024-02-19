@@ -1,7 +1,6 @@
-package com.moim.backend.domain.space.request.controller;
+package com.moim.backend.domain.space.request;
 
 import com.moim.backend.domain.space.entity.TransportationType;
-import com.moim.backend.domain.space.request.service.SpaceParticipateUpdateServiceRequest;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,17 +32,6 @@ public class SpaceParticipateUpdateRequest {
     @Enumerated(value = STRING)
     @NotNull
     private TransportationType transportationType;
-
-    public SpaceParticipateUpdateServiceRequest toServiceRequest() {
-        return SpaceParticipateUpdateServiceRequest.builder()
-                .participateId(participateId)
-                .userName(userName)
-                .locationName(locationName)
-                .latitude(latitude)
-                .longitude(longitude)
-                .transportationType(transportationType)
-                .build();
-    }
 
     public static SpaceParticipateUpdateRequest toRequest(Long participateId, String userName, String locationName, Double latitude, Double longitude, TransportationType transportationType) {
         return new SpaceParticipateUpdateRequest(

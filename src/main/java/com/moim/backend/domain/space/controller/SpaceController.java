@@ -1,10 +1,11 @@
 package com.moim.backend.domain.space.controller;
 
-import com.moim.backend.domain.space.request.controller.SpaceCreateRequest;
-import com.moim.backend.domain.space.request.controller.SpaceNameUpdateRequest;
-import com.moim.backend.domain.space.request.controller.SpaceParticipateRequest;
-import com.moim.backend.domain.space.request.controller.SpaceParticipateUpdateRequest;
-import com.moim.backend.domain.space.response.*;
+import com.moim.backend.domain.space.request.SpaceCreateRequest;
+import com.moim.backend.domain.space.request.SpaceNameUpdateRequest;
+import com.moim.backend.domain.space.request.SpaceParticipateRequest;
+import com.moim.backend.domain.space.request.SpaceParticipateUpdateRequest;
+import com.moim.backend.domain.space.response.NicknameValidationResponse;
+import com.moim.backend.domain.space.response.PlaceRouteResponse;
 import com.moim.backend.domain.space.response.space.*;
 import com.moim.backend.domain.space.service.SpaceService;
 import com.moim.backend.domain.user.entity.Users;
@@ -28,7 +29,7 @@ public class SpaceController {
     public CustomResponseEntity<SpaceCreateResponse> createSpace(
             @RequestBody @Valid SpaceCreateRequest request, @Login Users user
     ) {
-        return CustomResponseEntity.success(spaceService.createSpace(request.toServiceRequest(), user));
+        return CustomResponseEntity.success(spaceService.createSpace(request, user));
     }
 
     // 모임 참여자 정보 리스트 조회 API
@@ -45,9 +46,7 @@ public class SpaceController {
             @RequestParam Long groupId,
             @RequestBody @Valid SpaceNameUpdateRequest request, @Login Users user
     ) {
-        return CustomResponseEntity.success(
-                spaceService.updateSpaceName(groupId, request.toServiceRequest(), user)
-        );
+        return CustomResponseEntity.success(spaceService.updateSpaceName(groupId, request, user));
     }
 
     // 모임 참여 API
@@ -55,7 +54,7 @@ public class SpaceController {
     public CustomResponseEntity<SpaceParticipateResponse> participateSpace(
             @RequestBody @Valid SpaceParticipateRequest request, @Login Users user
     ) {
-        return CustomResponseEntity.success(spaceService.participateSpace(request.toServiceRequest(), user));
+        return CustomResponseEntity.success(spaceService.participateSpace(request, user));
     }
 
     // 모임 삭제 API
@@ -80,7 +79,7 @@ public class SpaceController {
     public CustomResponseEntity<SpaceParticipateUpdateResponse> participateUpdate(
             @RequestBody @Valid SpaceParticipateUpdateRequest request, @Login Users user
     ) {
-        return CustomResponseEntity.success(spaceService.participateUpdate(request.toServiceRequest(), user));
+        return CustomResponseEntity.success(spaceService.participateUpdate(request, user));
     }
 
     // 모임 나가기 API

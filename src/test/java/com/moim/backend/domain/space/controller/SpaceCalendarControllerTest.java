@@ -1,8 +1,8 @@
 package com.moim.backend.domain.space.controller;
 
 import com.moim.backend.domain.ControllerTestSupport;
-import com.moim.backend.domain.space.request.controller.CreateSpaceCalendarRequest;
-import com.moim.backend.domain.space.request.controller.SpaceTimeLineRequest;
+import com.moim.backend.domain.space.request.CreateSpaceCalendarRequest;
+import com.moim.backend.domain.space.request.SpaceTimeLineRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;

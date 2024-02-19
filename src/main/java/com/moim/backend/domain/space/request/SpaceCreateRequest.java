@@ -1,7 +1,6 @@
-package com.moim.backend.domain.space.request.controller;
+package com.moim.backend.domain.space.request;
 
 import com.moim.backend.domain.space.entity.TransportationType;
-import com.moim.backend.domain.space.request.service.SpaceCreateServiceRequest;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -43,18 +42,6 @@ public class SpaceCreateRequest {
 
     private String password;
 
-    public SpaceCreateServiceRequest toServiceRequest() {
-        return SpaceCreateServiceRequest.builder()
-                .name(name)
-                .date(date)
-                .userName(userName)
-                .locationName(locationName)
-                .latitude(latitude)
-                .longitude(longitude)
-                .transportationType(transportationType)
-                .password(password)
-                .build();
-    }
 
     public static SpaceCreateRequest toRequest(String name, LocalDate date, String userName, String locationName, Double latitude, Double longitude, TransportationType transportationType, String password) {
         return new SpaceCreateRequest(

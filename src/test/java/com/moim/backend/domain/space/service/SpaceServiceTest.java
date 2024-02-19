@@ -11,11 +11,10 @@ import com.moim.backend.domain.space.entity.TransportationType;
 import com.moim.backend.domain.space.repository.BestPlaceRepository;
 import com.moim.backend.domain.space.repository.SpaceRepository;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
-import com.moim.backend.domain.space.request.controller.SpaceCreateRequest;
-import com.moim.backend.domain.space.request.controller.SpaceNameUpdateRequest;
-import com.moim.backend.domain.space.request.controller.SpaceParticipateRequest;
-import com.moim.backend.domain.space.request.controller.SpaceParticipateUpdateRequest;
-import com.moim.backend.domain.space.request.service.SpaceParticipateServiceRequest;
+import com.moim.backend.domain.space.request.SpaceCreateRequest;
+import com.moim.backend.domain.space.request.SpaceNameUpdateRequest;
+import com.moim.backend.domain.space.request.SpaceParticipateRequest;
+import com.moim.backend.domain.space.request.SpaceParticipateUpdateRequest;
 import com.moim.backend.domain.space.response.space.*;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
@@ -82,7 +81,7 @@ class SpaceServiceTest {
         );
 
         // when
-        SpaceCreateResponse response = spaceService.createSpace(request.toServiceRequest(), user);
+        SpaceCreateResponse response = spaceService.createSpace(request, user);
         em.flush();
         em.clear();
 
@@ -111,7 +110,7 @@ class SpaceServiceTest {
         );
 
         // when
-        SpaceCreateResponse response = spaceService.createSpace(request.toServiceRequest(), user);
+        SpaceCreateResponse response = spaceService.createSpace(request, user);
 
         // then
         assertThat(response.getGroupId()).isNotNull();
@@ -137,7 +136,7 @@ class SpaceServiceTest {
 
         // when
         SpaceParticipateResponse response =
-                spaceService.participateSpace(request.toServiceRequest(), participateUser);
+                spaceService.participateSpace(request, participateUser);
 
         // then
         assertThat(response.getParticipationId()).isNotNull();
@@ -170,7 +169,7 @@ class SpaceServiceTest {
         );
 
         // when //then
-        assertThatThrownBy(() -> spaceService.participateSpace(request.toServiceRequest(), participateUser))
+        assertThatThrownBy(() -> spaceService.participateSpace(request, participateUser))
                 .extracting("result.code", "result.message")
                 .contains(-1009, "잘못된 지역 이름 입니다.");
     }
@@ -193,7 +192,7 @@ class SpaceServiceTest {
 
         // when
         SpaceParticipateResponse response =
-                spaceService.participateSpace(request.toServiceRequest(), participateUser);
+                spaceService.participateSpace(request, participateUser);
 
         // then
         assertThat(response)
@@ -226,7 +225,7 @@ class SpaceServiceTest {
         );
 
         // when // then
-        assertThatThrownBy(() -> spaceService.participateSpace(request.toServiceRequest(), user))
+        assertThatThrownBy(() -> spaceService.participateSpace(request, user))
                 .extracting("result.code", "result.message")
                 .contains(-1002, "잘못된 이동수단 입니다.");
     }
@@ -252,7 +251,7 @@ class SpaceServiceTest {
 
         // when
         SpaceParticipateUpdateResponse response =
-                spaceService.participateUpdate(request.toServiceRequest(), user1);
+                spaceService.participateUpdate(request, user1);
 
         // then
         assertThat(response)
@@ -285,7 +284,7 @@ class SpaceServiceTest {
         );
 
         // when // then
-        assertThatThrownBy(() -> spaceService.participateUpdate(request.toServiceRequest(), admin))
+        assertThatThrownBy(() -> spaceService.participateUpdate(request, admin))
                 .extracting("result.code", "result.message")
                 .contains(-1004, "자신의 참여 정보가 아닙니다.");
     }
@@ -598,7 +597,7 @@ class SpaceServiceTest {
         //given
         Users user = savedUser("test@gmail.com", "테스터");
         Space group = savedGroup(user.getUserId(), "테스트 그룹");
-        SpaceParticipateServiceRequest request = SpaceParticipateServiceRequest.builder()
+        SpaceParticipateRequest request = SpaceParticipateRequest.builder()
                 .groupId(group.getSpaceId())
                 .userName("테스터")
                 .locationName("서울 성북구 보문로34다길 2")
@@ -698,7 +697,7 @@ class SpaceServiceTest {
         SpaceNameUpdateRequest request = new SpaceNameUpdateRequest("그룹이름변경");
 
         // when
-        spaceService.updateSpaceName(saveGroup.getSpaceId(), request.toServiceRequest(), user);
+        spaceService.updateSpaceName(saveGroup.getSpaceId(), request, user);
 
         // then
         em.flush();
