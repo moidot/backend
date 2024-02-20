@@ -13,8 +13,6 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:3000")
                 .allowedOrigins("https://api.moidot.co.kr")
                 .allowedOrigins("https://api.moidot.co.kr/")
-                .allowedOrigins("https://moidot.vercel.app")
-                .allowedOrigins("https://moidot.vercel.app/")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                 .allowedHeaders("*")
                 .allowCredentials(true);
