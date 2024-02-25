@@ -376,7 +376,7 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                 .header(AUTHORIZATION, "Bearer {token}")
                 .param("groupId", String.valueOf(1L));
         SpaceParticipationsResponse participation =
-                SpaceParticipationsResponse.toResponse(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC", true);
+                SpaceParticipationsResponse.toResponse(1L, "kim@naver.com", "김모임장", 37.4830372, 127.0133939, "서울 성북구 보문로34다길 2", "PUBLIC", true);
 
         given(spaceService.getParticipationDetail(anyLong(), any()))
                 .willReturn(participation);
@@ -397,6 +397,8 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                         fieldWithPath("data.participationId").type(NUMBER).description("참여 ID"),
                         fieldWithPath("data.userEmail").type(STRING).description("유저 이메일"),
                         fieldWithPath("data.userName").type(STRING).description("유저 이름"),
+                        fieldWithPath("data.latitude").type(NUMBER).description("유저 시작 위치 위도"),
+                        fieldWithPath("data.longitude").type(NUMBER).description("유저 시작 위치 경도"),
                         fieldWithPath("data.locationName").type(STRING).description("유저 출발지 이름"),
                         fieldWithPath("data.transportation").type(STRING).description("유저 교통수단"),
                         fieldWithPath("data.isAdmin").type(BOOLEAN).description("관리자 여부(true: 모임장, false: 모임원)"))
@@ -743,19 +745,19 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
     @Test
     void readParticipateGroupByRegion() throws Exception {
         SpaceParticipationsResponse participations1 =
-                SpaceParticipationsResponse.toResponse(1L, "kim@naver.com", "김모임장", "서울 성북구 보문로34다길 2", "PUBLIC", true);
+                SpaceParticipationsResponse.toResponse(1L, "kim@naver.com", "김모임장", 37.4830372, 127.0133939, "서울 성북구 보문로34다길 2", "PUBLIC", true);
         SpaceParticipationsResponse participations2 =
-                SpaceParticipationsResponse.toResponse(2L, "park@naver.com", "박이람이", "서울 성북구 보문로34다길 2", "PUBLIC", false);
+                SpaceParticipationsResponse.toResponse(2L, "park@naver.com", "박이람이", 37.4830372, 127.0133939, "서울 성북구 보문로34다길 2", "PUBLIC", false);
         SpaceRegionResponse region1 = SpaceRegionResponse.toResponse("서울 성북구", List.of(participations1, participations2));
 
         SpaceParticipationsResponse participations3 =
-                SpaceParticipationsResponse.toResponse(3L, "cheon@gmail.com", "천수제비", "서울 강북구 도봉로 76가길 55", "PERSONAL", false);
+                SpaceParticipationsResponse.toResponse(3L, "cheon@gmail.com", "천수제비", 37.4830372, 127.0133939, "서울 강북구 도봉로 76가길 55", "PERSONAL", false);
         SpaceParticipationsResponse participations4 =
-                SpaceParticipationsResponse.toResponse(4L, "moram@gmail.com", "모람모람", "서울 강북구 도봉로 76가길 54", "PUBLIC", false);
+                SpaceParticipationsResponse.toResponse(4L, "moram@gmail.com", "모람모람", 37.4830372, 127.0133939, "서울 강북구 도봉로 76가길 54", "PUBLIC", false);
         SpaceRegionResponse region2 = SpaceRegionResponse.toResponse("서울 강북구", List.of(participations3, participations4));
 
         SpaceParticipationsResponse participations5 =
-                SpaceParticipationsResponse.toResponse(3L, "enfp@gmail.com", "낭만 ENFP", "경기도 부천시 부천로 1", "PERSONAL", false);
+                SpaceParticipationsResponse.toResponse(3L, "enfp@gmail.com", "낭만 ENFP", 37.4830372, 127.0133939, "경기도 부천시 부천로 1", "PERSONAL", false);
         SpaceRegionResponse region3 =
                 SpaceRegionResponse.toResponse("경기도 부천시", List.of(participations5));
 

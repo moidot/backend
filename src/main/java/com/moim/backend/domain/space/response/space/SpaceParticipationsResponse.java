@@ -16,6 +16,8 @@ public class SpaceParticipationsResponse {
     private Long participationId;
     private String userEmail;
     private String userName;
+    private Double latitude;
+    private Double longitude;
     private String locationName;
     private String transportation;
     private Boolean isAdmin;
@@ -25,15 +27,19 @@ public class SpaceParticipationsResponse {
                 .participationId(participation.getParticipationId())
                 .userEmail(user.getEmail())
                 .userName(participation.getUserName())
+                .latitude(participation.getLatitude())
+                .longitude(participation.getLongitude())
                 .locationName(participation.getLocationName())
                 .transportation(participation.getTransportation().name())
                 .isAdmin(space.getAdminId() == participation.getUserId())
                 .build();
     }
 
-    public static SpaceParticipationsResponse toResponse(Long participationId, String userEmail, String userName, String locationName, String transportation, Boolean isAdmin) {
+    public static SpaceParticipationsResponse toResponse(
+            Long participationId, String userEmail, String userName, Double latitude, Double longitude, String locationName, String transportation, Boolean isAdmin
+    ) {
         return new SpaceParticipationsResponse(
-                participationId, userEmail, userName, locationName, transportation, isAdmin
+                participationId, userEmail, userName, latitude, longitude, locationName, transportation, isAdmin
         );
     }
 }
