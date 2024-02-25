@@ -397,8 +397,8 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                         fieldWithPath("data.participationId").type(NUMBER).description("참여 ID"),
                         fieldWithPath("data.userEmail").type(STRING).description("유저 이메일"),
                         fieldWithPath("data.userName").type(STRING).description("유저 이름"),
-                        fieldWithPath("data.latitude").type(NUMBER).description("유저 시작 위치 위도"),
-                        fieldWithPath("data.longitude").type(NUMBER).description("유저 시작 위치 경도"),
+                        fieldWithPath("data.latitude").type(NUMBER).description("유저 출발지 위도"),
+                        fieldWithPath("data.longitude").type(NUMBER).description("유저 출발지 경도"),
                         fieldWithPath("data.locationName").type(STRING).description("유저 출발지 이름"),
                         fieldWithPath("data.transportation").type(STRING).description("유저 교통수단"),
                         fieldWithPath("data.isAdmin").type(BOOLEAN).description("관리자 여부(true: 모임장, false: 모임원)"))
@@ -797,6 +797,8 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                         fieldWithPath(participations + ".participationId").type(NUMBER).description("참여 ID"),
                         fieldWithPath(participations + ".userEmail").type(STRING).description("유저 이메일"),
                         fieldWithPath(participations + ".userName").type(STRING).description("유저 이름"),
+                        fieldWithPath(participations + ".latitude").type(NUMBER).description("유저 출발지 위도"),
+                        fieldWithPath(participations + ".longitude").type(NUMBER).description("유저 출발지 경도"),
                         fieldWithPath(participations + ".locationName").type(STRING).description("유저 출발지 이름"),
                         fieldWithPath(participations + ".transportation").type(STRING).description("유저 교통수단"),
                         fieldWithPath(participations + ".isAdmin").type(BOOLEAN).description("관리자 여부(true: 모임장, false: 모임원)"))
