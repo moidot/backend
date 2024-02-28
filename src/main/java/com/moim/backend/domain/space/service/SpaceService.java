@@ -268,7 +268,8 @@ public class SpaceService {
     // 모임 장소 추천 조회 리스트 API
     public List<SpacePlaceResponse> keywordCentralizedMeetingSpot(Double x, Double y, String local, String keyword) {
         // 네이버 API 요청
-        URI uri = createNaverRequestUri(local, keyword);
+        String station = getStation(local);
+        URI uri = createNaverRequestUri(station, keyword);
         ResponseEntity<NaverMapListDto> naverResponse = restTemplate.getForEntity(uri.toString(), NaverMapListDto.class);
 
         // 응답 처리
@@ -280,7 +281,17 @@ public class SpaceService {
         // 장소 정보 가져오기
         List<NaverMapListDto.placeList> placeList = optionalBody.get().getResult().getPlace().getList();
 
-        return placeList.stream().map(toPlaceEntity(x, y, local)).toList();
+        return placeList.stream().map(toPlaceEntity(x, y, station)).toList();
+    }
+
+    private static String getStation(String local) {
+        String station = local;
+        int index = local.indexOf("("); // 괄호의 위치를 찾음
+        if (index != -1) { // 괄호가 존재한다면
+            station = local.substring(0, index);
+        }
+
+        return station;
     }
 
     // 모임 참여자 정보 리스트 조회 API
