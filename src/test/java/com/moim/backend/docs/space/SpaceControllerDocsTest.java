@@ -524,7 +524,7 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                 .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .build();
 
-        given(spaceService.getMyParticipate(any()))
+        given(spaceService.getMyParticipate(any(), anyString()))
                 .willReturn(List.of(data1, data2));
 
         MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/group/participate")

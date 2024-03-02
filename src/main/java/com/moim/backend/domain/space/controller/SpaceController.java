@@ -117,9 +117,10 @@ public class SpaceController {
     // 내 모임 확인하기 API
     @GetMapping("/participate")
     public CustomResponseEntity<List<SpaceMyParticipateResponse>> getMyParticipate(
-            @Login Users user
+            @Login Users user,
+            @RequestParam(required = false) String spaceName
     ) {
-        return CustomResponseEntity.success(spaceService.getMyParticipate(user));
+        return CustomResponseEntity.success(spaceService.getMyParticipate(user, spaceName));
     }
 
     // 모임 장소 추천 조회 리스트 API

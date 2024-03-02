@@ -238,8 +238,10 @@ public class SpaceService {
     }
 
     // 내 모임 확인하기
-    public List<SpaceMyParticipateResponse> getMyParticipate(Users user) {
-        List<Space> groups = groupRepository.findBySpaceFetch(user.getUserId());
+    public List<SpaceMyParticipateResponse> getMyParticipate(Users user, String spaceName) {
+        List<Space> groups = (spaceName == null)
+                ? groupRepository.findBySpaceFetch(user.getUserId())
+                : groupRepository.findBySpaceFetch(user.getUserId(), spaceName);
 
         return groups.stream()
                 .map(group -> toMyParticiPateResponse(group, user))
