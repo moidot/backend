@@ -559,7 +559,7 @@ class SpaceServiceTest {
         em.clear();
 
         // when
-        List<SpaceMyParticipateResponse> response = spaceService.getMyParticipate(user1);
+        List<SpaceMyParticipateResponse> response = spaceService.getMyParticipate(user1, null);
 
         // then
         assertThat(response).hasSize(3);
@@ -585,7 +585,7 @@ class SpaceServiceTest {
         em.clear();
 
         // when
-        List<SpaceMyParticipateResponse> response = spaceService.getMyParticipate(admin1);
+        List<SpaceMyParticipateResponse> response = spaceService.getMyParticipate(admin1, null);
 
         // then
         assertThat(response).isEmpty();

@@ -1,6 +1,12 @@
 package com.moim.backend.domain.space.repository;
 
 import com.moim.backend.domain.space.entity.Space;
+import com.moim.backend.domain.user.entity.Users;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
 
@@ -21,11 +27,23 @@ public class SpaceRepositoryImpl implements SpaceCustomRepository {
 
     @Override
     public List<Space> findBySpaceFetch(Long userId) {
+        BooleanExpression userCondition = participation.userId.eq(userId);
+        return findBySpaceFetch(new BooleanExpression[]{userCondition});
+    }
+
+    @Override
+    public List<Space> findBySpaceFetch(Long userId, String name) {
+        BooleanExpression userCondition = participation.userId.eq(userId);
+        BooleanExpression searchNameCondition = removeWhiteSpace(space.name).containsIgnoreCase(name.replaceAll(" ", ""));
+        return findBySpaceFetch(new BooleanExpression[]{userCondition, searchNameCondition});
+    }
+
+    private List<Space> findBySpaceFetch(Predicate[] conditions) {
         return queryFactory
                 .selectFrom(space)
                 .innerJoin(space.participations, participation)
                 .leftJoin(space.bestPlaces, bestPlace)
-                .where(participation.userId.eq(userId))
+                .where(conditions)
                 .fetchJoin()
                 .fetch();
     }
@@ -38,5 +56,9 @@ public class SpaceRepositoryImpl implements SpaceCustomRepository {
                 .where(space.spaceId.eq(spaceId))
                 .fetchOne()
         );
+    }
+
+    private StringTemplate removeWhiteSpace(StringPath str) {
+        return Expressions.stringTemplate("replace({0}, ' ', '')", str);
     }
 }
