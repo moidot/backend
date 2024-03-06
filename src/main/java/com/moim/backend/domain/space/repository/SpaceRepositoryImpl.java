@@ -1,7 +1,9 @@
 package com.moim.backend.domain.space.repository;
 
 import com.moim.backend.domain.space.entity.Space;
+import com.moim.backend.domain.space.response.SpaceFilterEnum;
 import com.moim.backend.domain.user.entity.Users;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -26,24 +28,34 @@ public class SpaceRepositoryImpl implements SpaceCustomRepository {
     }
 
     @Override
-    public List<Space> findBySpaceFetch(Long userId) {
+    public List<Space> findBySpaceFetch(Long userId, SpaceFilterEnum filter) {
         BooleanExpression userCondition = participation.userId.eq(userId);
-        return findBySpaceFetch(new BooleanExpression[]{userCondition});
+        return findBySpaceFetch(new BooleanExpression[]{userCondition}, filter);
     }
 
     @Override
-    public List<Space> findBySpaceFetch(Long userId, String name) {
+    public List<Space> findBySpaceFetch(Long userId, String name, SpaceFilterEnum filter) {
         BooleanExpression userCondition = participation.userId.eq(userId);
         BooleanExpression searchNameCondition = removeWhiteSpace(space.name).containsIgnoreCase(name.replaceAll(" ", ""));
-        return findBySpaceFetch(new BooleanExpression[]{userCondition, searchNameCondition});
+        return findBySpaceFetch(new BooleanExpression[]{userCondition, searchNameCondition}, filter);
     }
 
-    private List<Space> findBySpaceFetch(Predicate[] conditions) {
+    private List<Space> findBySpaceFetch(Predicate[] conditions, SpaceFilterEnum filter) {
+        OrderSpecifier<?> orderFilter;
+        if (filter == null || filter.equals(SpaceFilterEnum.LATEST)) {
+            orderFilter = space.date.desc();
+        } else if (filter.equals(SpaceFilterEnum.OLDEST)) {
+            orderFilter = space.date.asc();
+        } else {
+            orderFilter = space.name.asc();
+        }
+
         return queryFactory
                 .selectFrom(space)
                 .innerJoin(space.participations, participation)
                 .leftJoin(space.bestPlaces, bestPlace)
                 .where(conditions)
+                .orderBy(orderFilter)
                 .fetchJoin()
                 .fetch();
     }

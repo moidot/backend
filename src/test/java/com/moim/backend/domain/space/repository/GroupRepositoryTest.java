@@ -89,7 +89,7 @@ class GroupRepositoryTest {
         em.clear();
 
         // when
-        List<Space> spaces = groupRepository.findBySpaceFetch(user1.getUserId());
+        List<Space> spaces = groupRepository.findBySpaceFetch(user1.getUserId(), null);
 
         // then
         assertThat(spaces).hasSize(3)

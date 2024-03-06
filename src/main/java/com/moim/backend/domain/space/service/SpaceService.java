@@ -4,6 +4,7 @@ import com.moim.backend.domain.space.request.SpaceCreateRequest;
 import com.moim.backend.domain.space.request.SpaceNameUpdateRequest;
 import com.moim.backend.domain.space.request.SpaceParticipateRequest;
 import com.moim.backend.domain.space.request.SpaceParticipateUpdateRequest;
+import com.moim.backend.domain.space.response.SpaceFilterEnum;
 import com.moim.backend.domain.spacevote.entity.Vote;
 import com.moim.backend.domain.spacevote.repository.VoteRepository;
 import com.moim.backend.domain.hotplace.repository.HotPlaceRepository;
@@ -238,10 +239,10 @@ public class SpaceService {
     }
 
     // 내 모임 확인하기
-    public List<SpaceMyParticipateResponse> getMyParticipate(Users user, String spaceName) {
+    public List<SpaceMyParticipateResponse> getMyParticipate(Users user, String spaceName, SpaceFilterEnum filter) {
         List<Space> groups = (spaceName == null)
-                ? groupRepository.findBySpaceFetch(user.getUserId())
-                : groupRepository.findBySpaceFetch(user.getUserId(), spaceName);
+                ? groupRepository.findBySpaceFetch(user.getUserId(), filter)
+                : groupRepository.findBySpaceFetch(user.getUserId(), spaceName, filter);
 
         return groups.stream()
                 .map(group -> toMyParticiPateResponse(group, user))
