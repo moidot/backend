@@ -49,9 +49,16 @@ public class VoteService {
         Space group = getSpace(groupId);
         validateAlreadyCreatedVote(groupId);
         validateUserIsAdmin(user, group);
+        validateOnlyAdminCreatedVote(group);
         Vote vote = voteRepository.save(toVoteEntity(request, groupId));
 
         return VoteCreateResponse.response(vote);
+    }
+
+    private static void validateOnlyAdminCreatedVote(Space group) {
+        if (group.getParticipations().size() == 1) {
+            throw new CustomException(NOT_CREATED_VOTE);
+        }
     }
 
     private void validateAlreadyCreatedVote(Long groupId) {
