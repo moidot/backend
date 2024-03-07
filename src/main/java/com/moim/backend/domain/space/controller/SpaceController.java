@@ -6,6 +6,7 @@ import com.moim.backend.domain.space.request.SpaceParticipateRequest;
 import com.moim.backend.domain.space.request.SpaceParticipateUpdateRequest;
 import com.moim.backend.domain.space.response.NicknameValidationResponse;
 import com.moim.backend.domain.space.response.PlaceRouteResponse;
+import com.moim.backend.domain.space.response.SpaceFilterEnum;
 import com.moim.backend.domain.space.response.space.*;
 import com.moim.backend.domain.space.service.SpaceService;
 import com.moim.backend.domain.user.entity.Users;
@@ -118,9 +119,10 @@ public class SpaceController {
     @GetMapping("/participate")
     public CustomResponseEntity<List<SpaceMyParticipateResponse>> getMyParticipate(
             @Login Users user,
-            @RequestParam(required = false) String spaceName
+            @RequestParam(required = false) String spaceName,
+            @RequestParam(required = false) SpaceFilterEnum filter
     ) {
-        return CustomResponseEntity.success(spaceService.getMyParticipate(user, spaceName));
+        return CustomResponseEntity.success(spaceService.getMyParticipate(user, spaceName, filter));
     }
 
     // 모임 장소 추천 조회 리스트 API

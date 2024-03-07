@@ -39,6 +39,7 @@ import static com.moim.backend.domain.space.entity.TransportationType.PERSONAL;
 import static com.moim.backend.domain.space.entity.TransportationType.PUBLIC;
 import static com.moim.backend.global.common.Result.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -533,46 +534,79 @@ class SpaceServiceTest {
         Users admin2 = savedUser("admin2@test.com", "어드민2");
         Users admin3 = savedUser("admin3@test.com", "어드민3");
 
-        Space group1 = savedGroup(admin1.getUserId(), "그룹1");
-        Space group2 = savedGroup(admin2.getUserId(), "그룹2");
-        Space group3 = savedGroup(admin3.getUserId(), "그룹3");
+        Space space1 = savedGroup(admin1.getUserId(), "그룹1");
+        Space space2 = savedGroup(admin2.getUserId(), "그룹2");
+        Space space3 = savedGroup(admin3.getUserId(), "그룹3");
 
-        saveBestPlace(group1, "의정부역", 127.123456, 36.123456);
-        saveBestPlace(group1, "서울역", 127.123457, 36.123457);
-        saveBestPlace(group1, "개봉역", 127.123458, 36.123458);
+        saveBestPlace(space1, "의정부역", 127.123456, 36.123456);
+        saveBestPlace(space1, "서울역", 127.123457, 36.123457);
+        saveBestPlace(space1, "개봉역", 127.123458, 36.123458);
 
         Users user1 = savedUser("test1@test.com", "테스트1");
         Users user2 = savedUser("test2@test.com", "테스트2");
 
-        savedParticipation(admin1, group1, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
-        savedParticipation(admin2, group2, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
-        savedParticipation(admin3, group3, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(admin1, space1, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(admin2, space2, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(admin3, space3, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
 
-        savedParticipation(user1, group1, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
-        savedParticipation(user1, group2, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
-        savedParticipation(user1, group3, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user1, space1, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user1, space2, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user1, space3, "양쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
 
-        savedParticipation(user2, group1, "주쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
-        savedParticipation(user2, group3, "주쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user2, space1, "주쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user2, space3, "주쿵", "아무데나", 36.23423, 127.32423, PUBLIC);
 
         em.flush();
         em.clear();
 
         // when
-        List<SpaceMyParticipateResponse> response = spaceService.getMyParticipate(user1, null);
+        List<SpaceMyParticipateResponse> response = spaceService.getMyParticipate(user1, null, null);
 
         // then
         assertThat(response).hasSize(3);
 
         assertThat(response.get(0))
                 .extracting("groupId", "groupName", "groupAdminName", "groupDate", "groupParticipates", "confirmPlace")
-                .contains(group1.getSpaceId(), "어드민", "그룹1", "2023-07-10", 3, "none");
+                .contains(space1.getSpaceId(), "어드민", "그룹1", "2023-07-10", 3, "none");
 
         assertThat(response.get(0).getParticipantNames()).isEqualTo(List.of("어드민", "양쿵", "주쿵"));
 
         assertThat(response.get(0).getBestPlaceNames())
                 .hasSize(3)
                 .contains("의정부역", "서울역", "개봉역");
+    }
+
+    @DisplayName("유저가 특정 이름을 포함하는 모임들을 확인한다.(검색 기능)")
+    @Test
+    void getMyParticipateBySpaceName() {
+        // given
+        Users user = savedUser("admin1@test.com", "나 자신");
+
+        Space space1 = savedGroup(user.getUserId(), "모이닷"); // 검색 조건 포함 O. 검색어와 정확하게 일치하는 경우.
+        Space space2 = savedGroup(user.getUserId(), "모이닷 백엔드 개발 모임"); // 검색 조건 포함 O. 검색어를 포함하는 경우
+        Space space3 = savedGroup(user.getUserId(), "모이 닷 백엔드 개발 모임"); // 검색 조건 포함 O. 띄어쓰기는 무시하고 검색어를 포함하는 경우
+        Space space4 = savedGroup(user.getUserId(), "백엔드 개발"); // 검색 조건 포함 X
+        Space space5 = savedGroup(user.getUserId(), "이펙티브자바 독서 스터디"); // 검색 조건 포함 X
+
+        savedParticipation(user, space1, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user, space2, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user, space3, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user, space4, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
+        savedParticipation(user, space5, "어드민", "아무데나", 36.23423, 127.32423, PUBLIC);
+
+        em.flush();
+        em.clear();
+
+        // when
+        List<SpaceMyParticipateResponse> response = spaceService.getMyParticipate(user, "모이닷", null);
+
+        // then
+        assertAll(
+                () -> assertThat(response).hasSize(3),
+                () -> assertThat(response.get(0).getGroupName()).isEqualTo(space1.getName()),
+                () -> assertThat(response.get(1).getGroupName()).isEqualTo(space2.getName()),
+                () -> assertThat(response.get(2).getGroupName()).isEqualTo(space3.getName())
+        );
     }
 
     @DisplayName("유저가 자신의 모임들을 확인할때 아직 아무것도 참여하지 않았다.")
@@ -585,7 +619,7 @@ class SpaceServiceTest {
         em.clear();
 
         // when
-        List<SpaceMyParticipateResponse> response = spaceService.getMyParticipate(admin1, null);
+        List<SpaceMyParticipateResponse> response = spaceService.getMyParticipate(admin1, null, null);
 
         // then
         assertThat(response).isEmpty();

@@ -524,11 +524,13 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                 .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .build();
 
-        given(spaceService.getMyParticipate(any(), anyString()))
+        given(spaceService.getMyParticipate(any(), any(), any()))
                 .willReturn(List.of(data1, data2));
 
         MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/group/participate")
-                .header(AUTHORIZATION, "Bearer {token}");
+                .header(AUTHORIZATION, "Bearer {token}")
+                .param("spaceName", "검색이름")
+                .param("filter", "ABC");
 
         ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
                 .tag("스페이스 API")
@@ -537,6 +539,10 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                         headerWithName("Authorization")
                                 .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
                                         "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
+                .queryParameters(
+                        parameterWithName("spaceName").description("검색하고 싶은 장소 이름. 해당 이름 포함하는 스페이스 조회 가능."),
+                        parameterWithName("filter").description("정렬 기준. ABC: 가나다순, LATEST: 최신순, OLDEST: 오래된 순")
+                )
                 .responseFields(
                         fieldWithPath("code").type(NUMBER)
                                 .description("상태 코드"),
