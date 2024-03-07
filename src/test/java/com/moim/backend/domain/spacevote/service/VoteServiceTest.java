@@ -61,8 +61,15 @@ class VoteServiceTest {
 
         // given
         Users admin = savedUser("admin@admin.com", "어드민");
+        Users user = savedUser("test@test.com", "테스트");
         Space group = savedGroup(admin.getUserId(), "테스트 그룹");
         VoteCreateRequest request = VoteCreateRequest.toRequest(true, true, null);
+
+        savedParticipation(admin, group, "어드민", "테스트", 123.123, 123.123, "PUBLIC");
+        savedParticipation(user, group, "일반인", "테스트", 123.123, 123.123, "PUBLIC");
+
+        em.flush();
+        em.clear();
 
         // when
         VoteCreateResponse response =
@@ -81,10 +88,17 @@ class VoteServiceTest {
 
         // given
         Users admin = savedUser("admin@admin.com", "어드민");
+        Users user = savedUser("test@test.com", "테스트");
         Space group = savedGroup(admin.getUserId(), "테스트 그룹");
         VoteCreateRequest request = VoteCreateRequest.toRequest(
                 false, false, LocalDateTime.of(2023, 8, 10, 15, 0, 0)
         );
+
+        savedParticipation(admin, group, "어드민", "테스트", 123.123, 123.123, "PUBLIC");
+        savedParticipation(user, group, "일반인", "테스트", 123.123, 123.123, "PUBLIC");
+
+        em.flush();
+        em.clear();
 
         // when
         VoteCreateResponse response =
