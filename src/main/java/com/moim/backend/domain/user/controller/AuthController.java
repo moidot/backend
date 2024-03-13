@@ -20,7 +20,7 @@ public class AuthController {
     // 배포 검증용 API
     @GetMapping("/success")
     public CustomResponseEntity<String> checkServerStatus() {
-        return CustomResponseEntity.success("Server On!");
+        return CustomResponseEntity.success("Server On!!");
     }
 
     // 소셜 로그인 API
