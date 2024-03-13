@@ -9,18 +9,16 @@ import java.math.BigDecimal;
 
 public class DistanceCalculator {
 
-    private static final int EARTH_RADIUS = 6371;
-    private static final int KM_TO_M = 1000;
+    // 두 좌표 사이의 거리를 구하는 함수
+    // dsitance(첫번쨰 좌표의 위도, 첫번째 좌표의 경도, 두번째 좌표의 위도, 두번째 좌표의 경도)
+    public static double getDistance(double lat1, double lon1, double lat2, double lon2) {
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515 * 1609.344;
 
-    //두 지점 간의 거리 계산
-    public static double getDistance(double startLatitude, double startLongitude, double endLatitude, double endLongitude) {
-        double dLat = Math.toRadians(endLatitude - startLatitude);
-        double dLon = Math.toRadians(endLongitude - startLongitude);
-
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(Math.toRadians(startLatitude)) * Math.cos(Math.toRadians(endLatitude)) * Math.sin(dLon/2) * Math.sin(dLon/2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-        return EARTH_RADIUS * c * KM_TO_M;
+        return dist;
     }
 
     public static NumberExpression<Double> calculateDistanceExpression(Double latitude, Double longitude, NumberPath<BigDecimal> latitudeTemplate, NumberPath<BigDecimal> longitudeTemplate) {
@@ -49,6 +47,16 @@ public class DistanceCalculator {
 
         // 최종 계산
         return Expressions.numberTemplate(Double.class, "6371 * {0}", acosExpression);
+    }
+
+    //10진수를 radian(라디안)으로 변환
+    private static double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    //radian(라디안)을 10진수로 변환
+    private static double rad2deg(double rad) {
+        return (rad * 180 / Math.PI);
     }
 
 }
