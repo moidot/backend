@@ -49,7 +49,8 @@ public class PlaceRouteResponse {
                 Space group,
                 Participation participation,
                 BusGraphicDataResponse busGraphicDataResponse,
-                BusPathResponse busPathResponse
+                BusPathResponse busPathResponse,
+                BestPlace bestPlace
         ) {
             this.isAdmin = (participation.getUserId() == group.getAdminId()) ? true : false;
             this.userId = participation.getUserId();
@@ -58,14 +59,15 @@ public class PlaceRouteResponse {
             this.transitCount = busPathResponse.getTotalTransitCount();
             this.totalTime = busPathResponse.getTotalTime();
             this.totalDistance = busPathResponse.getTotalDistance();
-            this.path = busGraphicDataResponse.getPathList(participation);
+            this.path = busGraphicDataResponse.getPathList(participation, bestPlace);
             this.payment = busPathResponse.getPayment();
         }
 
         public MoveUserInfo(
                 Space group,
                 Participation participation,
-                CarMoveInfo carMoveInfo
+                CarMoveInfo carMoveInfo,
+                BestPlace bestPlace
         ) {
             this.isAdmin = (participation.getUserId() == group.getAdminId()) ? true : false;
             this.userId = participation.getUserId();
@@ -73,7 +75,7 @@ public class PlaceRouteResponse {
             this.transportationType = participation.getTransportation();
             this.totalTime = carMoveInfo.getTotalTime();
             this.totalDistance = carMoveInfo.getTotalDistance();
-            this.path = carMoveInfo.getPathList(participation);
+            this.path = carMoveInfo.getPathList(participation, bestPlace);
             this.payment = carMoveInfo.getPayment();
         }
     }

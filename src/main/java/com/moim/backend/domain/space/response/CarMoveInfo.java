@@ -1,6 +1,7 @@
 package com.moim.backend.domain.space.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Participation;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -49,12 +50,15 @@ public class CarMoveInfo implements MoveInfoInterface, PathGraphicDataInterface 
     }
 
     @Override
-    public List<PathDto> getPathList(Participation participation) {
+    public List<PathDto> getPathList(Participation participation, BestPlace bestPlace) {
         // 위도, 경도 구분 없이 배열로 존재하여 vertexes를 Path 리스트로 변환
         // 짝수 인덱스: 경도, 홀스 인덱스: 위도
         List<PathDto> path = new ArrayList<>();
         path.add(PathDto.builder().latitude(participation.getLatitude()).longitude(participation.getLongitude()).build());
-        getBestRouteSection().roads.stream().forEach(road -> addVertexToPathList(road.vertexes, path));
+        for (Road road : getBestRouteSection().roads) {
+            addVertexToPathList(road.vertexes, path);
+        }
+        path.add(new PathDto(bestPlace.getLongitude(), bestPlace.getLatitude()));
         return path;
     }
 

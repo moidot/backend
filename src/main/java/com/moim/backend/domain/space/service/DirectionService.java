@@ -59,7 +59,9 @@ public class DirectionService {
                         .build()
                         .print();
             } else {
-                moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(group, participation, busGraphicDataResponse, busPathResponse));
+                moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(
+                        group, participation, busGraphicDataResponse, busPathResponse, bestPlace
+                ));
             }
         }
         return moveUserInfo;
@@ -86,7 +88,7 @@ public class DirectionService {
                     .build()
                     .print();
         } else {
-            moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(group, participation, carMoveInfo));
+            moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(group, participation, carMoveInfo, bestPlace));
         }
         return moveUserInfo;
     }
