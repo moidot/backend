@@ -1,21 +1,25 @@
 package com.moim.backend.domain.space.service;
 
-import com.moim.backend.domain.hotplace.repository.HotPlaceRepository;
-import com.moim.backend.domain.space.entity.BestPlace;
-import com.moim.backend.domain.space.entity.Participation;
-import com.moim.backend.domain.space.entity.Space;
-import com.moim.backend.domain.space.entity.TransportationType;
-import com.moim.backend.domain.space.repository.BestPlaceRepository;
-import com.moim.backend.domain.space.repository.ParticipationRepository;
-import com.moim.backend.domain.space.repository.SpaceRepository;
 import com.moim.backend.domain.space.request.SpaceCreateRequest;
 import com.moim.backend.domain.space.request.SpaceNameUpdateRequest;
 import com.moim.backend.domain.space.request.SpaceParticipateRequest;
 import com.moim.backend.domain.space.request.SpaceParticipateUpdateRequest;
-import com.moim.backend.domain.space.response.*;
-import com.moim.backend.domain.space.response.space.*;
+import com.moim.backend.domain.space.response.SpaceFilterEnum;
 import com.moim.backend.domain.spacevote.entity.Vote;
 import com.moim.backend.domain.spacevote.repository.VoteRepository;
+import com.moim.backend.domain.hotplace.repository.HotPlaceRepository;
+import com.moim.backend.domain.space.entity.BestPlace;
+import com.moim.backend.domain.space.entity.Space;
+import com.moim.backend.domain.space.entity.Participation;
+import com.moim.backend.domain.space.entity.TransportationType;
+import com.moim.backend.domain.space.repository.BestPlaceRepository;
+import com.moim.backend.domain.space.repository.SpaceRepository;
+import com.moim.backend.domain.space.repository.ParticipationRepository;
+import com.moim.backend.domain.space.response.MiddlePoint;
+import com.moim.backend.domain.space.response.NaverMapListDto;
+import com.moim.backend.domain.space.response.NicknameValidationResponse;
+import com.moim.backend.domain.space.response.PlaceRouteResponse;
+import com.moim.backend.domain.space.response.space.*;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
@@ -28,6 +32,8 @@ import com.moim.backend.global.util.DistanceCalculator;
 import com.moim.backend.global.util.RedisDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,6 +103,7 @@ public class SpaceService {
 
     // 모임 참여
     @Transactional
+    @CacheEvict(value = CacheName.group, key = "#request.getGroupId()")
     public SpaceParticipateResponse participateSpace(SpaceParticipateRequest request, Users user) {
         Space space = getGroup(request.getGroupId());
 
@@ -202,6 +209,7 @@ public class SpaceService {
 
     // 모임 삭제
     @Transactional
+    @CacheEvict(value = CacheName.group, key = "#groupId")
     public Void participateDelete(Long groupId, Users user) {
         Space space = getGroup(groupId);
         validateAdminStatus(user.getUserId(), space.getAdminId());
@@ -220,6 +228,7 @@ public class SpaceService {
 
     // 모임 추천 지역 조회하기
     @TimeCheck
+    @Cacheable(value = CacheName.group, key = "#groupId")
     public List<PlaceRouteResponse> getBestRegion(Long groupId) {
         Space space = getGroup(groupId);
         List<Participation> participationList = participationRepository.findAllBySpace(space);
