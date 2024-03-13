@@ -40,7 +40,7 @@ public class CarMoveInfo implements MoveInfoInterface, PathGraphicDataInterface 
 
     @Override
     public int getTotalTime() {
-        return getBestRouteSummary().duration;
+        return Math.round(getBestRouteSummary().duration / 60);
     }
 
     @Override
