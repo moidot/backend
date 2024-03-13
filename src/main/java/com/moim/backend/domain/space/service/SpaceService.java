@@ -441,7 +441,9 @@ public class SpaceService {
             SpacePlaceResponse response = SpacePlaceResponse.response(naver, local);
             double placeX = Double.parseDouble(naver.getX());
             double placeY = Double.parseDouble(naver.getY());
-            String distance = String.format("%s(으)로부터 %sm", local, (int) DistanceCalculator.getDistance(y, x, placeY, placeX));
+            int distance1 = (int) DistanceCalculator.getDistance(y, x, placeY, placeX);
+            System.out.println("******" + distance1);
+            String distance = String.format("%s(으)로부터 %sm", local, distance1);
             response.setDistance(distance);
             return response;
         };
