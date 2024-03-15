@@ -660,7 +660,7 @@ class SpaceServiceTest {
 
         // then
         assertThat(response)
-                .hasSize(12)
+                .hasSize(20)
                 .allSatisfy(place -> {
                     assertThat(place.getTitle()).isNotNull();
                     assertThat(place.getDetail().getX()).isNotNull();
