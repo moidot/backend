@@ -253,7 +253,7 @@ class VoteServiceTest {
         em.clear();
 
         // when
-        VoteSelectResultResponse response = voteService.readVote(group.getSpaceId(), admin);
+        VoteSelectResultResponse response = voteService.readVote(group.getSpaceId(), admin.getUserId());
 
         // then
 
@@ -292,7 +292,7 @@ class VoteServiceTest {
         em.clear();
 
         // when
-        VoteSelectResultResponse response = voteService.readVote(group.getSpaceId(), admin);
+        VoteSelectResultResponse response = voteService.readVote(group.getSpaceId(), admin.getUserId());
 
         // then
 
@@ -326,7 +326,7 @@ class VoteServiceTest {
         em.clear();
 
         // when
-        VoteSelectResultResponse response = voteService.readVote(group.getSpaceId(), admin);
+        VoteSelectResultResponse response = voteService.readVote(group.getSpaceId(), admin.getUserId());
 
         // then
 
