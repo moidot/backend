@@ -75,7 +75,7 @@ class VoteControllerTest extends ControllerTestSupport {
         // when // then
         mockMvc.perform(
                         MockMvcRequestBuilders.get("/group/{groupId}/vote", 1L)
-                                .header("Authorization", "JWT AccessToken")
+                                .param("user", "1")
                 )
                 .andDo(print())
                 .andExpect(status().isOk());
