@@ -236,23 +236,28 @@ public class SpaceService {
 
     // 내 모임 확인하기
     public List<SpaceMyParticipateResponse> getMyParticipate(Users user, String spaceName, SpaceFilterEnum filter) {
-        List<Space> groups = (spaceName == null)
+        List<Space> spaces = (spaceName == null)
                 ? groupRepository.findBySpaceFetch(user.getUserId(), filter)
                 : groupRepository.findBySpaceFetch(user.getUserId(), spaceName, filter);
 
-        return groups.stream()
-                .map(group -> toMyParticiPateResponse(group, user))
+        return spaces.stream()
+                .map(space -> {
+                            boolean isStartVote = voteRepository.existsBySpaceId(space.getSpaceId());
+                            return toMyParticiPateResponse(space, user, isStartVote);
+                        }
+                )
                 .toList();
     }
 
-    private static SpaceMyParticipateResponse toMyParticiPateResponse(Space space, Users user) {
+    private static SpaceMyParticipateResponse toMyParticiPateResponse(Space space, Users user, boolean isStartVote) {
         Participation admin = getGroupAdmin(space);
         return SpaceMyParticipateResponse.response(
                 space,
                 admin.getUserName(),
                 admin.getUserId().equals(user.getUserId()),
                 space.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
-                space.getParticipations().stream().map(Participation::getUserName).toList());
+                space.getParticipations().stream().map(Participation::getUserName).toList(),
+                isStartVote);
     }
 
     private static Participation getGroupAdmin(Space space) {

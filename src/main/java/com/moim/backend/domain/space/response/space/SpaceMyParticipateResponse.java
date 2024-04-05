@@ -23,12 +23,12 @@ public class SpaceMyParticipateResponse {
     private Integer groupParticipates;
     private String confirmPlace;
     private Boolean isAdmin;
+    private Boolean isStartVote;
     private List<String> bestPlaceNames;
     private List<String> participantNames;
 
     public static SpaceMyParticipateResponse response(
-            Space group, String groupAdminName, boolean isAdmin, List<String> bestPlaceNames, List<String> participantNames
-    ) {
+            Space group, String groupAdminName, boolean isAdmin, List<String> bestPlaceNames, List<String> participantNames, boolean isStartVote) {
         return SpaceMyParticipateResponse.builder()
                 .groupId(group.getSpaceId())
                 .groupName(group.getName())
@@ -39,6 +39,7 @@ public class SpaceMyParticipateResponse {
                 .groupParticipates(group.getParticipations().size())
                 .confirmPlace(group.getPlace())
                 .isAdmin(isAdmin)
+                .isStartVote(isStartVote)
                 .bestPlaceNames(bestPlaceNames)
                 .participantNames(participantNames)
                 .build();
