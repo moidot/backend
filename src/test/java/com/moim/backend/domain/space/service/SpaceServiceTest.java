@@ -566,8 +566,8 @@ class SpaceServiceTest {
         assertThat(response).hasSize(3);
 
         assertThat(response.get(0))
-                .extracting("groupId", "groupName", "groupAdminName", "groupDate", "groupParticipates", "confirmPlace")
-                .contains(space1.getSpaceId(), "어드민", "그룹1", "2023-07-10", 3, "none");
+                .extracting("groupId", "groupName", "groupAdminName", "groupDate", "groupParticipates", "confirmPlace", "isStartVote")
+                .contains(space1.getSpaceId(), "어드민", "그룹1", "2023-07-10", 3, "none", false);
 
         assertThat(response.get(0).getParticipantNames()).isEqualTo(List.of("어드민", "양쿵", "주쿵"));
 
