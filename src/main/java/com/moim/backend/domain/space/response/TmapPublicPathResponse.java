@@ -16,7 +16,7 @@ public class TmapPublicPathResponse implements MoveInfoInterface {
 
     @Override
     public int getTotalTime() {
-        return getBestPath().getTotalTime();
+        return getBestPath().getTotalTime() / 60;
     }
 
     @Override
