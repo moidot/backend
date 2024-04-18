@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface VoteRepository extends JpaRepository<Vote, Long> {
     Optional<Vote> findBySpaceId (Long spaceId);
+    boolean existsBySpaceId(Long spaceId);
     void deleteBySpaceId(Long spaceId);
 }

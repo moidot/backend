@@ -207,21 +207,19 @@ public class VoteControllerDocsTest extends RestDocsSupport {
                 .voteStatuses(createMockVoteStatuses())
                 .build();
 
-        given(voteService.readVote(anyLong(), any()))
+        given(voteService.readVote(anyLong(), anyLong()))
                 .willReturn(mockResult);
 
         MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/group/{groupId}/vote", 1L)
-                .header(AUTHORIZATION, "Bearer {token}");
+                .param("user", "1");
 
         ResourceSnippetParameters parameters = ResourceSnippetParameters.builder()
                 .tag("투표 API")
                 .summary("투표 현황 조회 API")
-                .requestHeaders(
-                        headerWithName("Authorization")
-                                .description("Swagger 요청시 해당 입력칸이 아닌 우측 상단 자물쇠 " +
-                                        "또는 Authorize 버튼을 이용해 토큰을 넣어주세요"))
                 .pathParameters(
                         parameterWithName("groupId").description("그룹 ID"))
+                .queryParameters(
+                        parameterWithName("user").description("유저 ID").optional())
                 .responseFields(
                         fieldWithPath("code").type(NUMBER).description("상태 코드"),
                         fieldWithPath("message").type(STRING).description("상태 메세지"),

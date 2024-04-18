@@ -108,7 +108,7 @@ public class VoteService {
 
     private List<VoteSelectResultResponse.VoteStatus> toVoteStatusResponse(Users user, Vote vote) {
         List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getSpaceId());
-        return getVoteStatuses(user, bestPlaces);
+        return getVoteStatuses(user.getUserId(), bestPlaces);
     }
 
     private void saveUserVotesForSelectPlaces(List<Long> selectPlaceIds, Users user, Vote vote) {
@@ -133,19 +133,18 @@ public class VoteService {
     }
 
     // 투표 읽기 API
-    public VoteSelectResultResponse readVote(Long groupId, Users user) {
+    public VoteSelectResultResponse readVote(Long groupId, Long userId) {
         Space group = getSpace(groupId);
         Optional<Vote> optionalVote = voteRepository.findBySpaceId(groupId);
         if (optionalVote.isEmpty()) {
-            return VoteSelectResultResponse.response(group, null, new ArrayList<>(), 0,false);
-        } else {
-            // 투표 이후 현재 추천된 장소들의 현황을 조회
-            Vote vote = optionalVote.get();
-            Boolean isVotingParticipant = selectPlaceRepository.existsByVoteAndUserId(vote, user.getUserId());
-            List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getSpaceId());
-            List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
-            return VoteSelectResultResponse.response(group, vote, voteStatuses, selectPlaceRepository.countByVote(vote), isVotingParticipant);
+            return VoteSelectResultResponse.response(group, null, new ArrayList<>(), 0, false);
         }
+        Vote vote = optionalVote.get();
+        Boolean isVotingParticipant = selectPlaceRepository.existsByVoteAndUserId(vote, userId);
+        // 투표 이후 현재 추천된 장소들의 현황을 조회
+        List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getSpaceId());
+        List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(userId, bestPlaces);
+        return VoteSelectResultResponse.response(group, vote, voteStatuses, selectPlaceRepository.countByVote(vote), isVotingParticipant);
     }
 
     // 해당 장소 투표한 인원 리스트 조회하기 API
@@ -202,9 +201,9 @@ public class VoteService {
 
         // 종료 이후 현재 추천된 장소들의 현황을 조회
         List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getSpaceId());
-        List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(user, bestPlaces);
+        List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(user.getUserId(), bestPlaces);
 
-        return VoteSelectResultResponse.response(group, vote, voteStatuses, selectPlaceRepository.countByVote(vote),true);
+        return VoteSelectResultResponse.response(group, vote, voteStatuses, selectPlaceRepository.countByVote(vote), true);
     }
 
     // 재투표 API
@@ -263,13 +262,15 @@ public class VoteService {
         }
     }
 
-    private static List<VoteSelectResultResponse.VoteStatus> getVoteStatuses(Users user, List<BestPlace> bestPlaces) {
+    private static List<VoteSelectResultResponse.VoteStatus> getVoteStatuses(Long userId, List<BestPlace> bestPlaces) {
         return bestPlaces.stream().map(bestPlace -> {
-            // 내가 투표했는지 여부 확인
-            Boolean isVoted = bestPlace.getSelectPlaces().stream()
-                    .anyMatch(selectPlace -> selectPlace.getUserId().equals(user.getUserId()));
-
-            return VoteSelectResultResponse.VoteStatus.toStatusDto(bestPlace, isVoted);
+            // 유저가 존재하는 경우 투표 여부 확인
+            if (userId != -1) {
+                Boolean isVoted = bestPlace.getSelectPlaces().stream()
+                        .anyMatch(selectPlace -> selectPlace.getUserId().equals(userId));
+                return VoteSelectResultResponse.VoteStatus.toStatusDto(bestPlace, isVoted);
+            }
+            return VoteSelectResultResponse.VoteStatus.toStatusDto(bestPlace, false);
         }).toList();
     }
 }

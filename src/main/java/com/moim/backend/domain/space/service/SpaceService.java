@@ -1,25 +1,21 @@
 package com.moim.backend.domain.space.service;
 
+import com.moim.backend.domain.hotplace.repository.HotPlaceRepository;
+import com.moim.backend.domain.space.entity.BestPlace;
+import com.moim.backend.domain.space.entity.Participation;
+import com.moim.backend.domain.space.entity.Space;
+import com.moim.backend.domain.space.entity.TransportationType;
+import com.moim.backend.domain.space.repository.BestPlaceRepository;
+import com.moim.backend.domain.space.repository.ParticipationRepository;
+import com.moim.backend.domain.space.repository.SpaceRepository;
 import com.moim.backend.domain.space.request.SpaceCreateRequest;
 import com.moim.backend.domain.space.request.SpaceNameUpdateRequest;
 import com.moim.backend.domain.space.request.SpaceParticipateRequest;
 import com.moim.backend.domain.space.request.SpaceParticipateUpdateRequest;
-import com.moim.backend.domain.space.response.SpaceFilterEnum;
+import com.moim.backend.domain.space.response.*;
+import com.moim.backend.domain.space.response.space.*;
 import com.moim.backend.domain.spacevote.entity.Vote;
 import com.moim.backend.domain.spacevote.repository.VoteRepository;
-import com.moim.backend.domain.hotplace.repository.HotPlaceRepository;
-import com.moim.backend.domain.space.entity.BestPlace;
-import com.moim.backend.domain.space.entity.Space;
-import com.moim.backend.domain.space.entity.Participation;
-import com.moim.backend.domain.space.entity.TransportationType;
-import com.moim.backend.domain.space.repository.BestPlaceRepository;
-import com.moim.backend.domain.space.repository.SpaceRepository;
-import com.moim.backend.domain.space.repository.ParticipationRepository;
-import com.moim.backend.domain.space.response.MiddlePoint;
-import com.moim.backend.domain.space.response.NaverMapListDto;
-import com.moim.backend.domain.space.response.NicknameValidationResponse;
-import com.moim.backend.domain.space.response.PlaceRouteResponse;
-import com.moim.backend.domain.space.response.space.*;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
@@ -250,23 +246,28 @@ public class SpaceService {
 
     // 내 모임 확인하기
     public List<SpaceMyParticipateResponse> getMyParticipate(Users user, String spaceName, SpaceFilterEnum filter) {
-        List<Space> groups = (spaceName == null)
+        List<Space> spaces = (spaceName == null)
                 ? groupRepository.findBySpaceFetch(user.getUserId(), filter)
                 : groupRepository.findBySpaceFetch(user.getUserId(), spaceName, filter);
 
-        return groups.stream()
-                .map(group -> toMyParticiPateResponse(group, user))
+        return spaces.stream()
+                .map(space -> {
+                            boolean isStartVote = voteRepository.existsBySpaceId(space.getSpaceId());
+                            return toMyParticiPateResponse(space, user, isStartVote);
+                        }
+                )
                 .toList();
     }
 
-    private static SpaceMyParticipateResponse toMyParticiPateResponse(Space space, Users user) {
+    private static SpaceMyParticipateResponse toMyParticiPateResponse(Space space, Users user, boolean isStartVote) {
         Participation admin = getGroupAdmin(space);
         return SpaceMyParticipateResponse.response(
                 space,
                 admin.getUserName(),
                 admin.getUserId().equals(user.getUserId()),
                 space.getBestPlaces().stream().map(BestPlace::getPlaceName).toList(),
-                space.getParticipations().stream().map(Participation::getUserName).toList());
+                space.getParticipations().stream().map(Participation::getUserName).toList(),
+                isStartVote);
     }
 
     private static Participation getGroupAdmin(Space space) {
@@ -282,7 +283,7 @@ public class SpaceService {
     public List<SpacePlaceResponse> keywordCentralizedMeetingSpot(Double x, Double y, String local, String keyword) {
         // 네이버 API 요청
         String station = getStation(local);
-        URI uri = createNaverRequestUri(station, keyword);
+        URI uri = createNaverRequestUri(station, keyword, x, y);
         ResponseEntity<NaverMapListDto> naverResponse = restTemplate.getForEntity(uri.toString(), NaverMapListDto.class);
 
         // 응답 처리
@@ -392,15 +393,13 @@ public class SpaceService {
 
     // validate
 
-    private static URI createNaverRequestUri(String local, String keyword) {
-        return UriComponentsBuilder.fromHttpUrl("https://map.naver.com/v5/api/search")
-                .queryParam("caller", "pcweb")
+    private static URI createNaverRequestUri(String local, String keyword, Double x, Double y) {
+        String searchCoord = y + ";" + x;
+        return UriComponentsBuilder.fromHttpUrl("https://map.naver.com/p/api/search/allSearch")
                 .queryParam("query", local + keyword)
                 .queryParam("type", "all")
-                .queryParam("page", 1)
-                .queryParam("displayCount", 12)
-                .queryParam("isPlaceRecommendationReplace", true)
-                .queryParam("lang", "ko")
+                .queryParam("searchCoord", searchCoord)
+                .queryParam("boundary", "")
                 .build()
                 .toUri();
     }
@@ -451,9 +450,9 @@ public class SpaceService {
             SpacePlaceResponse response = SpacePlaceResponse.response(naver, local);
             double placeX = Double.parseDouble(naver.getX());
             double placeY = Double.parseDouble(naver.getY());
-            int distance1 = (int) DistanceCalculator.getDistance(y, x, placeY, placeX);
-            System.out.println("******" + distance1);
-            String distance = String.format("%s(으)로부터 %sm", local, distance1);
+            int calculateDistance = (int) DistanceCalculator.getDistance(x, y, placeY, placeX);
+
+            String distance = String.format("%s(으)로부터 %sm", local, calculateDistance);
             response.setDistance(distance);
             return response;
         };

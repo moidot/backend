@@ -33,9 +33,9 @@ public class VoteController {
     // 투표 읽기 API
     @GetMapping("/{groupId}/vote")
     public CustomResponseEntity<VoteSelectResultResponse> readVote(
-            @PathVariable Long groupId, @Login Users user
+            @PathVariable Long groupId, @RequestParam(name = "user", required = false, defaultValue = "-1") Long userId
     ) {
-        return CustomResponseEntity.success(voteService.readVote(groupId, user));
+        return CustomResponseEntity.success(voteService.readVote(groupId, userId));
     }
 
     // 투표 참여 API

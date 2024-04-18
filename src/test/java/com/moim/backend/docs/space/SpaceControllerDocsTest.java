@@ -508,6 +508,7 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                 .groupParticipates(3)
                 .confirmPlace("none")
                 .isAdmin(true)
+                .isStartVote(true)
                 .bestPlaceNames(List.of("종로5가역", "종로3가역", "동대문역"))
                 .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .build();
@@ -520,6 +521,7 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                 .groupParticipates(3)
                 .confirmPlace("교대역")
                 .isAdmin(false)
+                .isStartVote(true)
                 .bestPlaceNames(List.of("강남역", "교대역", "역삼역"))
                 .participantNames(List.of("양파쿵야", "주먹밥쿵야", "샐러리쿵야"))
                 .build();
@@ -562,6 +564,8 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                                 .description("그룹 확정 장소 / 미확정 : 'none' "),
                         fieldWithPath("data[].isAdmin").type(BOOLEAN)
                                 .description("해당 그룹 모임장 여부"),
+                        fieldWithPath("data[].isStartVote").type(BOOLEAN)
+                                .description("해당 그룹 투표 개설 여부"),
                         fieldWithPath("data[].participantNames[]").type(ARRAY)
                                 .description("그룹 참여자 이름 리스트"),
                         fieldWithPath("data[].bestPlaceNames[]").type(ARRAY)
