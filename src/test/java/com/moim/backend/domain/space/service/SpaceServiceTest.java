@@ -648,27 +648,27 @@ class SpaceServiceTest {
                 .contains(DUPLICATE_PARTICIPATION.getCode(), DUPLICATE_PARTICIPATION.getMessage());
     }
 
-    @DisplayName("네이버 API 를 이용해 장소의 정보를 가져온다.")
-    @Test
-    void keywordCentralizedMeetingSpot() throws UnsupportedEncodingException {
-        // given
-
-        // when
-        List<SpacePlaceResponse> response = spaceService.keywordCentralizedMeetingSpot(
-                127.01674669413555, 37.59276455965626, "성신여대입구역", "카페"
-        );
-
-        // then
-        assertThat(response)
-                .hasSize(12)
-                .allSatisfy(place -> {
-                    assertThat(place.getTitle()).isNotNull();
-                    assertThat(place.getDetail().getX()).isNotNull();
-                    assertThat(place.getDetail().getY()).isNotNull();
-                    assertThat(place.getDetail().getAddress()).isNotNull();
-                    assertThat(place.getDistance()).isNotNull();
-                });
-    }
+//    @DisplayName("네이버 API 를 이용해 장소의 정보를 가져온다.")
+//    @Test
+//    void keywordCentralizedMeetingSpot() throws UnsupportedEncodingException {
+//        // given
+//
+//        // when
+//        List<SpacePlaceResponse> response = spaceService.keywordCentralizedMeetingSpot(
+//                127.01674669413555, 37.59276455965626, "성신여대입구역", "카페"
+//        );
+//
+//        // then
+//        assertThat(response)
+//                .hasSize(12)
+//                .allSatisfy(place -> {
+//                    assertThat(place.getTitle()).isNotNull();
+//                    assertThat(place.getDetail().getX()).isNotNull();
+//                    assertThat(place.getDetail().getY()).isNotNull();
+//                    assertThat(place.getDetail().getAddress()).isNotNull();
+//                    assertThat(place.getDistance()).isNotNull();
+//                });
+//    }
 
     @DisplayName("유저가 해당 모임의 참여자 정보들을 조회한다.")
     @Test

@@ -238,6 +238,16 @@ public class SpaceService {
         )).collect(Collectors.toList());
     }
 
+    @TimeCheck
+    public List<PlaceRouteResponse> getBestRegionWithTmap(Long groupId) {
+        Space space = getGroup(groupId);
+        List<Participation> participationList = participationRepository.findAllBySpace(space);
+
+        return bestPlaceRepository.findAllBySpace(space).stream().map(bestPlace -> new PlaceRouteResponse(
+                bestPlace, getMoveUserInfoListWithTmap(bestPlace, space, participationList)
+        )).collect(Collectors.toList());
+    }
+
     // 내 모임 확인하기
     public List<SpaceMyParticipateResponse> getMyParticipate(Users user, String spaceName, SpaceFilterEnum filter) {
         List<Space> groups = (spaceName == null)
@@ -501,6 +511,26 @@ public class SpaceService {
         participationList.forEach(participation -> {
             if ((participation.getTransportation() == TransportationType.PUBLIC)) {
                 directionService.getBusRouteToResponse(bestPlace, space, participation)
+                        .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
+            } else if (participation.getTransportation() == TransportationType.PERSONAL) {
+                directionService.getCarRouteToResponse(bestPlace, space, participation)
+                        .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
+            }
+        });
+
+        return moveUserInfoList;
+    }
+
+    private List<PlaceRouteResponse.MoveUserInfo> getMoveUserInfoListWithTmap(
+            BestPlace bestPlace,
+            Space space,
+            List<Participation> participationList
+    ) {
+        List<PlaceRouteResponse.MoveUserInfo> moveUserInfoList = new ArrayList<>();
+
+        participationList.forEach(participation -> {
+            if ((participation.getTransportation() == TransportationType.PUBLIC)) {
+                directionService.getBusRouteToResponseWithTmap(bestPlace, space, participation)
                         .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
             } else if (participation.getTransportation() == TransportationType.PERSONAL) {
                 directionService.getCarRouteToResponse(bestPlace, space, participation)

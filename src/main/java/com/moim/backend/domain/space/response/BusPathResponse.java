@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BusPathResponse {
+public class BusPathResponse implements MoveInfoInterface {
 
     private Result result;
     private Info bestPathInfo;
@@ -23,14 +23,18 @@ public class BusPathResponse {
         return searchBestPathInfo().busTransitCount + searchBestPathInfo().subwayTransitCount;
     }
 
+    @Override
     public int getTotalTime() {
         return searchBestPathInfo().totalTime;
     }
 
+    @Override
     public Double getTotalDistance() {
 
         return searchBestPathInfo().totalDistance;
     }
+
+    @Override
     public int getPayment() {
         return searchBestPathInfo().getPayment();
     }

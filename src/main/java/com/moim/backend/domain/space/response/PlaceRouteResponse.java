@@ -78,6 +78,23 @@ public class PlaceRouteResponse {
             this.path = carMoveInfo.getPathList(participation, bestPlace);
             this.payment = carMoveInfo.getPayment();
         }
+
+        public MoveUserInfo(
+                Space group,
+                Participation participation,
+                TmapPublicPathResponse tmapPublicPathResponse,
+                BestPlace bestPlace,
+                List<PathDto> path
+        ) {
+            this.isAdmin = (participation.getUserId() == group.getAdminId()) ? true : false;
+            this.userId = participation.getUserId();
+            this.userName = participation.getUserName();
+            this.transportationType = participation.getTransportation();
+            this.totalTime = tmapPublicPathResponse.getTotalTime();
+            this.totalDistance = tmapPublicPathResponse.getTotalDistance();
+            this.path = path;
+            this.payment = tmapPublicPathResponse.getPayment();
+        }
     }
 
 }

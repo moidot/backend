@@ -62,6 +62,7 @@ public class CarMoveInfo implements MoveInfoInterface, PathGraphicDataInterface 
         return path;
     }
 
+    @Override
     public int getPayment() {
         return getBestRouteSummary().fare.toll;
     }

@@ -6,4 +6,6 @@ public interface MoveInfoInterface {
 
     public Double getTotalDistance();
 
+    public int getPayment();
+
 }

@@ -439,7 +439,7 @@ public class SpaceControllerDocsTest extends RestDocsSupport {
                 new PlaceRouteResponse("광화문(세종문화회관)", 37.571525, 126.97717, moveUserInfoList)
 
         );
-        given(spaceService.getBestRegion(any()))
+        given(spaceService.getBestRegionWithTmap(any()))
                 .willReturn(placeRouteResponseList);
 
         MockHttpServletRequestBuilder httpRequest = RestDocumentationRequestBuilders.get("/group/best-region")

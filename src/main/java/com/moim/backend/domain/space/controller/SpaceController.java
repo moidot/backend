@@ -112,7 +112,7 @@ public class SpaceController {
     public CustomResponseEntity<List<PlaceRouteResponse>> getBestRegion(
             @RequestParam Long groupId
     ) {
-        return CustomResponseEntity.success(spaceService.getBestRegion(groupId));
+        return CustomResponseEntity.success(spaceService.getBestRegionWithTmap(groupId));
     }
 
     // 내 모임 확인하기 API
