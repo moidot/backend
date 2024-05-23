@@ -1,7 +1,5 @@
 package com.moim.backend.global.auth.jwt;
 
-import com.moim.backend.global.common.RedisKeyPrefix;
-import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
 import com.moim.backend.global.util.RedisDao;
 import io.jsonwebtoken.Claims;
@@ -64,11 +62,7 @@ public class JwtService implements InitializingBean {
         if (redisDao.getValues(token) != null) {
             throw new CustomException(IS_TOKEN_LOGOUT);
         }
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("JWT 토큰이 잘못되었습니다.");
-        }
+        Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
     }
 
     public void validateRefreshToken(String token) {

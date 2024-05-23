@@ -105,10 +105,12 @@ public class UserService {
     }
 
     // 회원탈퇴 API
+    @Transactional
     public Void deleteAccount(Users user) {
         Long userId = user.getUserId();
         bookmarkRepository.deleteByUserId(userId);
         participationRepository.deleteByUserId(userId);
+        userRepository.delete(user);
         return null;
     }
 
