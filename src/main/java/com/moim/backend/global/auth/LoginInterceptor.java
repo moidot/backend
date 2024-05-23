@@ -4,7 +4,6 @@ import com.moim.backend.global.auth.jwt.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -28,8 +27,12 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         String authorization = request.getHeader(AUTHORIZATION);
         if (authorization != null) {
-            String token = jwtService.getToken(Optional.of(authorization));
-            jwtService.validateToken(token);
+            try {
+                String token = jwtService.getToken(Optional.of(authorization));
+                jwtService.validateToken(token);
+            } catch (Exception e) {
+                return false;
+            }
         }
 
         return true;
