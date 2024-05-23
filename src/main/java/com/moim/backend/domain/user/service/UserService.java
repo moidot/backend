@@ -97,11 +97,11 @@ public class UserService {
     }
 
     // 로그아웃 API
-    public Void logout(Users user, String atk) {
-        String decodeAtk = atk.substring(7);
-        Long expiration = jwtService.getExpiration(decodeAtk);
+    public Void logout(Users user, String authorization) {
+        String token = jwtService.getToken(Optional.of(authorization));
+        Long expiration = jwtService.getExpiration(token);
 
-        return redisService.logoutFromRedis(user.getEmail(), decodeAtk, expiration);
+        return redisService.logoutFromRedis(user.getEmail(), token, expiration);
     }
 
     // 회원탈퇴 API

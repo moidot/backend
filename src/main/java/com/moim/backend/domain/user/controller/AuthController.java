@@ -51,9 +51,9 @@ public class AuthController {
     @DeleteMapping("/logout")
     public CustomResponseEntity<Void> logout(
             @Login Users user,
-            @RequestHeader(value = "Authorization") String atk
+            @RequestHeader(value = "Authorization") String authorization
     ) {
-        return CustomResponseEntity.success(userService.logout(user, atk));
+        return CustomResponseEntity.success(userService.logout(user, authorization));
     }
 
     // 회원탈퇴 API
