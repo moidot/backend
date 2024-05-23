@@ -1,5 +1,11 @@
 package com.moim.backend.domain.spacevote.service;
 
+import com.moim.backend.domain.space.entity.BestPlace;
+import com.moim.backend.domain.space.entity.Participation;
+import com.moim.backend.domain.space.entity.Space;
+import com.moim.backend.domain.space.repository.BestPlaceRepository;
+import com.moim.backend.domain.space.repository.ParticipationRepository;
+import com.moim.backend.domain.space.repository.SpaceRepository;
 import com.moim.backend.domain.spacevote.entity.SelectPlace;
 import com.moim.backend.domain.spacevote.entity.Vote;
 import com.moim.backend.domain.spacevote.repository.SelectPlaceRepository;
@@ -9,12 +15,6 @@ import com.moim.backend.domain.spacevote.response.VoteCreateResponse;
 import com.moim.backend.domain.spacevote.response.VoteParticipation;
 import com.moim.backend.domain.spacevote.response.VoteSelectPlaceUserResponse;
 import com.moim.backend.domain.spacevote.response.VoteSelectResultResponse;
-import com.moim.backend.domain.space.entity.BestPlace;
-import com.moim.backend.domain.space.entity.Space;
-import com.moim.backend.domain.space.entity.Participation;
-import com.moim.backend.domain.space.repository.BestPlaceRepository;
-import com.moim.backend.domain.space.repository.SpaceRepository;
-import com.moim.backend.domain.space.repository.ParticipationRepository;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.global.common.exception.CustomException;
 import jakarta.persistence.OptimisticLockException;
@@ -103,7 +103,9 @@ public class VoteService {
 
     private void processUserVotes(List<Long> selectPlaceIds, Users user, Vote vote) {
         removeUserVotesIfExist(selectPlaceIds, user, vote);
-        saveUserVotesForSelectPlaces(selectPlaceIds, user, vote);
+        if (!selectPlaceIds.isEmpty()) {
+            saveUserVotesForSelectPlaces(selectPlaceIds, user, vote);
+        }
     }
 
     private List<VoteSelectResultResponse.VoteStatus> toVoteStatusResponse(Users user, Vote vote) {
