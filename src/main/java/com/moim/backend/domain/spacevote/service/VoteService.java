@@ -103,9 +103,7 @@ public class VoteService {
 
     private void processUserVotes(List<Long> selectPlaceIds, Users user, Vote vote) {
         removeUserVotesIfExist(selectPlaceIds, user, vote);
-        if (!selectPlaceIds.isEmpty()) {
-            saveUserVotesForSelectPlaces(selectPlaceIds, user, vote);
-        }
+        saveUserVotesForSelectPlaces(selectPlaceIds, user, vote);
     }
 
     private List<VoteSelectResultResponse.VoteStatus> toVoteStatusResponse(Users user, Vote vote) {
@@ -129,9 +127,7 @@ public class VoteService {
     private void removeUserVotesIfExist(List<Long> bestPlaceIds, Users user, Vote vote) {
         List<Long> selectPlaceIds =
                 selectPlaceRepository.findSelectPlaceByUserIdAndVoteId(user.getUserId(), vote.getVoteId());
-        if (!bestPlaceIds.isEmpty()) {
-            selectPlaceRepository.deleteAllById(selectPlaceIds);
-        }
+        selectPlaceRepository.deleteAllById(selectPlaceIds);
     }
 
     // 투표 읽기 API
