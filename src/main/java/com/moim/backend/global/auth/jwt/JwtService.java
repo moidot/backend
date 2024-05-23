@@ -129,6 +129,8 @@ public class JwtService implements InitializingBean {
     }
 
     public Long getExpiration(String accessToken) {
+        log.error("JwtService getExpiration accessToken: {}", accessToken);
+
         // accessToken 남은 유효시간
         Date expiration = Jwts.parserBuilder()
                 .setSigningKey(key)

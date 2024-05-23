@@ -1,5 +1,6 @@
 package com.moim.backend.global.common.exception;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.moim.backend.global.common.CustomResponseEntity;
 import com.moim.backend.global.common.Result;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -129,6 +130,17 @@ public class CommonRestExceptionHandler extends RuntimeException {
             ExpiredJwtException e, HttpServletRequest request
     ) {
         String errorMessage = "지원되지 않는 JWT 토큰입니다.";
+        log.error("url: \"{}\", message: {}", request.getRequestURI(), errorMessage);
+
+        return CustomResponseEntity.fail(errorMessage);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(JsonParseException.class)
+    public CustomResponseEntity<String> JsonParseExceptionHandler(
+            ExpiredJwtException e, HttpServletRequest request
+    ) {
+        String errorMessage = "지원되지 않는 JSON 형식입니다..";
         log.error("url: \"{}\", message: {}", request.getRequestURI(), errorMessage);
 
         return CustomResponseEntity.fail(errorMessage);
