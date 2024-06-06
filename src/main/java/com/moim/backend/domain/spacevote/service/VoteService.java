@@ -132,17 +132,22 @@ public class VoteService {
 
     // 투표 읽기 API
     public VoteSelectResultResponse readVote(Long groupId, Long userId) {
-        Space group = getSpace(groupId);
+        Space space = getSpace(groupId);
         Optional<Vote> optionalVote = voteRepository.findBySpaceId(groupId);
         if (optionalVote.isEmpty()) {
-            return VoteSelectResultResponse.response(group, null, new ArrayList<>(), 0, false);
+            return VoteSelectResultResponse.response(space, null, new ArrayList<>(), 0, false);
         }
         Vote vote = optionalVote.get();
         Boolean isVotingParticipant = selectPlaceRepository.existsByVoteAndUserId(vote, userId);
         // 투표 이후 현재 추천된 장소들의 현황을 조회
         List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getSpaceId());
         List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(userId, bestPlaces);
-        return VoteSelectResultResponse.response(group, vote, voteStatuses, selectPlaceRepository.countByVote(vote), isVotingParticipant);
+        // 마감일이 지난 투표는 종료
+        if (vote.getEndAt().isAfter(LocalDateTime.now())) {
+            vote.conclusionVote();
+            confirmSpace(space);
+        }
+        return VoteSelectResultResponse.response(space, vote, voteStatuses, selectPlaceRepository.countByVote(vote), isVotingParticipant);
     }
 
     // 해당 장소 투표한 인원 리스트 조회하기 API
@@ -183,25 +188,22 @@ public class VoteService {
 
     // 투표 종료하기 API
     @Transactional
-    public VoteSelectResultResponse conclusionVote(Long groupId, Users user) {
-        Space group = getSpace(groupId);
-        validateUserIsAdmin(user, group);
-        Vote vote = getVote(groupId);
+    public VoteSelectResultResponse conclusionVote(Long spaceId, Users user) {
+        Space space = getSpace(spaceId);
+        validateUserIsAdmin(user, space);
+        Vote vote = getVote(spaceId);
 
         // 투표 종료
         vote.conclusionVote();
 
         // 가장 높은 투표를 받은 장소 선정
-        BestPlace confirmPlace = group.getBestPlaces().stream()
-                .max(Comparator.comparing(bestPlace -> bestPlace.getSelectPlaces().size()))
-                .orElseThrow(() -> new CustomException(FAIL));
-        group.confirmPlace(confirmPlace.getPlaceName());
+        confirmSpace(space);
 
         // 종료 이후 현재 추천된 장소들의 현황을 조회
         List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getSpaceId());
         List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(user.getUserId(), bestPlaces);
 
-        return VoteSelectResultResponse.response(group, vote, voteStatuses, selectPlaceRepository.countByVote(vote), true);
+        return VoteSelectResultResponse.response(space, vote, voteStatuses, selectPlaceRepository.countByVote(vote), true);
     }
 
     // 재투표 API
@@ -270,5 +272,13 @@ public class VoteService {
             }
             return VoteSelectResultResponse.VoteStatus.toStatusDto(bestPlace, false);
         }).toList();
+    }
+
+    private void confirmSpace(Space space) {
+        // 가장 높은 투표를 받은 장소 선정
+        BestPlace confirmPlace = space.getBestPlaces().stream()
+                .max(Comparator.comparing(bestPlace -> bestPlace.getSelectPlaces().size()))
+                .orElseThrow(() -> new CustomException(FAIL));
+        space.confirmPlace(confirmPlace.getPlaceName());
     }
 }
