@@ -3,6 +3,7 @@ package com.moim.backend.global.auth;
 import com.moim.backend.global.auth.jwt.JwtService;
 import com.moim.backend.global.common.Result;
 import com.moim.backend.global.common.exception.CustomException;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +30,8 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         String authorization = request.getHeader(AUTHORIZATION);
         if (authorization != null) {
-            try {
-                String token = jwtService.getToken(Optional.of(authorization));
-                jwtService.validateToken(token);
-            } catch (Exception e) {
-                throw new CustomException(Result.FAIL);
-            }
+            String token = jwtService.getToken(Optional.of(authorization));
+            jwtService.validateToken(token);
         }
 
         return true;
