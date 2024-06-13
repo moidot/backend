@@ -143,7 +143,7 @@ public class VoteService {
         List<BestPlace> bestPlaces = selectPlaceRepository.findByVoteStatus(vote.getSpaceId());
         List<VoteSelectResultResponse.VoteStatus> voteStatuses = getVoteStatuses(userId, bestPlaces);
         // 마감일이 지난 투표는 종료
-        if (vote.getEndAt().isBefore(LocalDateTime.now())) {
+        if (vote.getEndAt() != null && vote.getEndAt().isBefore(LocalDateTime.now())) {
             vote.conclusionVote();
             confirmSpace(space);
         }
