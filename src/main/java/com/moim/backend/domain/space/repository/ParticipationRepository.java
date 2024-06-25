@@ -21,6 +21,7 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     MiddlePoint getMiddlePoint(@Param("space") Space space);
 
     int countBySpaceAndUserId(Space space, Long userId);
+    int countBySpace(Space space);
 
     List<Participation> findAllBySpaceSpaceIdAndUserIdIn(Long spaceId, List<Long> userId);
     List<Participation> findAllBySpace(Space space);

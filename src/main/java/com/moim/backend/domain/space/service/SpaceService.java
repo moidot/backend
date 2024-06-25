@@ -16,6 +16,7 @@ import com.moim.backend.domain.space.response.*;
 import com.moim.backend.domain.space.response.space.*;
 import com.moim.backend.domain.spacevote.entity.Vote;
 import com.moim.backend.domain.spacevote.repository.VoteRepository;
+import com.moim.backend.domain.spacevote.service.VoteService;
 import com.moim.backend.domain.subway.repository.SubwayRepository;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
@@ -65,6 +66,7 @@ public class SpaceService {
     private final DirectionService directionService;
     private final RedisDao redisDao;
     private final RestTemplate restTemplate = new RestTemplate();
+    private final VoteService voteService;
 
     // 모임 생성
     @Transactional
@@ -158,6 +160,7 @@ public class SpaceService {
 
     // 내 모임 나가기
     @Transactional
+    @CacheEvict(value = CacheName.group, key = "#groupId")
     public SpaceExitResponse participateExit(Long participateId, Users user) {
         Participation myParticipate = getParticipate(participateId);
         validateParticipationMyInfo(user, myParticipate);
@@ -165,16 +168,24 @@ public class SpaceService {
         Space space = myParticipate.getSpace();
         Optional<Vote> optionalVote = voteRepository.findBySpaceId(space.getSpaceId());
 
-        // 투표 시작시 모임 나가기 불가
-        checkIfVoteStartedBeforeLeaving(optionalVote);
-
-
         // 모임장이 나가는 경우 스페이스 삭제
         if (deleteGroupIfAdminLeaves(user, space)) {
             return SpaceExitResponse.response(true, "모임이 삭제되었습니다.");
         }
 
+        // 투표했던 항목 모두 제거
+        // 24.06.13 기준 기획 변경.
+        // 기존: 투표 시작시 모임 나가기 불가
+        // 변경: 탈퇴 시 투표 여부와 상관없이 무조건 나가야하기 때문에 변경)
+        if (optionalVote.isPresent()) {
+            voteService.removeUserVotesIfExist(user, optionalVote.get());
+        }
+
         removeParticipation(myParticipate, space);
+        // 팀원이 모임을 나가서 1명만 남는 경우 투표 종료
+        if (participationRepository.countBySpace(space) < 2) {
+            optionalVote.ifPresent(vote -> vote.conclusionVote());
+        }
         return SpaceExitResponse.response(false, "모임에서 나갔습니다.");
     }
 
@@ -195,6 +206,7 @@ public class SpaceService {
 
     // 모임원 내보내기
     @Transactional
+    @CacheEvict(value = CacheName.group, key = "#groupId")
     public Void participateRemoval(Long participateId, Users user) {
         Participation participate = getParticipate(participateId);
         Space space = participate.getSpace();
@@ -235,6 +247,7 @@ public class SpaceService {
     }
 
     @TimeCheck
+    @Cacheable(value = CacheName.group, key = "#groupId")
     public List<PlaceRouteResponse> getBestRegionWithTmap(Long groupId) {
         Space space = getGroup(groupId);
         List<Participation> participationList = participationRepository.findAllBySpace(space);
@@ -375,6 +388,7 @@ public class SpaceService {
     }
 
     // 모임 전체 나가기 API
+    @CacheEvict(value = CacheName.group, key = "#groupId")
     public Void allParticipateExit(Users user) {
         Long userId = user.getUserId();
         List<Participation> participations = participationRepository.findByUserId(userId);
