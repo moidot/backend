@@ -102,7 +102,7 @@ public class VoteService {
     }
 
     private void processUserVotes(List<Long> selectPlaceIds, Users user, Vote vote) {
-        removeUserVotesIfExist(selectPlaceIds, user, vote);
+        removeUserVotesIfExist(user, vote);
         saveUserVotesForSelectPlaces(selectPlaceIds, user, vote);
     }
 
@@ -124,13 +124,14 @@ public class VoteService {
         }
     }
 
-    private void removeUserVotesIfExist(List<Long> bestPlaceIds, Users user, Vote vote) {
+    public void removeUserVotesIfExist(Users user, Vote vote) {
         List<Long> selectPlaceIds =
                 selectPlaceRepository.findSelectPlaceByUserIdAndVoteId(user.getUserId(), vote.getVoteId());
         selectPlaceRepository.deleteAllById(selectPlaceIds);
     }
 
     // 투표 읽기 API
+    @Transactional
     public VoteSelectResultResponse readVote(Long groupId, Long userId) {
         Space space = getSpace(groupId);
         Optional<Vote> optionalVote = voteRepository.findBySpaceId(groupId);

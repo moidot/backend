@@ -52,7 +52,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     // JAXBException 방지
-    implementation 'javax.xml.bind:jaxb-api:2.3.0'
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
+    implementation 'javax.activation:activation:1.1.1'
 
     // lombok
     compileOnly 'org.projectlombok:lombok'

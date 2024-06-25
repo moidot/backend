@@ -1,7 +1,9 @@
 package com.moim.backend.domain.user.service;
 
 import com.moim.backend.domain.bookmark.repository.BookmarkRepository;
+import com.moim.backend.domain.space.entity.Participation;
 import com.moim.backend.domain.space.repository.ParticipationRepository;
+import com.moim.backend.domain.space.service.SpaceService;
 import com.moim.backend.domain.user.config.Platform;
 import com.moim.backend.domain.user.entity.Users;
 import com.moim.backend.domain.user.repository.UserRepository;
@@ -30,6 +32,7 @@ public class UserService {
     private final ParticipationRepository participationRepository;
     private final JwtService jwtService;
     private final RedisService redisService;
+    private final SpaceService spaceService;
 
     // 소셜 로그인 API
     @Transactional
@@ -109,8 +112,12 @@ public class UserService {
     public Void deleteAccount(Users user) {
         Long userId = user.getUserId();
         bookmarkRepository.deleteByUserId(userId);
-        participationRepository.deleteByUserId(userId);
+        List<Participation> participationList = participationRepository.findByUserId(userId);
+        for (Participation participation : participationList) {
+            spaceService.participateExit(participation.getParticipationId(), user);
+        }
         userRepository.delete(user);
+
         return null;
     }
 
