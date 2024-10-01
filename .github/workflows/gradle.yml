@@ -64,5 +64,5 @@ jobs:
         --application-name moidot-CD \
         --deployment-group-name moidot-cicdGroup \
         --file-exists-behavior OVERWRITE \
-        --s3-location bucket=moidot-bucket,bundleType=zip,key=moidotServer.zip \
+        --s3-location bucket=mo2dot,bundleType=zip,key=moidotServer.zip \
         --region ${{ secrets.AWS_REGION }}
