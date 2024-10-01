@@ -1,6 +1,7 @@
 # 🔮 우리가 만나는 지점, 모이닷
 
-## 📈 About Service
+[//]: # ()
+[//]: # (## 📈 About Service)
 
 ## 💻 Backend Developer
 
