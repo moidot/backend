@@ -53,7 +53,7 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Upload to S3
-      run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./moidotServer.zip s3://moidot-bucket/moidotServer.zip
+      run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./moidotServer.zip s3://mo2dot/moidotServer.zip
 
     - name: Deploy
       env:
