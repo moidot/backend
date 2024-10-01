@@ -6,11 +6,11 @@ files:
 file_exists_behavior: OVERWRITE
 
 permissions:
-  - object: /scripts
+  - object: /home/ec2-user/backend
     owner: root
     mode: 755
     type:
-      - directory
+      - file
 
 hooks:
   ApplicationStart:
