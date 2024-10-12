@@ -3,6 +3,8 @@
 #!/bin/bash
 
 echo "start run_new_was"
+echo "current user: $USER"
+shopt -q login_shell && echo "Login shell" || echo "Non-login shell"
 PROJECT_ROOT="/home/ec2-user/backend"
 JAR_FILE="$PROJECT_ROOT/build/libs/backend-0.0.1-SNAPSHOT.jar"
 
