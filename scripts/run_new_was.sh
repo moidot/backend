@@ -8,7 +8,7 @@ shopt -q login_shell && echo "Login shell" || echo "Non-login shell"
 PROJECT_ROOT="/home/ec2-user/backend"
 JAR_FILE="$PROJECT_ROOT/build/libs/backend-0.0.1-SNAPSHOT.jar"
 
-CURRENT_PORT=$(cat /home/ec2-user/service_url.inc | grep -Po '[0-9]+' | tail -1)
+#CURRENT_PORT=$(cat /home/ec2-user/service_url.inc | grep -Po '[0-9]+' | tail -1)
 TARGET_PORT=8080
 
 #echo "> Current port of running WAS is ${CURRENT_PORT}."
