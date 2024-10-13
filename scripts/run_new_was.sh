@@ -3,9 +3,9 @@
 #!/bin/bash
 
 # JAVA_HOME과 PATH 설정을 명시적으로 로드
-if [ -f /etc/profile.d/jdk.sh ]; then
-    source /etc/profile.d/jdk.sh
-fi
+#if [ -f /etc/profile.d/jdk.sh ]; then
+#    source /etc/profile.d/jdk.sh
+#fi
 
 echo "start run_new_was"
 echo "current user: $USER"
