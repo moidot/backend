@@ -5,12 +5,11 @@ import com.moim.backend.domain.space.config.TmapProperties;
 import com.moim.backend.domain.space.entity.BestPlace;
 import com.moim.backend.domain.space.entity.Space;
 import com.moim.backend.domain.space.entity.Participation;
-import com.moim.backend.domain.space.response.BusGraphicDataResponse;
-import com.moim.backend.domain.space.response.BusPathResponse;
-import com.moim.backend.domain.space.response.CarMoveInfo;
+import com.moim.backend.domain.space.response.CarPathResponse;
+import com.moim.backend.domain.space.response.MoveUserInfo;
 import com.moim.backend.domain.space.response.PathDto;
-import com.moim.backend.domain.space.response.PlaceRouteResponse;
 import com.moim.backend.domain.space.response.TmapPublicPathResponse;
+import com.moim.backend.domain.space.response.TmapWalkPathResponse;
 import com.moim.backend.domain.user.config.KakaoProperties;
 import com.moim.backend.global.aspect.TimeCheck;
 import com.moim.backend.global.util.LoggingUtil;
@@ -19,13 +18,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.util.ArrayList;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,55 +42,21 @@ public class DirectionService {
     private final TmapService tmapService;
 
     @TimeCheck
-    public Optional<PlaceRouteResponse.MoveUserInfo> getBusRouteToResponse(
+    public Optional<MoveUserInfo> getCarRoute(
             BestPlace bestPlace, Space group, Participation participation
     ) {
-        Optional<PlaceRouteResponse.MoveUserInfo> moveUserInfo = Optional.empty();
-        URI searchPathUri = odsayProperties.getSearchPathUriWithParams(bestPlace, participation);
-        BusPathResponse busPathResponse = restTemplate.getForObject(searchPathUri, BusPathResponse.class);
-
-        if (busPathResponse.getResult() == null) {
-            LoggingUtil.builder()
-                    .title("버스 길찾기")
-                    .status("실패")
-                    .message("지역: " + bestPlace.getPlaceName() + ", url: " + searchPathUri)
-                    .build()
-                    .print();
-        } else {
-            URI graphicDataUri = odsayProperties.getGraphicDataUriWIthParams(busPathResponse.getPathInfoMapObj());
-            BusGraphicDataResponse busGraphicDataResponse = restTemplate.getForObject(
-                    graphicDataUri, BusGraphicDataResponse.class
-            );
-            if (busPathResponse.getResult() == null) {
-                LoggingUtil.builder()
-                        .title("버스 그래픽 데이터 조회")
-                        .status("실패")
-                        .message("지역: " + bestPlace.getPlaceName() + ", url: " + graphicDataUri)
-                        .build()
-                        .print();
-            } else {
-                moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(
-                        group, participation, busGraphicDataResponse, busPathResponse, bestPlace
-                ));
-            }
-        }
-        return moveUserInfo;
-    }
-
-    @TimeCheck
-    public Optional<PlaceRouteResponse.MoveUserInfo> getCarRouteToResponse(
-            BestPlace bestPlace, Space group, Participation participation
-    ) {
-        Optional<PlaceRouteResponse.MoveUserInfo> moveUserInfo = Optional.empty();
+        log.info("[getCarRoute {} START]", participation.getUserName());
+        Optional<MoveUserInfo> moveUserInfo = Optional.empty();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "KakaoAK " + kakaoProperties.getClientId());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         URI searchCarPathUri = kakaoProperties.getSearchCarPathUriWithParams(bestPlace, participation);
-        CarMoveInfo carMoveInfo = restTemplate.exchange(
-                searchCarPathUri, HttpMethod.GET, new HttpEntity<>(headers), CarMoveInfo.class
+        log.info("searchCarPathUri: {}", searchCarPathUri);
+        CarPathResponse carPathResponse = restTemplate.exchange(
+                searchCarPathUri, HttpMethod.GET, new HttpEntity<>(headers), CarPathResponse.class
         ).getBody();
-        if (carMoveInfo.getRoutes() == null) {
+        if (carPathResponse.getRoutes() == null) {
             LoggingUtil.builder()
                     .title("차 길찾기")
                     .status("실패")
@@ -97,42 +64,62 @@ public class DirectionService {
                     .build()
                     .print();
         } else {
-            moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(group, participation, carMoveInfo, bestPlace));
+            moveUserInfo = Optional.of(MoveUserInfo.createWithCarPath(group, participation, carPathResponse, bestPlace));
         }
         return moveUserInfo;
     }
 
     @TimeCheck
-    public Optional<PlaceRouteResponse.MoveUserInfo> getBusRouteToResponseWithTmap(
-            BestPlace bestPlace, Space group, Participation participation
+    public Optional<MoveUserInfo> getPublicRoute(
+            BestPlace bestPlace, Space space, Participation participation
     ) {
-        Optional<PlaceRouteResponse.MoveUserInfo> moveUserInfo = Optional.empty();
-
+        log.info("[getPublicRoute {} START]", participation.getUserName());
         ResponseEntity<TmapPublicPathResponse> response = restTemplate.postForEntity(
                 tmapProperties.getSearchPathUri(),
-                createHttpEntity(bestPlace, participation),
+                createTmapPublicRouteHttpEntity(bestPlace, participation),
                 TmapPublicPathResponse.class
         );
-
         TmapPublicPathResponse tmapPublicPathResponse = response.getBody();
 
-        if (tmapPublicPathResponse == null || tmapPublicPathResponse.getMetaData() == null) {
-            LoggingUtil.builder()
-                    .title("TMAP 대중교통 길찾기")
-                    .status("실패")
-                    .message("bestplace: " + bestPlace + ", participation: " + participation)
-                    .build()
-                    .print();
-        } else {
-            List<PathDto> path = tmapService.getPath(tmapPublicPathResponse);
-
-            moveUserInfo = Optional.of(new PlaceRouteResponse.MoveUserInfo(group, participation, tmapPublicPathResponse, bestPlace, path));
+        if (response.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(200))) {
+            MoveUserInfo moveUserInfo = tmapService.createMoveUserInfoWithPublicPath(space, participation, tmapPublicPathResponse, bestPlace);
+            return Optional.of(moveUserInfo);
         }
+        LoggingUtil.builder()
+                .title("TMAP 대중교통 길찾기")
+                .status("실패")
+                .message("bestplace: " + bestPlace + ", participation: " + participation)
+                .build()
+                .print();
 
-        return moveUserInfo;
+        return Optional.empty();
     }
 
-    private HttpEntity<?> createHttpEntity(BestPlace bestPlace, Participation participation) {
+    @TimeCheck
+    public Optional<MoveUserInfo> getWalkRoute(
+            BestPlace bestPlace, Space space, Participation participation
+    ) {
+        log.info("[getWalkRoute {} START]", participation.getUserName());
+        ResponseEntity<TmapWalkPathResponse> response = restTemplate.postForEntity(
+                tmapProperties.getWalkSearchPathUri(),
+                createTmapWalkRouteHttpEntity(bestPlace, participation),
+                TmapWalkPathResponse.class
+        );
+        if (response.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(200))) {
+            MoveUserInfo moveUserInfo = tmapService.createMoveUserInfoWithWalkPath(space, participation, response.getBody(), bestPlace);
+            return Optional.of(moveUserInfo);
+
+        }
+        LoggingUtil.builder()
+                .title("TMAP 도보 길찾기")
+                .status("실패")
+                .message("bestplace: " + bestPlace + ", participation: " + participation)
+                .build()
+                .print();
+        return Optional.empty();
+    }
+
+    private HttpEntity<?> createTmapPublicRouteHttpEntity(BestPlace bestPlace, Participation participation) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
@@ -145,6 +132,32 @@ public class DirectionService {
                 bestPlace.getLatitude()
         );
 
+        return new HttpEntity<>(requestBody, headers);
+    }
+
+    private HttpEntity<?> createTmapWalkRouteHttpEntity(BestPlace bestPlace, Participation participation) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+        headers.set("appKey", tmapProperties.getAppKey());
+
+        String defaultLocationName = "%EC%84%B1%EC%8B%A0%EC%97%AC%EB%8C%80"; // 성신여대
+        String startName = defaultLocationName; // 이름은 식별용으로 경로 탐색에 영향을 주지는 않음
+        String endName = defaultLocationName;
+        try {
+            startName = URLEncoder.encode(participation.getLocationName(), "UTF-8");
+            endName = URLEncoder.encode(bestPlace.getPlaceName(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.error("보행자 경로 계산 시 출발지와 도착지 인코딩 중 에러발생: {}", e.getMessage());
+        }
+        Map<String, String> requestBody = tmapProperties.getWalkRequestParameter(
+                startName,
+                endName,
+                participation.getLongitude(),
+                participation.getLatitude(),
+                bestPlace.getLongitude(),
+                bestPlace.getLatitude()
+        );
         return new HttpEntity<>(requestBody, headers);
     }
 }

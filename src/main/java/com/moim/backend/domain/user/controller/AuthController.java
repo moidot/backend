@@ -7,6 +7,7 @@ import com.moim.backend.domain.user.response.UserReissueResponse;
 import com.moim.backend.domain.user.service.UserService;
 import com.moim.backend.global.auth.Login;
 import com.moim.backend.global.common.CustomResponseEntity;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +20,14 @@ public class AuthController {
 
     // 배포 검증용 API
     @GetMapping("/success")
+    @Operation(summary = "배포 검증용")
     public CustomResponseEntity<String> checkServerStatus() {
         return CustomResponseEntity.success("Server On!!");
     }
 
     // 소셜 로그인 API
     @GetMapping("/signin")
+    @Operation(summary = "소셜 로그인")
     public CustomResponseEntity<UserLoginResponse> loginByOAuth(
             @RequestParam(name = "code") String code, @RequestParam Platform platform
     ) {
@@ -33,6 +36,7 @@ public class AuthController {
 
     // 소셜 로그인 API
     @GetMapping("/signin/token")
+    @Operation(summary = "소셜 로그인", description = "엑세스 토큰을 사용하는 앱용 로그인 API")
     public CustomResponseEntity<UserLoginResponse> socialLoginByAccessToken(
             @RequestParam(name = "token") String token, @RequestParam Platform platform
     ) {

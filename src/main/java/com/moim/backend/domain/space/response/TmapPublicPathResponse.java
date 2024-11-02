@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TmapPublicPathResponse implements MoveInfoInterface {
 
+    private Result result;
     private MetaData metaData;
 
     @Override
@@ -36,6 +37,18 @@ public class TmapPublicPathResponse implements MoveInfoInterface {
     private Itinerary getBestPath() {
         Collections.sort(metaData.plan.itineraries);
         return metaData.plan.itineraries.get(0);
+    }
+
+    public int getResultStatus() {
+        return result.status;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class Result {
+        private String message;
+        private int status;
     }
 
     @Getter

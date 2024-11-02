@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CarMoveInfo implements MoveInfoInterface, PathGraphicDataInterface {
+public class CarPathResponse implements MoveInfoInterface, PathGraphicDataInterface {
     private List<Route> routes;
 
     private Route getBestRoute() {
