@@ -237,23 +237,12 @@ public class SpaceService {
     // 모임 추천 지역 조회하기
     @TimeCheck
     @Cacheable(value = CacheName.group, key = "#groupId")
-    public List<PlaceRouteResponse> getBestRegion(Long groupId) {
-        Space space = getGroup(groupId);
-        List<Participation> participationList = participationRepository.findAllBySpace(space);
-
-        return bestPlaceRepository.findAllBySpace(space).stream().map(bestPlace -> new PlaceRouteResponse(
-                bestPlace, getMoveUserInfoList(bestPlace, space, participationList)
-        )).collect(Collectors.toList());
-    }
-
-    @TimeCheck
-    @Cacheable(value = CacheName.group, key = "#groupId")
     public List<PlaceRouteResponse> getBestRegionWithTmap(Long groupId) {
         Space space = getGroup(groupId);
         List<Participation> participationList = participationRepository.findAllBySpace(space);
 
         return bestPlaceRepository.findAllBySpace(space).stream().map(bestPlace -> new PlaceRouteResponse(
-                bestPlace, getMoveUserInfoListWithTmap(bestPlace, space, participationList)
+                bestPlace, getMoveUserInfoList(bestPlace, space, participationList)
         )).collect(Collectors.toList());
     }
 
@@ -514,44 +503,48 @@ public class SpaceService {
         );
     }
 
-    private List<PlaceRouteResponse.MoveUserInfo> getMoveUserInfoList(
+    private List<MoveUserInfo> getMoveUserInfoList(
             BestPlace bestPlace,
             Space space,
             List<Participation> participationList
     ) {
-        List<PlaceRouteResponse.MoveUserInfo> moveUserInfoList = new ArrayList<>();
+        log.info("[getMoveUserInfoList START]");
+        log.info("BestPlace: ({}, {})", bestPlace.getLatitude(), bestPlace.getLongitude());
+        List<MoveUserInfo> moveUserInfoList = new ArrayList<>();
 
-        participationList.forEach(participation -> {
-            if ((participation.getTransportation() == TransportationType.PUBLIC)) {
-                directionService.getBusRouteToResponse(bestPlace, space, participation)
-                        .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
-            } else if (participation.getTransportation() == TransportationType.PERSONAL) {
-                directionService.getCarRouteToResponse(bestPlace, space, participation)
-                        .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
-            }
-        });
+        for (Participation participation : participationList) {
+            log.info("participation: {}, ({}, {})", participation.getUserName(), participation.getLatitude(), participation.getLongitude());
+            moveUserInfoList.add(getMoveUserInfo(bestPlace, space, participation));
+        }
 
         return moveUserInfoList;
     }
 
-    private List<PlaceRouteResponse.MoveUserInfo> getMoveUserInfoListWithTmap(
+    private MoveUserInfo getMoveUserInfo(
             BestPlace bestPlace,
             Space space,
-            List<Participation> participationList
+            Participation participation
     ) {
-        List<PlaceRouteResponse.MoveUserInfo> moveUserInfoList = new ArrayList<>();
-
-        participationList.forEach(participation -> {
-            if ((participation.getTransportation() == TransportationType.PUBLIC)) {
-                directionService.getBusRouteToResponseWithTmap(bestPlace, space, participation)
-                        .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
-            } else if (participation.getTransportation() == TransportationType.PERSONAL) {
-                directionService.getCarRouteToResponse(bestPlace, space, participation)
-                        .ifPresent(moveUserInfo -> moveUserInfoList.add(moveUserInfo));
-            }
-        });
-
-        return moveUserInfoList;
+        switch (participation.getTransportation()) {
+            case PUBLIC:
+                Optional<MoveUserInfo> publicRoute = directionService.getPublicRoute(bestPlace, space, participation);
+                if (publicRoute.isPresent()) {
+                    return publicRoute.get();
+                }
+                Optional<MoveUserInfo> walkRoute = directionService.getWalkRoute(bestPlace, space, participation);
+                if (publicRoute.isPresent()) {
+                    return walkRoute.get();
+                }
+                break;
+            case PERSONAL:
+                Optional<MoveUserInfo> carRoute = directionService.getCarRoute(bestPlace, space, participation);
+                if (carRoute.isPresent()) {
+                    return carRoute.get();
+                }
+                break;
+        }
+        log.error("유저의 경로 조회 실패. space: {}, user name: {}", space.getSpaceId(), participation.getUserName());
+        return MoveUserInfo.createWithEmptyPath(space, participation);
     }
 
     private double getValidRange(List<Participation> participationList, MiddlePoint middlePoint) {
