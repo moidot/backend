@@ -83,5 +83,6 @@
         <appender-ref ref="TIME-CHECK"/>
         <appender-ref ref="WARNING-FILE"/>
         <appender-ref ref="ERROR-FILE"/>
+        <appender-ref ref="ALL-LOG-FILE"/>
     </root>
 </configuration>
