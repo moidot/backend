@@ -531,10 +531,6 @@ public class SpaceService {
                 if (publicRoute.isPresent()) {
                     return publicRoute.get();
                 }
-                Optional<MoveUserInfo> walkRoute = directionService.getWalkRoute(bestPlace, space, participation);
-                if (publicRoute.isPresent()) {
-                    return walkRoute.get();
-                }
                 break;
             case PERSONAL:
                 Optional<MoveUserInfo> carRoute = directionService.getCarRoute(bestPlace, space, participation);

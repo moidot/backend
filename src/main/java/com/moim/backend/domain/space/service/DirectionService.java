@@ -79,18 +79,17 @@ public class DirectionService {
                 createTmapPublicRouteHttpEntity(bestPlace, participation),
                 TmapPublicPathResponse.class
         );
-        TmapPublicPathResponse tmapPublicPathResponse = response.getBody();
 
         if (response.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(200))) {
-            MoveUserInfo moveUserInfo = tmapService.createMoveUserInfoWithPublicPath(space, participation, tmapPublicPathResponse, bestPlace);
-            return Optional.of(moveUserInfo);
+            TmapPublicPathResponse tmapPublicPathResponse = response.getBody();
+            if (tmapPublicPathResponse.isSuccess()) {
+                MoveUserInfo moveUserInfo = tmapService.createMoveUserInfoWithPublicPath(space, participation, tmapPublicPathResponse, bestPlace);
+                return Optional.of(moveUserInfo);
+            }
+            if (tmapPublicPathResponse.isWalkRoute()) {
+                return getWalkRoute(bestPlace, space, participation);
+            }
         }
-        LoggingUtil.builder()
-                .title("TMAP 대중교통 길찾기")
-                .status("실패")
-                .message("bestplace: " + bestPlace + ", participation: " + participation)
-                .build()
-                .print();
 
         return Optional.empty();
     }
@@ -110,12 +109,6 @@ public class DirectionService {
             return Optional.of(moveUserInfo);
 
         }
-        LoggingUtil.builder()
-                .title("TMAP 도보 길찾기")
-                .status("실패")
-                .message("bestplace: " + bestPlace + ", participation: " + participation)
-                .build()
-                .print();
         return Optional.empty();
     }
 

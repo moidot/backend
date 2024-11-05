@@ -25,7 +25,7 @@ import java.util.List;
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
-public class CommonRestExceptionHandler extends RuntimeException {
+public class CommonRestExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(Exception.class)
@@ -97,8 +97,6 @@ public class CommonRestExceptionHandler extends RuntimeException {
     public CustomResponseEntity<String> nullPointerExceptionHandler(
             Exception e, HttpServletRequest request
     ) {
-        log.error("url: \"{}\", message: {}", request.getRequestURI(), e.getMessage());
-
         return CustomResponseEntity.fail(e.getMessage());
     }
 
@@ -109,9 +107,8 @@ public class CommonRestExceptionHandler extends RuntimeException {
     public CustomResponseEntity<String> securityExceptionHandler(
             SecurityException e, HttpServletRequest request
     ) {
-        log.error("잘못된 JWT 서명입니다. | url: \"{}\", message: {}", request.getRequestURI(), e.getMessage());
-
-        return CustomResponseEntity.fail("잘못된 JWT 서명입니다.");
+        String errorMessage = String.format("잘못된 JWT 서명입니다. | url: %s, message: %s", request.getRequestURI(), e.getMessage());
+        return handleException(errorMessage, e, request);
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -119,9 +116,8 @@ public class CommonRestExceptionHandler extends RuntimeException {
     public CustomResponseEntity<String> expiredJwtExceptionHandler(
             ExpiredJwtException e, HttpServletRequest request
     ) {
-        log.error("url: \"{}\", message: {}", request.getRequestURI(), e.getMessage());
-
-        return CustomResponseEntity.fail("토큰이 만료되었습니다.");
+        String errorMessage = "토큰이 만료되었습니다.";
+        return handleException(errorMessage, e, request);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -130,9 +126,7 @@ public class CommonRestExceptionHandler extends RuntimeException {
             ExpiredJwtException e, HttpServletRequest request
     ) {
         String errorMessage = "지원되지 않는 JWT 토큰입니다.";
-        log.error("url: \"{}\", message: {}", request.getRequestURI(), errorMessage);
-
-        return CustomResponseEntity.fail(errorMessage);
+        return handleException(errorMessage, e, request);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -141,9 +135,38 @@ public class CommonRestExceptionHandler extends RuntimeException {
             ExpiredJwtException e, HttpServletRequest request
     ) {
         String errorMessage = "지원되지 않는 JSON 형식입니다..";
-        log.error("url: \"{}\", message: {}", request.getRequestURI(), errorMessage);
+        return handleException(errorMessage, e, request);
+    }
+
+    // 기본 예외 핸들러
+    private CustomResponseEntity<String> handleException(Throwable e) {
+        return handleException(e.getMessage(), e);
+    }
+
+    private CustomResponseEntity<String> handleException(String errorMessage, Throwable e, HttpServletRequest request) {
+        log.error("url: {}", request.getRequestURI());
+        return handleException(errorMessage, e);
+    }
+
+    private CustomResponseEntity<String> handleException(String errorMessage, Throwable e) {
+        printErrorLog(e);
+        if (e.getCause() != null) {
+            log.error("▼ [Cause of Error] ▼");
+            printErrorLog(e.getCause());
+        }
 
         return CustomResponseEntity.fail(errorMessage);
     }
+
+    private void printErrorLog(Throwable e) {
+        StackTraceElement lastOfErrorStack = e.getStackTrace()[0];
+        String lastOfErrorClassName = lastOfErrorStack.getClassName();
+        String lastOfErrorMethodName = lastOfErrorStack.getMethodName();
+        int lastOfErrorLineNumber = lastOfErrorStack.getLineNumber();
+
+        log.error("{} in {}.{} at line {}", e.getClass(), lastOfErrorClassName, lastOfErrorMethodName, lastOfErrorLineNumber);
+        log.error("Exception message: {}", e.getMessage());
+    }
+
 
 }

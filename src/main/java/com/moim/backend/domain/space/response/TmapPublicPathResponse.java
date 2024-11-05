@@ -12,12 +12,27 @@ import java.util.List;
 @AllArgsConstructor
 public class TmapPublicPathResponse implements MoveInfoInterface {
 
-    private Result result;
-    private MetaData metaData;
+    private Result result; // 실패했을 때 오는 응답용 필드
+    private MetaData metaData; // 성공했을 때 오는 응답용 필드
 
     @Override
     public int getTotalTime() {
         return getBestPath().getTotalTime() / 60;
+    }
+
+    /**
+     * 경로 조회 성공 여부
+     */
+    public boolean isSuccess() {
+        return metaData != null && metaData.plan != null;
+    }
+
+    /**
+     * 도보 경로 탐색 필요한지에 대한 여부
+     * @return true: 출발지와 도착지가 너무 가까워서 에러가 발생한 경우
+     */
+    public boolean isWalkRoute() {
+        return result != null && result.getStatus() == 11;
     }
 
     @Override
