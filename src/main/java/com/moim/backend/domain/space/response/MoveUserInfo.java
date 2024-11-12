@@ -15,6 +15,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "목적지까지 이동 경로 상세")
 public class MoveUserInfo {
     @Schema(description = "모임장 여부")
     private Boolean isAdmin;
