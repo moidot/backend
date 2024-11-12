@@ -87,19 +87,18 @@ public class MoveUserInfo {
     public static MoveUserInfo createWithWalkPath(
             Space space,
             Participation participation,
-            int totalTime,
-            double totalDistance,
+            TmapWalkPathResponse tmapWalkPathResponse,
             List<PathDto>path
     ) {
         MoveUserInfo moveUserInfo = new MoveUserInfo();
         moveUserInfo.isAdmin = (participation.getUserId() == space.getAdminId()) ? true : false;
         moveUserInfo.userId = participation.getUserId();
         moveUserInfo.userName = participation.getUserName();
-        moveUserInfo.transportationType = participation.getTransportation();
-        moveUserInfo.totalTime = totalTime;
-        moveUserInfo.totalDistance = totalDistance;
+        moveUserInfo.transportationType = TransportationType.WALK;
+        moveUserInfo.totalTime = tmapWalkPathResponse.getTotalTime();
+        moveUserInfo.totalDistance = tmapWalkPathResponse.getTotalDistance();
         moveUserInfo.path = path;
-        moveUserInfo.payment = 0;
+        moveUserInfo.payment = tmapWalkPathResponse.getPayment();
         return moveUserInfo;
     }
 }

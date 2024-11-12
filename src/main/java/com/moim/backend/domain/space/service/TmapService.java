@@ -10,7 +10,10 @@ import com.moim.backend.domain.space.response.TmapWalkPathResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class TmapService {
@@ -42,23 +45,18 @@ public class TmapService {
             TmapWalkPathResponse tmapWalkPathResponse,
             BestPlace bestPlace
     ) {
-        List<PathDto> path = new ArrayList<>();
-        int totalTime = 0;
-        double totalDistance = 0;
-
+        Set<PathDto> path = new LinkedHashSet<>();
         for (TmapWalkPathResponse.Feature feature : tmapWalkPathResponse.getFeatures()) {
             // path 구성 추가
             if ("Point".equals(feature.getGeometry().type)) {
-                path.add(getPathFromPointOfWalkPath(feature.geometry.coordinates));
+                Optional<PathDto> pathFromPointOfWalkPath = getPathFromPointOfWalkPath(feature.geometry.coordinates);
+                pathFromPointOfWalkPath.ifPresent(p -> path.add(p));
             } else if ("LineString".equals(feature.getGeometry().type)) {
                 path.addAll(getPathListFromLineStringOfWalkPath(feature));
             }
-            path.add(new PathDto(bestPlace.getLongitude(), bestPlace.getLatitude()));
-            // geometry 타입에 따라 totalTime에 값
-            totalTime += feature.properties.getTotalTime();
-            totalDistance += feature.properties.getTotalDistance();
         }
-        return MoveUserInfo.createWithWalkPath(space, participation, totalTime, totalDistance, path);
+        path.add(new PathDto(bestPlace.getLongitude(), bestPlace.getLatitude()));
+        return MoveUserInfo.createWithWalkPath(space, participation, tmapWalkPathResponse, new ArrayList<>(path));
     }
 
     // 이동 구간이 도보인 경우, 상세 도보 경로를 path list로 변환
@@ -91,18 +89,23 @@ public class TmapService {
 
     private List<PathDto> getPathListFromLineStringOfWalkPath(TmapWalkPathResponse.Feature feature) {
         List pathList = new ArrayList<>();
-        String[] pathStr = feature.geometry.coordinates.replace("[", "").replace("]", "").split(",");
-        for (String point : pathStr) {
-            pathList.add(getPathFromPointOfWalkPath(point));
+        for (Object coordinate : feature.geometry.coordinates) {
+            if (coordinate instanceof List<?>) {
+                Optional<PathDto> pathFromPoint = getPathFromPointOfWalkPath((List<Object>) coordinate);
+                pathFromPoint.ifPresent(p -> pathList.add(p));
+            }
         }
         return pathList;
     }
 
-    private PathDto getPathFromPointOfWalkPath(String point) {
-        String[] pathStr = point.replace("[", "").replace("]", "").split(",");
-        return PathDto.builder()
-                .longitude(Double.parseDouble(pathStr[0]))
-                .latitude(Double.parseDouble(pathStr[1]))
-                .build();
+    private Optional<PathDto> getPathFromPointOfWalkPath(List<Object> point) {
+        if (point.get(0) instanceof Double && point.get(1) instanceof Double) {
+            PathDto path = PathDto.builder()
+                    .longitude(Double.parseDouble(point.get(0).toString()))
+                    .latitude(Double.parseDouble(point.get(1).toString()))
+                    .build();
+            return Optional.ofNullable(path);
+        }
+        return Optional.empty();
     }
 }

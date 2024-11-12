@@ -513,7 +513,8 @@ public class SpaceService {
         List<MoveUserInfo> moveUserInfoList = new ArrayList<>();
 
         for (Participation participation : participationList) {
-            log.info("participation: {}, ({}, {})", participation.getUserName(), participation.getLatitude(), participation.getLongitude());
+            log.info("participation id: {}, name: {}", participation.getParticipationId(), participation.getUserName());
+            log.info("start position: ({}, {})", participation.getLatitude(), participation.getLongitude());
             moveUserInfoList.add(getMoveUserInfo(bestPlace, space, participation));
         }
 
