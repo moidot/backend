@@ -54,7 +54,7 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Upload to S3
-      run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./moidotServer.zip s3://mo2dot/moidotServer.zip
+      run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./moidotServer.zip s3://mo2dot3/moidotServer.zip
 
     - name: Deploy
       env:
@@ -65,5 +65,5 @@ jobs:
         --application-name moidot-CD \
         --deployment-group-name moidot-cicdGroup \
         --file-exists-behavior OVERWRITE \
-        --s3-location bucket=mo2dot,bundleType=zip,key=moidotServer.zip \
+        --s3-location bucket=mo2dot3,bundleType=zip,key=moidotServer.zip \
         --region ${{ secrets.AWS_REGION }}
