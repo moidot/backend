@@ -23,17 +23,13 @@ jobs:
     - uses : actions/checkout@v3
     - run : touch ./src/main/resources/application.yml
     - run : touch ./src/main/resources/application-prod.yml
-    - run : echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
-    - run : echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application-prod.yml
     - run : cat ./src/main/resources/application.yml
       
     - run: touch ./src/test/resources/application.yml
-    - run: echo "${{ secrets.TEST_APPLICATION }}" > ./src/test/resources/application.yml
     - run: cat ./src/test/resources/application.yml
 
     - run: mkdir -p ./src/main/resources/db/h2
     - run: touch ./src/main/resources/db/h2/data.sql
-    - run: echo "${{ secrets.TEST_DATA }}" > ./src/main/resources/db/h2/data.sql
     - run: cat ./src/main/resources/db/h2/data.sql
 
     - name: Grant execute permission for gradlew
